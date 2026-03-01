@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { Trophy, Star, Users, ArrowRight } from "lucide-react";
 import { coaches, mission, contact } from "@/lib/constants";
 
@@ -59,24 +60,33 @@ export default function UeberUnsPage() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {coaches.map((coach, i) => (
+            {coaches.map((coach, i) => {
+              const imgSrc = i === 0 ? "/images/jonas.jpg" : "/images/patrick.jpg";
+              return (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.15 }}
-                className="bg-surface border border-white/5 hover:border-gold/20 rounded-2xl p-8 transition-colors duration-300"
+                className="bg-surface border border-white/5 hover:border-gold/20 rounded-2xl overflow-hidden transition-colors duration-300"
               >
-                {/* Avatar + Name */}
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-16 h-16 rounded-full bg-gold/10 border-2 border-gold/30 flex items-center justify-center">
-                    <span className="text-gold font-bold text-xl">{coach.initials}</span>
-                  </div>
-                  <div>
+                {/* Coach Image */}
+                <div className="relative h-72 overflow-hidden">
+                  <Image
+                    src={imgSrc}
+                    alt={coach.name}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/30 to-transparent" />
+                </div>
+
+                <div className="p-8 pt-4">
+                {/* Name */}
+                <div className="mb-6">
                     <h3 className="text-xl font-bold text-white">{coach.name}</h3>
                     <p className="text-gold/80 text-sm">{coach.role}</p>
-                  </div>
                 </div>
 
                 {/* Bio */}
@@ -106,8 +116,10 @@ export default function UeberUnsPage() {
                     ))}
                   </ul>
                 </div>
+                </div>
               </motion.div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

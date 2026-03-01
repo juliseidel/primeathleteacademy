@@ -1,8 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Zap, Apple, Trophy, Users, Star, ChevronDown, Quote, Instagram } from "lucide-react";
+import { ArrowRight, Zap, Apple, Trophy, Quote, Instagram, Play } from "lucide-react";
 import { coaches, testimonials, stats, contact } from "@/lib/constants";
 
 export default function Home() {
@@ -21,11 +22,28 @@ export default function Home() {
         <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-gold-dark/10 rounded-full blur-[100px]" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          {/* Logo */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1, duration: 0.6 }}
+            className="mb-8"
+          >
+            <Image
+              src="/images/logo.jpg"
+              alt="Prime Athlete Academy Logo"
+              width={120}
+              height={120}
+              className="mx-auto rounded-2xl border border-gold/20 shadow-lg shadow-gold/10"
+              priority
+            />
+          </motion.div>
+
           {/* Subtitle */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.3 }}
             className="text-sm md:text-base tracking-[0.3em] uppercase text-muted mb-6"
           >
             Elite Athletik-Coaching
@@ -35,7 +53,7 @@ export default function Home() {
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
             className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight gradient-text-gold glow-gold-text mb-8"
           >
             PRIME ATHLETE
@@ -45,7 +63,7 @@ export default function Home() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.7 }}
             className="text-lg md:text-xl text-muted max-w-2xl mx-auto mb-10 leading-relaxed"
           >
             Individuelles Athletik- und Ernährungscoaching von Profifußballern.
@@ -58,7 +76,7 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
+            transition={{ delay: 0.9 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <a
@@ -186,8 +204,100 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ===== VIDEO / TRAINING SHOWCASE ===== */}
+      <section className="py-20 md:py-32 bg-surface/50 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-5xl font-black mb-4">
+              So trainieren wir <span className="gradient-text-gold">Profis</span>
+            </h2>
+            <p className="text-muted max-w-xl mx-auto">
+              Ein Einblick in unser Training. Jeden Tag arbeiten wir daran, Athleten aufs nächste Level zu bringen.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            {/* Video - autoplay, muted, loop */}
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative"
+            >
+              <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-gold/5 bg-surface mx-auto w-full max-w-[340px]">
+                <video
+                  src="/images/reel.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-full aspect-[9/16] object-cover"
+                />
+              </div>
+              {/* Gold glow beneath video */}
+              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-gold/20 blur-2xl rounded-full" />
+            </motion.div>
+
+            {/* Training Images + Info */}
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="space-y-6"
+            >
+              <div className="relative rounded-2xl overflow-hidden border border-white/10">
+                <Image
+                  src="/images/training-1.jpg"
+                  alt="PAA Athletiktraining"
+                  width={600}
+                  height={400}
+                  className="w-full h-64 object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+                <div className="absolute bottom-4 left-4">
+                  <span className="px-3 py-1 bg-gold/20 text-gold text-xs font-bold rounded-full backdrop-blur-sm border border-gold/20">
+                    Athletiktraining
+                  </span>
+                </div>
+              </div>
+
+              <div className="relative rounded-2xl overflow-hidden border border-white/10">
+                <Image
+                  src="/images/training-2.jpg"
+                  alt="PAA Training Session"
+                  width={600}
+                  height={400}
+                  className="w-full h-64 object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+                <div className="absolute bottom-4 left-4">
+                  <span className="px-3 py-1 bg-gold/20 text-gold text-xs font-bold rounded-full backdrop-blur-sm border border-gold/20">
+                    Performance Coaching
+                  </span>
+                </div>
+              </div>
+
+              <Link
+                href="/athletiktraining"
+                className="inline-flex items-center gap-2 text-gold hover:text-gold-light transition-colors font-medium"
+              >
+                Mehr über unser Training erfahren
+                <ArrowRight size={16} />
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* ===== COACHES SECTION ===== */}
-      <section className="py-20 md:py-32 bg-surface/50">
+      <section className="py-20 md:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -204,54 +314,63 @@ export default function Home() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {coaches.map((coach, index) => (
-              <motion.div
-                key={coach.name}
-                initial={{ opacity: 0, x: index === 0 ? -30 : 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 + index * 0.2 }}
-              >
-                <Link
-                  href="/ueber-uns"
-                  className="group block bg-surface hover:bg-surface-light border border-white/5 hover:border-gold/20 rounded-3xl p-8 transition-colors duration-300"
+            {coaches.map((coach, index) => {
+              const imgSrc = index === 0 ? "/images/jonas.jpg" : "/images/patrick.jpg";
+              return (
+                <motion.div
+                  key={coach.name}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2 + index * 0.2 }}
                 >
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gold/20 to-gold-dark/20 border border-gold/20 flex items-center justify-center text-gold font-black text-lg">
-                      {coach.initials}
+                  <Link
+                    href="/ueber-uns"
+                    className="group block bg-surface hover:bg-surface-light border border-white/5 hover:border-gold/20 rounded-3xl overflow-hidden transition-colors duration-300"
+                  >
+                    {/* Coach Image */}
+                    <div className="relative h-64 overflow-hidden">
+                      <Image
+                        src={imgSrc}
+                        alt={coach.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/30 to-transparent" />
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-black group-hover:text-gold transition-colors">
+
+                    <div className="p-8 pt-4">
+                      <h3 className="text-2xl font-black group-hover:text-gold transition-colors mb-1">
                         {coach.name}
                       </h3>
-                      <p className="text-sm text-muted">{coach.role}</p>
+                      <p className="text-sm text-gold/80 mb-4">{coach.role}</p>
+                      <p className="text-muted leading-relaxed mb-6 text-sm">
+                        {coach.bio}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {coach.highlights.map((h) => (
+                          <span
+                            key={h.text}
+                            className="px-3 py-1 bg-gold/10 text-gold text-xs font-medium rounded-full"
+                          >
+                            {h.text}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="mt-6 flex items-center gap-2 text-sm text-gold opacity-0 group-hover:opacity-100 transition-opacity">
+                        Mehr erfahren <ArrowRight size={14} />
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-muted leading-relaxed mb-6">
-                    {coach.bio}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {coach.highlights.map((h) => (
-                      <span
-                        key={h.text}
-                        className="px-3 py-1 bg-gold/10 text-gold text-xs font-medium rounded-full"
-                      >
-                        {h.text}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-6 flex items-center gap-2 text-sm text-gold opacity-0 group-hover:opacity-100 transition-opacity">
-                    Mehr erfahren <ArrowRight size={14} />
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* ===== TESTIMONIALS ===== */}
-      <section className="py-20 md:py-32">
+      <section className="py-20 md:py-32 bg-surface/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -309,13 +428,13 @@ export default function Home() {
       </section>
 
       {/* ===== INSTAGRAM SECTION ===== */}
-      <section className="py-20 md:py-32 bg-surface/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 md:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="mb-10"
           >
             <h2 className="text-3xl md:text-5xl font-black mb-4">
               Folge uns auf <span className="gradient-text-gold">Instagram</span>
@@ -325,32 +444,19 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                className="aspect-square bg-surface border border-white/5 rounded-xl flex items-center justify-center hover:border-gold/20 transition-colors duration-300"
-              >
-                <Instagram className="w-8 h-8 text-muted/30" />
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="text-center mt-10">
-            <a
-              href={contact.instagramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 border border-white/10 hover:border-gold/30 rounded-full text-sm font-medium text-muted hover:text-gold transition-all duration-300"
-            >
-              {contact.instagramHandle}
-              <ArrowRight size={16} />
-            </a>
-          </div>
+          <motion.a
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            href={contact.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 px-8 py-4 bg-gold/10 hover:bg-gold/20 border border-gold/30 rounded-full text-gold font-bold transition-all duration-300 hover:scale-105"
+          >
+            <Instagram size={20} />
+            {contact.instagramHandle}
+            <ArrowRight size={16} />
+          </motion.a>
         </div>
       </section>
 
