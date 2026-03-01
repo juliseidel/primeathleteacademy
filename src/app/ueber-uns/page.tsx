@@ -6,7 +6,6 @@ import GlowCard from "@/components/ui/GlowCard";
 import FadeInView from "@/components/animation/FadeInView";
 import StaggerChildren from "@/components/animation/StaggerChildren";
 import ImageWithPlaceholder from "@/components/media/ImageWithPlaceholder";
-import Divider from "@/components/ui/Divider";
 import GoldGlow from "@/components/effects/GoldGlow";
 import { coaches, contact } from "@/lib/constants";
 import {
@@ -74,6 +73,7 @@ export default function UeberUnsPage() {
 
       {/* ===== COACHES SECTION ===== */}
       <section className="relative py-24 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
         <GoldGlow size="lg" position="top-left" className="opacity-30" />
 
         <div className="max-w-7xl mx-auto px-6">
@@ -82,7 +82,7 @@ export default function UeberUnsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-24">
               {/* Image */}
               <FadeInView direction="left">
-                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden">
+                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/[0.08]">
                   <ImageWithPlaceholder
                     src={coaches[0].imageSrc}
                     alt={coaches[0].name}
@@ -91,7 +91,7 @@ export default function UeberUnsPage() {
                     placeholderIcon="user"
                     placeholderText={coaches[0].name}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-950/60 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/80 via-transparent to-transparent" />
                 </div>
               </FadeInView>
 
@@ -115,9 +115,11 @@ export default function UeberUnsPage() {
                   <div className="space-y-4 mb-8">
                     {coaches[0].highlights.map((h, i) => (
                       <div key={i} className="flex items-center gap-3">
-                        {highlightIconMap[h.icon] || (
-                          <CheckCircle className="w-5 h-5 text-gold" />
-                        )}
+                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gold/[0.08] border border-gold/[0.12] flex items-center justify-center">
+                          {highlightIconMap[h.icon] || (
+                            <CheckCircle className="w-5 h-5 text-gold" />
+                          )}
+                        </div>
                         <span className="text-gray-300">{h.text}</span>
                       </div>
                     ))}
@@ -128,7 +130,7 @@ export default function UeberUnsPage() {
                     {coaches[0].licenses.map((license, i) => (
                       <span
                         key={i}
-                        className="px-3 py-1.5 text-xs font-medium rounded-full border border-gold/20 bg-gold/5 text-gold"
+                        className="px-3 py-1.5 text-xs font-medium rounded-full border border-gold/20 bg-gold/[0.08] text-gold"
                       >
                         {license}
                       </span>
@@ -139,7 +141,8 @@ export default function UeberUnsPage() {
             </div>
           </FadeInView>
 
-          <Divider className="mb-24" />
+          {/* Divider between coaches */}
+          <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent mb-24" />
 
           {/* Patrick - Text Left, Image Right (reversed) */}
           <FadeInView direction="up">
@@ -164,9 +167,11 @@ export default function UeberUnsPage() {
                   <div className="space-y-4 mb-8">
                     {coaches[1].highlights.map((h, i) => (
                       <div key={i} className="flex items-center gap-3">
-                        {highlightIconMap[h.icon] || (
-                          <CheckCircle className="w-5 h-5 text-gold" />
-                        )}
+                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gold/[0.08] border border-gold/[0.12] flex items-center justify-center">
+                          {highlightIconMap[h.icon] || (
+                            <CheckCircle className="w-5 h-5 text-gold" />
+                          )}
+                        </div>
                         <span className="text-gray-300">{h.text}</span>
                       </div>
                     ))}
@@ -177,7 +182,7 @@ export default function UeberUnsPage() {
                     {coaches[1].licenses.map((license, i) => (
                       <span
                         key={i}
-                        className="px-3 py-1.5 text-xs font-medium rounded-full border border-gold/20 bg-gold/5 text-gold"
+                        className="px-3 py-1.5 text-xs font-medium rounded-full border border-gold/20 bg-gold/[0.08] text-gold"
                       >
                         {license}
                       </span>
@@ -188,7 +193,7 @@ export default function UeberUnsPage() {
 
               {/* Image */}
               <FadeInView direction="right">
-                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden order-1 lg:order-2">
+                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden order-1 lg:order-2 border border-white/[0.08]">
                   <ImageWithPlaceholder
                     src={coaches[1].imageSrc}
                     alt={coaches[1].name}
@@ -197,7 +202,7 @@ export default function UeberUnsPage() {
                     placeholderIcon="user"
                     placeholderText={coaches[1].name}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-950/60 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/80 via-transparent to-transparent" />
                 </div>
               </FadeInView>
             </div>
@@ -207,8 +212,10 @@ export default function UeberUnsPage() {
 
       {/* ===== PHILOSOPHY SECTION ===== */}
       <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 gradient-mesh-subtle" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="absolute inset-0 gradient-mesh" />
         <GoldGlow size="md" position="center" className="opacity-20" />
+        <GoldGlow size="sm" position="top-right" className="opacity-15" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6">
           <SectionHeader
@@ -222,7 +229,11 @@ export default function UeberUnsPage() {
             {philosophyValues.map((value, i) => (
               <FadeInView key={i} direction="up" delay={i * 0.1}>
                 <GlowCard padding="large" className="h-full text-center">
-                  <div className="flex justify-center mb-5">{value.icon}</div>
+                  <div className="flex justify-center mb-5">
+                    <div className="w-14 h-14 rounded-xl bg-gold/[0.08] border border-gold/[0.12] flex items-center justify-center transition-all duration-300 hover:bg-gold/15 hover:border-gold/25">
+                      {value.icon}
+                    </div>
+                  </div>
                   <h3 className="text-lg font-semibold text-white mb-3">
                     {value.title}
                   </h3>
@@ -238,12 +249,16 @@ export default function UeberUnsPage() {
 
       {/* ===== CTA SECTION ===== */}
       <section className="relative py-24 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="absolute inset-0 gradient-mesh-subtle" />
         <GoldGlow size="lg" position="center" className="opacity-30" />
 
         <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
           <FadeInView>
             <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              Bereit für den nächsten Schritt?
+              Bereit für den{" "}
+              <span className="text-gold glow-gold-text">nächsten Schritt</span>
+              ?
             </h2>
             <p className="text-gray-400 text-lg mb-10 leading-relaxed">
               Lerne uns in einem kostenlosen Erstgespräch kennen und erfahre, wie

@@ -2,13 +2,18 @@
 
 import FadeInView from "@/components/animation/FadeInView";
 import Divider from "@/components/ui/Divider";
+import GoldGlow from "@/components/effects/GoldGlow";
 import { mission } from "@/lib/constants";
 
 export default function HomeMission() {
   return (
-    <section className="py-24 sm:py-32 relative">
+    <section className="py-24 sm:py-32 relative gradient-mesh-subtle">
       <Divider />
-      <div className="max-w-4xl mx-auto px-6 pt-24 text-center">
+
+      {/* Background glow */}
+      <GoldGlow size="lg" position="center" className="opacity-30" />
+
+      <div className="relative max-w-4xl mx-auto px-6 pt-24 text-center">
         <FadeInView>
           <p className="text-gold text-sm font-medium tracking-[0.2em] uppercase mb-8">
             Unsere Mission
@@ -29,7 +34,7 @@ export default function HomeMission() {
 
         {/* Decorative gold line */}
         <FadeInView delay={0.6}>
-          <div className="mt-12 mx-auto w-20 h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent" />
+          <div className="mt-12 mx-auto w-24 h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent" />
         </FadeInView>
       </div>
     </section>

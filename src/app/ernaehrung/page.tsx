@@ -5,7 +5,6 @@ import GlowButton from "@/components/ui/GlowButton";
 import GlowCard from "@/components/ui/GlowCard";
 import FadeInView from "@/components/animation/FadeInView";
 import StaggerChildren from "@/components/animation/StaggerChildren";
-import Divider from "@/components/ui/Divider";
 import GoldGlow from "@/components/effects/GoldGlow";
 import NutritionFAQ from "@/components/sections/ernaehrung/NutritionFAQ";
 import { nutritionServices, contact } from "@/lib/constants";
@@ -46,6 +45,7 @@ export default function ErnaehrungPage() {
 
       {/* ===== NUTRITION APPROACH ===== */}
       <section className="relative py-24 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
         <GoldGlow size="md" position="top-left" className="opacity-20" />
 
         <div className="max-w-4xl mx-auto px-6 text-center">
@@ -73,12 +73,12 @@ export default function ErnaehrungPage() {
         </div>
       </section>
 
-      <Divider />
-
       {/* ===== SERVICES GRID ===== */}
       <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 gradient-mesh-subtle" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="absolute inset-0 gradient-mesh" />
         <GoldGlow size="lg" position="center" className="opacity-20" />
+        <GoldGlow size="sm" position="top-left" className="opacity-15" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6">
           <SectionHeader
@@ -91,7 +91,7 @@ export default function ErnaehrungPage() {
             {nutritionServices.map((service, i) => (
               <FadeInView key={i} direction="up" delay={i * 0.1}>
                 <GlowCard padding="large" className="h-full">
-                  <div className="w-14 h-14 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center mb-5">
+                  <div className="w-14 h-14 rounded-xl bg-gold/[0.08] border border-gold/[0.12] flex items-center justify-center mb-5 transition-all duration-300 hover:bg-gold/15 hover:border-gold/25">
                     {serviceIconMap[service.icon]}
                   </div>
                   <h3 className="text-lg font-semibold text-white mb-3">
@@ -107,10 +107,10 @@ export default function ErnaehrungPage() {
         </div>
       </section>
 
-      <Divider />
-
       {/* ===== FAQ SECTION ===== */}
       <section className="relative py-24 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="absolute inset-0 gradient-mesh-subtle" />
         <GoldGlow size="md" position="bottom-right" className="opacity-20" />
 
         <div className="relative z-10 max-w-3xl mx-auto px-6">
@@ -128,12 +128,15 @@ export default function ErnaehrungPage() {
 
       {/* ===== CTA SECTION ===== */}
       <section className="relative py-24 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="absolute inset-0 gradient-mesh" />
         <GoldGlow size="lg" position="center" className="opacity-30" />
 
         <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
           <FadeInView>
             <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              Bereit, deine Ernährung zu optimieren?
+              Bereit, deine Ernährung zu{" "}
+              <span className="text-gold glow-gold-text">optimieren</span>?
             </h2>
             <p className="text-gray-400 text-lg mb-10 leading-relaxed">
               In einem kostenlosen Erstgespräch besprechen wir deine aktuelle

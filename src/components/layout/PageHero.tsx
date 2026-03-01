@@ -4,6 +4,7 @@ import RevealText from "@/components/animation/RevealText";
 import FadeInView from "@/components/animation/FadeInView";
 import GoldGlow from "@/components/effects/GoldGlow";
 import GridPattern from "@/components/effects/GridPattern";
+import SpeedLines from "@/components/effects/SpeedLines";
 
 interface PageHeroProps {
   tag: string;
@@ -25,12 +26,14 @@ export default function PageHero({
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-gray-950 via-gray-900/50 to-gray-950" />
       <GridPattern variant={backgroundVariant} />
-      <GoldGlow size="lg" position="center" className="opacity-50" />
+      <GoldGlow size="lg" position="center" className="opacity-40" />
+      <GoldGlow size="md" position="top-right" className="opacity-20" />
+      <SpeedLines count={3} />
 
       <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
         {/* Tag */}
         <FadeInView delay={0.1}>
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gold/20 bg-gold/5 mb-8">
+          <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-gold/20 bg-gold/[0.06] backdrop-blur-sm mb-10">
             <span className="w-2 h-2 rounded-full bg-gold animate-pulse-gold" />
             <span className="text-gold text-sm font-medium tracking-wide">
               {tag}
@@ -42,14 +45,14 @@ export default function PageHero({
         <RevealText
           text={title}
           as="h1"
-          className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight"
+          className="text-4xl sm:text-5xl md:text-7xl font-bold leading-[1.1]"
           delay={0.2}
         />
         {titleAccent && (
           <RevealText
             text={titleAccent}
             as="p"
-            className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-500 leading-tight mt-2"
+            className="text-4xl sm:text-5xl md:text-7xl font-bold text-gray-500 leading-[1.1] mt-2"
             delay={0.4}
           />
         )}

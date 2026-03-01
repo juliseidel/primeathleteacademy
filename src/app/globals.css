@@ -4,6 +4,8 @@
 @theme inline {
   --color-background: #0a0a0a;
   --color-foreground: #f5f5f5;
+  --color-surface: #141414;
+  --color-surface-light: #1a1a1a;
   --color-gold: #C5A55A;
   --color-gold-light: #D4B96E;
   --color-gold-dark: #A88B3D;
@@ -31,6 +33,8 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -74,8 +78,9 @@ body {
 
 .glow-gold-text {
   text-shadow:
-    0 0 20px rgba(197, 165, 90, 0.5),
-    0 0 40px rgba(197, 165, 90, 0.3);
+    0 0 30px rgba(197, 165, 90, 0.6),
+    0 0 60px rgba(197, 165, 90, 0.3),
+    0 0 100px rgba(197, 165, 90, 0.15);
 }
 
 .glow-gold-subtle {
@@ -88,6 +93,14 @@ body {
   box-shadow:
     0 0 15px rgba(197, 165, 90, 0.2),
     inset 0 0 15px rgba(197, 165, 90, 0.05);
+}
+
+/* ===== GRADIENT TEXT ===== */
+.gradient-text-gold {
+  background: linear-gradient(135deg, #C5A55A, #D4B96E, #A88B3D);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* ===== BACKGROUND PATTERNS ===== */
@@ -105,15 +118,15 @@ body {
 
 .gradient-mesh {
   background:
-    radial-gradient(ellipse 600px 400px at 15% 20%, rgba(197, 165, 90, 0.06) 0%, transparent 70%),
-    radial-gradient(ellipse 500px 500px at 85% 75%, rgba(197, 165, 90, 0.04) 0%, transparent 70%),
-    linear-gradient(180deg, #0a0a0a 0%, #111111 50%, #0a0a0a 100%);
+    radial-gradient(ellipse 800px 500px at 15% 20%, rgba(197, 165, 90, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 600px 600px at 85% 75%, rgba(197, 165, 90, 0.06) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(10, 10, 10, 0.5) 0%, rgba(17, 17, 17, 0.8) 50%, rgba(10, 10, 10, 0.5) 100%);
 }
 
 .gradient-mesh-subtle {
   background:
-    radial-gradient(ellipse 400px 300px at 20% 30%, rgba(197, 165, 90, 0.03) 0%, transparent 70%),
-    radial-gradient(ellipse 300px 300px at 80% 70%, rgba(197, 165, 90, 0.02) 0%, transparent 70%);
+    radial-gradient(ellipse 500px 400px at 20% 30%, rgba(197, 165, 90, 0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 400px at 80% 70%, rgba(197, 165, 90, 0.03) 0%, transparent 70%);
 }
 
 /* ===== KEYFRAME ANIMATIONS ===== */
@@ -142,6 +155,11 @@ body {
   50% { transform: translateY(-10px); }
 }
 
+@keyframes glow-breathe {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
 .animate-speed-line {
   animation: speed-line 4s ease-in-out infinite;
 }
@@ -151,13 +169,17 @@ body {
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent 0%, rgba(197, 165, 90, 0.1) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(197, 165, 90, 0.08) 50%, transparent 100%);
   background-size: 200% 100%;
-  animation: shimmer 2s ease-in-out infinite;
+  animation: shimmer 3s ease-in-out infinite;
 }
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+.animate-glow-breathe {
+  animation: glow-breathe 4s ease-in-out infinite;
 }
 
 /* ===== INTERACTIVE UTILITIES ===== */
@@ -179,7 +201,7 @@ body {
 
 /* ===== IMAGE PLACEHOLDER SHIMMER ===== */
 .placeholder-shimmer {
-  background: linear-gradient(110deg, #171717 0%, #262626 40%, #171717 60%);
+  background: linear-gradient(110deg, #141414 0%, #1a1a1a 40%, #141414 60%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
 }

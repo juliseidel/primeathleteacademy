@@ -5,7 +5,6 @@ import GlowButton from "@/components/ui/GlowButton";
 import GlowCard from "@/components/ui/GlowCard";
 import FadeInView from "@/components/animation/FadeInView";
 import StaggerChildren from "@/components/animation/StaggerChildren";
-import Divider from "@/components/ui/Divider";
 import GoldGlow from "@/components/effects/GoldGlow";
 import { trainingPillars, processSteps, contact } from "@/lib/constants";
 import {
@@ -53,6 +52,7 @@ export default function AthletiktrainingPage() {
 
       {/* ===== PHILOSOPHY INTRO ===== */}
       <section className="relative py-24 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
         <GoldGlow size="md" position="top-right" className="opacity-20" />
 
         <div className="max-w-4xl mx-auto px-6 text-center">
@@ -74,12 +74,12 @@ export default function AthletiktrainingPage() {
         </div>
       </section>
 
-      <Divider />
-
       {/* ===== TRAINING PILLARS ===== */}
       <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 gradient-mesh-subtle" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="absolute inset-0 gradient-mesh" />
         <GoldGlow size="lg" position="center" className="opacity-20" />
+        <GoldGlow size="sm" position="bottom-right" className="opacity-15" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6">
           <SectionHeader
@@ -94,7 +94,7 @@ export default function AthletiktrainingPage() {
               <FadeInView key={i} direction="up" delay={i * 0.1}>
                 <GlowCard padding="large" className="h-full">
                   <div className="flex items-start gap-4 mb-5">
-                    <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center">
+                    <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gold/[0.08] border border-gold/[0.12] flex items-center justify-center transition-all duration-300 hover:bg-gold/15 hover:border-gold/25">
                       {pillarIconMap[pillar.icon]}
                     </div>
                     <div>
@@ -124,10 +124,10 @@ export default function AthletiktrainingPage() {
         </div>
       </section>
 
-      <Divider />
-
       {/* ===== PROCESS STEPS ===== */}
       <section className="relative py-24 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="absolute inset-0 gradient-mesh-subtle" />
         <GoldGlow size="md" position="bottom-left" className="opacity-20" />
 
         <div className="relative z-10 max-w-4xl mx-auto px-6">
@@ -142,7 +142,7 @@ export default function AthletiktrainingPage() {
               <FadeInView key={i} direction="left" delay={i * 0.15}>
                 <div className="flex gap-6 items-start">
                   <div className="flex-shrink-0 flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-gold/[0.08] border border-gold/[0.12] flex items-center justify-center shadow-[0_0_15px_rgba(197,165,90,0.1)] transition-all duration-300 hover:bg-gold/15 hover:border-gold/25">
                       <span className="text-gold font-bold text-sm">
                         {step.step}
                       </span>
@@ -151,7 +151,7 @@ export default function AthletiktrainingPage() {
                       <div className="w-px h-16 bg-gradient-to-b from-gold/30 to-transparent mt-2" />
                     )}
                   </div>
-                  <div className="pt-1">
+                  <div className="pt-1 bg-[#141414]/90 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 flex-1 transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_rgba(197,165,90,0.12)]">
                     <h3 className="text-xl font-bold text-white mb-2">
                       {step.title}
                     </h3>
@@ -168,12 +168,15 @@ export default function AthletiktrainingPage() {
 
       {/* ===== CTA SECTION ===== */}
       <section className="relative py-24 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="absolute inset-0 gradient-mesh" />
         <GoldGlow size="lg" position="center" className="opacity-30" />
 
         <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
           <FadeInView>
             <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              Bereit für dein nächstes Level?
+              Bereit für dein{" "}
+              <span className="text-gold glow-gold-text">nächstes Level</span>?
             </h2>
             <p className="text-gray-400 text-lg mb-10 leading-relaxed">
               Lass uns in einem kostenlosen Erstgespräch herausfinden, wie wir

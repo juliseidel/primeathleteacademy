@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { Instagram, Mail, MapPin, ArrowUpRight } from "lucide-react";
 import { navLinks, contact } from "@/lib/constants";
-import Divider from "@/components/ui/Divider";
 
 export default function Footer() {
   return (
-    <footer className="relative pt-20 pb-8">
-      <Divider />
+    <footer className="relative pt-20 pb-8 border-t border-white/[0.04]">
+      {/* Top gold accent line */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/15 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-6">
         {/* Main footer grid */}
@@ -27,7 +27,7 @@ export default function Footer() {
                 href={contact.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-lg border border-gray-800 flex items-center justify-center text-gray-500 hover:text-gold hover:border-gold/30 hover:shadow-[0_0_15px_rgba(197,165,90,0.1)] transition-all duration-300"
+                className="w-10 h-10 rounded-xl bg-[#141414] border border-white/[0.08] flex items-center justify-center text-gray-500 hover:text-gold hover:border-gold/30 hover:shadow-[0_0_15px_rgba(197,165,90,0.1)] transition-all duration-300"
                 aria-label="Instagram"
               >
                 <Instagram className="w-4 h-4" />
@@ -130,7 +130,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-gray-800/50 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="border-t border-white/[0.04] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-600">
             &copy; {new Date().getFullYear()} Prime Athlete Academy. Alle Rechte
             vorbehalten.

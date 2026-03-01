@@ -30,24 +30,23 @@ export default function Navigation() {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-gray-950/80 backdrop-blur-xl border-b border-gold/5"
+          ? "bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_4px_30px_rgba(0,0,0,0.3)]"
           : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          {/* PAA Logo Mark */}
           <div className="relative">
             <span className="text-gold font-bold text-2xl tracking-tight glow-gold-text">
               PAA
             </span>
           </div>
           <div className="hidden sm:flex flex-col leading-none">
-            <span className="text-[10px] text-gray-500 tracking-[0.3em] uppercase font-light">
+            <span className="text-[10px] text-gray-400 tracking-[0.3em] uppercase font-light">
               Prime Athlete
             </span>
-            <span className="text-[10px] text-gray-500 tracking-[0.3em] uppercase font-light">
+            <span className="text-[10px] text-gray-400 tracking-[0.3em] uppercase font-light">
               Academy
             </span>
           </div>
@@ -61,7 +60,7 @@ export default function Navigation() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`relative px-4 py-2 text-sm tracking-wide transition-colors duration-200 rounded ${
+                className={`relative px-4 py-2 text-sm tracking-wide transition-colors duration-200 rounded-lg ${
                   isActive
                     ? "text-gold"
                     : "text-gray-400 hover:text-gray-200"
@@ -71,7 +70,7 @@ export default function Navigation() {
                 {isActive && (
                   <motion.div
                     layoutId="activeNav"
-                    className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-gold glow-gold"
+                    className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-gold shadow-[0_0_8px_rgba(197,165,90,0.6)]"
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                 )}
@@ -86,7 +85,7 @@ export default function Navigation() {
             href={contact.calendlyUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-5 py-2.5 bg-gold text-gray-950 text-sm font-semibold rounded hover:bg-gold-light hover:shadow-[0_0_20px_rgba(197,165,90,0.3)] transition-all duration-300"
+            className="px-5 py-2.5 bg-gold text-gray-950 text-sm font-semibold rounded-xl shadow-[0_0_15px_rgba(197,165,90,0.2)] hover:bg-gold-light hover:shadow-[0_0_30px_rgba(197,165,90,0.4)] transition-all duration-300"
           >
             Erstgespräch buchen
           </a>
@@ -110,7 +109,7 @@ export default function Navigation() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="lg:hidden bg-gray-950/95 backdrop-blur-xl border-t border-gold/5 overflow-hidden"
+            className="lg:hidden bg-[#0a0a0a]/95 backdrop-blur-xl border-t border-white/[0.06] overflow-hidden"
           >
             <div className="px-6 py-8 flex flex-col gap-2">
               {navLinks.map((link, i) => {
@@ -139,13 +138,13 @@ export default function Navigation() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: navLinks.length * 0.05 }}
-                className="mt-4 pt-4 border-t border-gray-800"
+                className="mt-4 pt-4 border-t border-white/[0.06]"
               >
                 <a
                   href={contact.calendlyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full py-3.5 bg-gold text-gray-950 font-semibold rounded text-center hover:bg-gold-light transition-colors"
+                  className="block w-full py-3.5 bg-gold text-gray-950 font-semibold rounded-xl text-center hover:bg-gold-light transition-colors"
                 >
                   Erstgespräch buchen
                 </a>

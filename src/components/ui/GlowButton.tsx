@@ -25,15 +25,15 @@ export default function GlowButton({
   className = "",
 }: GlowButtonProps) {
   const baseClasses =
-    "inline-flex items-center justify-center gap-2 font-semibold rounded transition-all duration-300";
+    "inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-300";
 
   const sizeClasses =
-    size === "large" ? "px-8 py-4 text-lg" : "px-6 py-3 text-sm";
+    size === "large" ? "px-8 py-4 text-base" : "px-6 py-3 text-sm";
 
   const variantClasses =
     variant === "primary"
-      ? "bg-gold text-gray-950 hover:bg-gold-light hover:shadow-[0_0_30px_rgba(197,165,90,0.4),0_0_80px_rgba(197,165,90,0.15)]"
-      : "border border-gold/30 text-gold hover:bg-gold/10 hover:border-gold/50 hover:shadow-[0_0_20px_rgba(197,165,90,0.15)]";
+      ? "bg-gold text-gray-950 shadow-[0_0_20px_rgba(197,165,90,0.2)] hover:bg-gold-light hover:shadow-[0_0_40px_rgba(197,165,90,0.5),0_0_100px_rgba(197,165,90,0.2)]"
+      : "border border-gold/30 text-gold bg-gold/[0.04] hover:bg-gold/10 hover:border-gold/50 hover:shadow-[0_0_30px_rgba(197,165,90,0.15)]";
 
   const classes = `${baseClasses} ${sizeClasses} ${variantClasses} ${className}`;
 

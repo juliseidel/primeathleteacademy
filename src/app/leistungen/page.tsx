@@ -5,7 +5,6 @@ import GlowButton from "@/components/ui/GlowButton";
 import GlowCard from "@/components/ui/GlowCard";
 import FadeInView from "@/components/animation/FadeInView";
 import StaggerChildren from "@/components/animation/StaggerChildren";
-import Divider from "@/components/ui/Divider";
 import GoldGlow from "@/components/effects/GoldGlow";
 import { deliverables, processSteps, contact } from "@/lib/constants";
 import {
@@ -68,8 +67,10 @@ export default function LeistungenPage() {
 
       {/* ===== DELIVERABLES GRID ===== */}
       <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 gradient-mesh-subtle" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="absolute inset-0 gradient-mesh" />
         <GoldGlow size="lg" position="top-right" className="opacity-20" />
+        <GoldGlow size="sm" position="bottom-left" className="opacity-15" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6">
           <SectionHeader
@@ -84,7 +85,7 @@ export default function LeistungenPage() {
               <FadeInView key={i} direction="up" delay={i * 0.05}>
                 <GlowCard className="h-full">
                   <div className="flex items-center gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gold/[0.08] border border-gold/[0.12] flex items-center justify-center transition-all duration-300 hover:bg-gold/15 hover:border-gold/25">
                       {deliverableIconMap[item.icon]}
                     </div>
                     <span className="text-white font-medium">{item.text}</span>
@@ -96,10 +97,10 @@ export default function LeistungenPage() {
         </div>
       </section>
 
-      <Divider />
-
       {/* ===== PROCESS TIMELINE ===== */}
       <section className="relative py-24 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="absolute inset-0 gradient-mesh-subtle" />
         <GoldGlow size="md" position="center" className="opacity-20" />
 
         <div className="relative z-10 max-w-4xl mx-auto px-6">
@@ -119,7 +120,7 @@ export default function LeistungenPage() {
                   <div className="flex gap-8 items-start relative">
                     {/* Timeline node */}
                     <div className="flex-shrink-0 relative z-10">
-                      <div className="w-12 h-12 rounded-full bg-gray-950 border-2 border-gold/40 flex items-center justify-center shadow-[0_0_15px_rgba(197,165,90,0.2)]">
+                      <div className="w-12 h-12 rounded-full bg-[#141414]/90 border-2 border-gold/[0.12] flex items-center justify-center shadow-[0_0_15px_rgba(197,165,90,0.15)] transition-all duration-300 hover:border-gold/30 hover:shadow-[0_0_25px_rgba(197,165,90,0.25)]">
                         {processIconMap[step.icon] || (
                           <span className="text-gold font-bold text-sm">
                             {step.step}
@@ -150,16 +151,16 @@ export default function LeistungenPage() {
         </div>
       </section>
 
-      <Divider />
-
       {/* ===== INDIVIDUELL SECTION ===== */}
       <section className="relative py-24 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="absolute inset-0 gradient-mesh" />
         <GoldGlow size="md" position="bottom-left" className="opacity-20" />
 
         <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
           <FadeInView>
             <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-2xl bg-gold/[0.08] border border-gold/[0.12] flex items-center justify-center transition-all duration-300 hover:bg-gold/15 hover:border-gold/25">
                 <Sparkles className="w-8 h-8 text-gold" />
               </div>
             </div>
@@ -167,7 +168,8 @@ export default function LeistungenPage() {
               Individuell
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold mt-4 mb-6">
-              Individuell auf dich abgestimmt
+              <span className="text-gold glow-gold-text">Individuell</span> auf
+              dich abgestimmt
             </h2>
             <p className="text-gray-400 text-lg leading-relaxed mb-4">
               Jeder Athlet ist anders – deshalb gibt es bei uns keine
@@ -194,12 +196,15 @@ export default function LeistungenPage() {
 
       {/* ===== CTA SECTION ===== */}
       <section className="relative py-24 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="absolute inset-0 gradient-mesh-subtle" />
         <GoldGlow size="lg" position="center" className="opacity-30" />
 
         <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
           <FadeInView>
             <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              Starte jetzt mit deinem Coaching
+              Starte jetzt mit deinem{" "}
+              <span className="text-gold glow-gold-text">Coaching</span>
             </h2>
             <p className="text-gray-400 text-lg mb-10 leading-relaxed">
               Sichere dir dein kostenloses Erstgespräch und erfahre, wie wir

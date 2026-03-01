@@ -1,13 +1,14 @@
 interface GoldGlowProps {
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   position?: "center" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
   className?: string;
 }
 
 const sizeMap = {
-  sm: "w-[300px] h-[300px]",
-  md: "w-[500px] h-[500px]",
-  lg: "w-[700px] h-[700px]",
+  sm: "w-[300px] h-[300px] blur-[80px]",
+  md: "w-[500px] h-[500px] blur-[120px]",
+  lg: "w-[700px] h-[700px] blur-[160px]",
+  xl: "w-[900px] h-[900px] blur-[200px]",
 };
 
 const positionMap = {
@@ -25,7 +26,7 @@ export default function GoldGlow({
 }: GoldGlowProps) {
   return (
     <div
-      className={`absolute ${positionMap[position]} ${sizeMap[size]} bg-gold/5 rounded-full blur-[120px] pointer-events-none ${className}`}
+      className={`absolute ${positionMap[position]} ${sizeMap[size]} bg-gold/[0.07] rounded-full pointer-events-none ${className}`}
     />
   );
 }
