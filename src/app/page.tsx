@@ -1,25 +1,20 @@
-import Navigation from "@/components/Navigation";
-import Hero from "@/components/Hero";
-import About from "@/components/About";
-import Services from "@/components/Services";
-import Results from "@/components/Results";
-import Process from "@/components/Process";
-import Contact from "@/components/Contact";
-import Footer from "@/components/Footer";
+import HomeHero from "@/components/sections/home/HomeHero";
+import HomeMission from "@/components/sections/home/HomeMission";
+import HomeHighlights from "@/components/sections/home/HomeHighlights";
+import HomeTestimonialPreview from "@/components/sections/home/HomeTestimonialPreview";
+import InstagramFeed from "@/components/media/InstagramFeed";
+import HomeCTA from "@/components/sections/home/HomeCTA";
+import { instagramPosts } from "@/lib/constants";
 
 export default function Home() {
   return (
     <>
-      <Navigation />
-      <main>
-        <Hero />
-        <About />
-        <Services />
-        <Results />
-        <Process />
-        <Contact />
-      </main>
-      <Footer />
+      <HomeHero />
+      <HomeMission />
+      <HomeHighlights />
+      <HomeTestimonialPreview />
+      <InstagramFeed postUrls={[...instagramPosts]} />
+      <HomeCTA />
     </>
   );
 }

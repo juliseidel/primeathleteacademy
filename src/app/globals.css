@@ -1,11 +1,14 @@
 @import "tailwindcss";
 
+/* ===== THEME TOKENS ===== */
 @theme inline {
   --color-background: #0a0a0a;
   --color-foreground: #f5f5f5;
   --color-gold: #C5A55A;
   --color-gold-light: #D4B96E;
   --color-gold-dark: #A88B3D;
+  --color-gold-glow: rgba(197, 165, 90, 0.4);
+  --color-gold-glow-subtle: rgba(197, 165, 90, 0.15);
   --color-gray-100: #f5f5f5;
   --color-gray-200: #e5e5e5;
   --color-gray-300: #d4d4d4;
@@ -19,6 +22,7 @@
   --font-sans: var(--font-inter);
 }
 
+/* ===== RESET ===== */
 * {
   margin: 0;
   padding: 0;
@@ -36,22 +40,146 @@ body {
   overflow-x: hidden;
 }
 
-/* Scrollbar styling */
+/* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
-
 ::-webkit-scrollbar-track {
   background: #0a0a0a;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #C5A55A;
+  background: linear-gradient(180deg, #A88B3D, #C5A55A, #D4B96E);
   border-radius: 3px;
 }
 
-/* Selection color */
+/* ===== SELECTION ===== */
 ::selection {
   background: rgba(197, 165, 90, 0.3);
   color: #f5f5f5;
+}
+
+/* ===== GOLD GLOW UTILITIES ===== */
+.glow-gold {
+  box-shadow:
+    0 0 20px rgba(197, 165, 90, 0.3),
+    0 0 60px rgba(197, 165, 90, 0.1);
+}
+
+.glow-gold-strong {
+  box-shadow:
+    0 0 30px rgba(197, 165, 90, 0.5),
+    0 0 80px rgba(197, 165, 90, 0.2),
+    0 0 120px rgba(197, 165, 90, 0.1);
+}
+
+.glow-gold-text {
+  text-shadow:
+    0 0 20px rgba(197, 165, 90, 0.5),
+    0 0 40px rgba(197, 165, 90, 0.3);
+}
+
+.glow-gold-subtle {
+  box-shadow:
+    0 0 15px rgba(197, 165, 90, 0.15),
+    0 0 45px rgba(197, 165, 90, 0.05);
+}
+
+.glow-gold-border {
+  box-shadow:
+    0 0 15px rgba(197, 165, 90, 0.2),
+    inset 0 0 15px rgba(197, 165, 90, 0.05);
+}
+
+/* ===== BACKGROUND PATTERNS ===== */
+.bg-field-lines {
+  background-image:
+    linear-gradient(rgba(197, 165, 90, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(197, 165, 90, 0.03) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+.bg-dots {
+  background-image: radial-gradient(rgba(197, 165, 90, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.gradient-mesh {
+  background:
+    radial-gradient(ellipse 600px 400px at 15% 20%, rgba(197, 165, 90, 0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 500px 500px at 85% 75%, rgba(197, 165, 90, 0.04) 0%, transparent 70%),
+    linear-gradient(180deg, #0a0a0a 0%, #111111 50%, #0a0a0a 100%);
+}
+
+.gradient-mesh-subtle {
+  background:
+    radial-gradient(ellipse 400px 300px at 20% 30%, rgba(197, 165, 90, 0.03) 0%, transparent 70%),
+    radial-gradient(ellipse 300px 300px at 80% 70%, rgba(197, 165, 90, 0.02) 0%, transparent 70%);
+}
+
+/* ===== KEYFRAME ANIMATIONS ===== */
+@keyframes speed-line {
+  0% { transform: translateX(-100%) scaleX(0); opacity: 0; }
+  30% { opacity: 0.6; }
+  100% { transform: translateX(300%) scaleX(2); opacity: 0; }
+}
+
+@keyframes pulse-gold {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(197, 165, 90, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(197, 165, 90, 0.6), 0 0 80px rgba(197, 165, 90, 0.2);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-speed-line {
+  animation: speed-line 4s ease-in-out infinite;
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(197, 165, 90, 0.1) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* ===== INTERACTIVE UTILITIES ===== */
+.gold-underline {
+  background-image: linear-gradient(var(--color-gold), var(--color-gold));
+  background-size: 0% 2px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.3s ease;
+}
+.gold-underline:hover {
+  background-size: 100% 2px;
+}
+
+/* ===== SCROLL PROGRESS ===== */
+.scroll-progress {
+  background: linear-gradient(90deg, var(--color-gold-dark), var(--color-gold), var(--color-gold-light));
+}
+
+/* ===== IMAGE PLACEHOLDER SHIMMER ===== */
+.placeholder-shimmer {
+  background: linear-gradient(110deg, #171717 0%, #262626 40%, #171717 60%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
 }
