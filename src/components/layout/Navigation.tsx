@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
@@ -34,15 +35,19 @@ export default function Navigation() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 group">
-              <span className="text-xl md:text-2xl font-black tracking-wider gradient-text-gold glow-gold-text">
-                PAA
-              </span>
+            <Link href="/" className="flex items-center gap-2 group">
+              <Image
+                src="/images/logo.jpg"
+                alt="Prime Athlete Academy"
+                width={40}
+                height={40}
+                className="rounded-lg border border-gold/20"
+              />
               <div className="hidden sm:flex flex-col leading-none">
-                <span className="text-[10px] text-muted tracking-[0.2em] uppercase">
-                  Prime Athlete
+                <span className="text-xs font-black tracking-wider gradient-text-gold">
+                  PRIME ATHLETE
                 </span>
-                <span className="text-[10px] text-muted tracking-[0.2em] uppercase">
+                <span className="text-[10px] text-muted tracking-[0.15em] uppercase">
                   Academy
                 </span>
               </div>

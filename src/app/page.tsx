@@ -22,23 +22,6 @@ export default function Home() {
         <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-gold-dark/10 rounded-full blur-[100px]" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Logo */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, duration: 0.6 }}
-            className="mb-8"
-          >
-            <Image
-              src="/images/logo.jpg"
-              alt="Prime Athlete Academy Logo"
-              width={120}
-              height={120}
-              className="mx-auto rounded-2xl border border-gold/20 shadow-lg shadow-gold/10"
-              priority
-            />
-          </motion.div>
-
           {/* Subtitle */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
