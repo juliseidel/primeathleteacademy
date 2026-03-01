@@ -1,151 +1,118 @@
+"use client";
+
 import Link from "next/link";
-import { Instagram, Mail, MapPin, ArrowUpRight } from "lucide-react";
+import { Instagram, Mail, MapPin, ArrowUp } from "lucide-react";
 import { navLinks, contact } from "@/lib/constants";
 
 export default function Footer() {
-  return (
-    <footer className="relative pt-20 pb-8 border-t border-white/[0.04]">
-      {/* Top gold accent line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/15 to-transparent" />
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Main footer grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 py-16">
+  return (
+    <footer className="relative bg-surface border-t border-white/5">
+      {/* Back to top */}
+      <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+        <button
+          onClick={scrollToTop}
+          className="w-10 h-10 bg-gold/20 hover:bg-gold/40 border border-gold/30 rounded-full flex items-center justify-center text-gold transition-all duration-300 hover:scale-110"
+          aria-label="Zurück nach oben"
+        >
+          <ArrowUp size={18} />
+        </button>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="inline-block mb-4">
-              <span className="text-gold font-bold text-2xl glow-gold-text">
-                PAA
-              </span>
-            </Link>
-            <p className="text-gray-500 text-sm leading-relaxed mb-6 max-w-xs">
-              Elite Athletik- und Ernährungscoaching von Profifußballern für
-              Profifußballer.
+          <div>
+            <h3 className="text-2xl font-black tracking-wider gradient-text-gold mb-4">
+              PAA
+            </h3>
+            <p className="text-muted text-sm leading-relaxed max-w-xs">
+              Individuelles Athletik- und Ernährungscoaching von Profifußballern für Profifußballer.
             </p>
-            <div className="flex items-center gap-3">
-              <a
-                href={contact.instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-[#141414] border border-white/[0.08] flex items-center justify-center text-gray-500 hover:text-gold hover:border-gold/30 hover:shadow-[0_0_15px_rgba(197,165,90,0.1)] transition-all duration-300"
-                aria-label="Instagram"
-              >
-                <Instagram className="w-4 h-4" />
-              </a>
-            </div>
           </div>
 
-          {/* Seiten */}
+          {/* Navigation */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-300 mb-4 tracking-wide">
+            <h4 className="text-sm font-bold tracking-widest uppercase text-foreground/50 mb-4">
               Seiten
             </h4>
-            <ul className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
               {navLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-gray-500 hover:text-gold transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm text-muted hover:text-gold transition-colors duration-300"
+                >
+                  {link.label}
+                </Link>
               ))}
-            </ul>
+            </div>
           </div>
 
           {/* Leistungen */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-300 mb-4 tracking-wide">
+            <h4 className="text-sm font-bold tracking-widest uppercase text-foreground/50 mb-4">
               Leistungen
             </h4>
-            <ul className="space-y-3">
-              <li>
-                <Link
-                  href="/athletiktraining"
-                  className="text-sm text-gray-500 hover:text-gold transition-colors"
-                >
-                  Athletiktraining
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/ernaehrung"
-                  className="text-sm text-gray-500 hover:text-gold transition-colors"
-                >
-                  Ernährungscoaching
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/leistungen"
-                  className="text-sm text-gray-500 hover:text-gold transition-colors"
-                >
-                  Alle Leistungen
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/referenzen"
-                  className="text-sm text-gray-500 hover:text-gold transition-colors"
-                >
-                  Referenzen
-                </Link>
-              </li>
-            </ul>
+            <div className="flex flex-col gap-2">
+              <Link href="/athletiktraining" className="text-sm text-muted hover:text-gold transition-colors duration-300">
+                Athletiktraining
+              </Link>
+              <Link href="/ernaehrung" className="text-sm text-muted hover:text-gold transition-colors duration-300">
+                Ernährungscoaching
+              </Link>
+              <Link href="/leistungen" className="text-sm text-muted hover:text-gold transition-colors duration-300">
+                Alle Leistungen
+              </Link>
+              <Link href="/referenzen" className="text-sm text-muted hover:text-gold transition-colors duration-300">
+                Referenzen
+              </Link>
+            </div>
           </div>
 
-          {/* Kontakt */}
+          {/* Contact */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-300 mb-4 tracking-wide">
+            <h4 className="text-sm font-bold tracking-widest uppercase text-foreground/50 mb-4">
               Kontakt
             </h4>
-            <ul className="space-y-3">
-              <li>
-                <a
-                  href={`mailto:${contact.email}`}
-                  className="flex items-start gap-2 text-sm text-gray-500 hover:text-gold transition-colors"
-                >
-                  <Mail className="w-4 h-4 mt-0.5 shrink-0" />
-                  <span className="break-all">{contact.email}</span>
-                </a>
-              </li>
-              <li className="flex items-start gap-2 text-sm text-gray-500">
-                <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
-                <span>{contact.location}</span>
-              </li>
-              <li>
-                <a
-                  href={contact.calendlyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-gold hover:text-gold-light transition-colors mt-2"
-                >
-                  Termin buchen
-                  <ArrowUpRight className="w-3 h-3" />
-                </a>
-              </li>
-            </ul>
+            <div className="flex flex-col gap-3">
+              <a
+                href={contact.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-sm text-muted hover:text-gold transition-colors duration-300 group"
+              >
+                <Instagram size={18} className="group-hover:scale-110 transition-transform" />
+                {contact.instagramHandle}
+              </a>
+              <a
+                href={`mailto:${contact.email}`}
+                className="flex items-center gap-3 text-sm text-muted hover:text-gold transition-colors duration-300 group"
+              >
+                <Mail size={18} className="group-hover:scale-110 transition-transform" />
+                E-Mail
+              </a>
+              <div className="flex items-center gap-3 text-sm text-muted">
+                <MapPin size={18} />
+                {contact.location}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="border-t border-white/[0.04] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-gray-600">
-            &copy; {new Date().getFullYear()} Prime Athlete Academy. Alle Rechte
-            vorbehalten.
+        {/* Bottom Bar */}
+        <div className="mt-12 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-muted">
+            &copy; {new Date().getFullYear()} Prime Athlete Academy. Alle Rechte vorbehalten.
           </p>
-          <div className="flex items-center gap-6 text-xs text-gray-600">
-            <Link
-              href="/impressum"
-              className="hover:text-gray-400 transition-colors"
-            >
+          <div className="flex items-center gap-6">
+            <Link href="/impressum" className="text-xs text-muted hover:text-gold transition-colors">
               Impressum
             </Link>
-            <Link
-              href="/datenschutz"
-              className="hover:text-gray-400 transition-colors"
-            >
+            <Link href="/datenschutz" className="text-xs text-muted hover:text-gold transition-colors">
               Datenschutz
             </Link>
           </div>

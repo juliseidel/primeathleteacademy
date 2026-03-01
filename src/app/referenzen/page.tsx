@@ -1,139 +1,187 @@
-import { generatePageMetadata } from "@/lib/metadata";
-import PageHero from "@/components/layout/PageHero";
-import SectionHeader from "@/components/ui/SectionHeader";
-import GlowButton from "@/components/ui/GlowButton";
-import GlowCard from "@/components/ui/GlowCard";
-import AnimatedCounter from "@/components/ui/AnimatedCounter";
-import FadeInView from "@/components/animation/FadeInView";
-import StaggerChildren from "@/components/animation/StaggerChildren";
-import GoldGlow from "@/components/effects/GoldGlow";
-import { testimonials, stats, contact } from "@/lib/constants";
-import { Quote } from "lucide-react";
+"use client";
 
-export const metadata = generatePageMetadata({
-  title: "Referenzen",
-  description:
-    "Was unsere Athleten über die Prime Athlete Academy sagen. Erfahrungsberichte von Profifußballern aus der 2. Bundesliga, 3. Liga und 4. Liga.",
-  path: "/referenzen",
-});
+import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { Quote, ArrowRight } from "lucide-react";
+import { testimonials, stats, contact } from "@/lib/constants";
+
+function useCounter(target: number, duration = 2000) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const started = useRef(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !started.current) {
+          started.current = true;
+          const start = performance.now();
+          const animate = (now: number) => {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            setCount(Math.floor(progress * target));
+            if (progress < 1) requestAnimationFrame(animate);
+          };
+          requestAnimationFrame(animate);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [target, duration]);
+
+  return { count, ref };
+}
 
 export default function ReferenzenPage() {
   return (
     <>
-      <PageHero
-        tag="Referenzen"
-        title="Was unsere Athleten"
-        titleAccent="über uns sagen"
-        description="Profifußballer aus ganz Deutschland vertrauen auf unser Coaching. Hier sind ihre Geschichten."
-      />
+      {/* ===== HERO ===== */}
+      <section className="py-20 md:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="tracking-[0.3em] uppercase text-muted text-sm mb-4"
+          >
+            Referenzen
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-5xl md:text-7xl font-black gradient-text-gold mb-6"
+          >
+            Was unsere Athleten sagen
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-muted text-lg md:text-xl max-w-2xl mx-auto"
+          >
+            Profifußballer aus ganz Deutschland vertrauen auf unser Coaching.
+            Hier sind ihre Geschichten.
+          </motion.p>
+        </div>
+      </section>
 
-      {/* ===== STATS SECTION ===== */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-        <GoldGlow size="md" position="center" className="opacity-20" />
-
-        <div className="relative z-10 max-w-5xl mx-auto px-6">
-          <FadeInView>
-            <div className="grid grid-cols-3 gap-8">
-              {stats.map((stat, i) => (
-                <div
+      {/* ===== STATS ===== */}
+      <section className="py-20 md:py-32 bg-surface/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto">
+            {stats.map((stat, i) => {
+              const { count, ref } = useCounter(stat.value);
+              return (
+                <motion.div
                   key={i}
-                  className="bg-[#141414]/90 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 sm:p-8 text-center transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_rgba(197,165,90,0.12)]"
+                  ref={ref}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.15 }}
+                  className="bg-surface border border-white/5 hover:border-gold/20 rounded-2xl p-8 transition-colors duration-300 text-center"
                 >
-                  <AnimatedCounter
-                    target={stat.value}
-                    suffix={stat.suffix}
-                    label={stat.label}
-                  />
-                </div>
-              ))}
-            </div>
-          </FadeInView>
-        </div>
-      </section>
-
-      {/* ===== TESTIMONIALS GRID ===== */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-        <div className="absolute inset-0 gradient-mesh" />
-        <GoldGlow size="lg" position="top-left" className="opacity-20" />
-        <GoldGlow size="md" position="bottom-right" className="opacity-15" />
-
-        <div className="relative z-10 max-w-7xl mx-auto px-6">
-          <SectionHeader
-            tag="Testimonials"
-            title="Stimmen unserer Athleten"
-            titleMuted="Echte Erfahrungen, echte Ergebnisse"
-          />
-
-          <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {testimonials.map((testimonial, i) => (
-              <FadeInView key={i} direction="up" delay={i * 0.1}>
-                <GlowCard padding="large" className="h-full flex flex-col">
-                  {/* Quote icon */}
-                  <div className="mb-6">
-                    <div className="w-12 h-12 rounded-xl bg-gold/[0.08] border border-gold/[0.12] flex items-center justify-center">
-                      <Quote className="w-6 h-6 text-gold/40" />
-                    </div>
-                  </div>
-
-                  {/* Quote text */}
-                  <p className="text-gray-300 text-lg leading-relaxed mb-8 flex-1">
-                    &ldquo;{testimonial.quote}&rdquo;
+                  <p className="text-4xl md:text-5xl font-black gradient-text-gold mb-2">
+                    {count}{stat.suffix}
                   </p>
-
-                  {/* Attribution */}
-                  <div className="border-t border-white/[0.08] pt-6">
-                    <p className="text-white font-semibold text-lg">
-                      {testimonial.name}
-                    </p>
-                    <p className="text-gold/80 text-sm mt-1">
-                      {testimonial.team}
-                    </p>
-                    <p className="text-gray-500 text-sm">{testimonial.league}</p>
-                  </div>
-                </GlowCard>
-              </FadeInView>
-            ))}
-          </StaggerChildren>
+                  <p className="text-muted text-sm">{stat.label}</p>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      {/* ===== CTA SECTION ===== */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-        <div className="absolute inset-0 gradient-mesh-subtle" />
-        <GoldGlow size="lg" position="center" className="opacity-30" />
-
-        <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
-          <FadeInView>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              Werde Teil der{" "}
-              <span className="text-gold glow-gold-text">Academy</span>
+      {/* ===== TESTIMONIALS ===== */}
+      <section className="py-20 md:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-5xl font-black mb-4">
+              Stimmen unserer <span className="gradient-text-gold">Athleten</span>
             </h2>
-            <p className="text-gray-400 text-lg mb-10 leading-relaxed">
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {testimonials.map((testimonial, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-surface border border-white/5 hover:border-gold/20 rounded-2xl p-8 transition-colors duration-300 flex flex-col"
+              >
+                <div className="mb-6">
+                  <div className="w-12 h-12 bg-gold/10 rounded-xl flex items-center justify-center">
+                    <Quote className="w-6 h-6 text-gold/40" />
+                  </div>
+                </div>
+
+                <p className="text-white/80 text-lg leading-relaxed mb-8 flex-1">
+                  &ldquo;{testimonial.quote}&rdquo;
+                </p>
+
+                <div className="border-t border-white/5 pt-6">
+                  <p className="text-white font-semibold text-lg">{testimonial.name}</p>
+                  <p className="text-gold/80 text-sm mt-1">{testimonial.team}</p>
+                  <p className="text-muted text-sm">{testimonial.league}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== CTA ===== */}
+      <section className="py-20 md:py-32 bg-gradient-to-b from-surface/50 to-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <h2 className="text-3xl md:text-5xl font-black mb-4">
+              Werde Teil der <span className="gradient-text-gold">Academy</span>
+            </h2>
+            <p className="text-muted text-lg mb-10 max-w-2xl mx-auto">
               Schließe dich den Athleten an, die bereits von unserem Coaching
               profitieren. Starte mit einem kostenlosen Erstgespräch.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <GlowButton
+              <a
                 href={contact.calendlyUrl}
-                external
-                size="large"
-                showArrow
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-8 py-4 bg-gold hover:bg-gold-light text-background font-bold rounded-full transition-all duration-300 hover:scale-105 inline-flex items-center justify-center gap-2"
               >
                 Kostenloses Erstgespräch buchen
-              </GlowButton>
-              <GlowButton
+                <ArrowRight className="w-4 h-4" />
+              </a>
+              <a
                 href={contact.instagramUrl}
-                variant="secondary"
-                external
-                size="large"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-3 border border-white/10 hover:border-gold/30 rounded-full text-sm font-medium text-muted hover:text-gold transition-all duration-300 inline-flex items-center justify-center"
               >
                 Folge uns auf Instagram
-              </GlowButton>
+              </a>
             </div>
-          </FadeInView>
+          </motion.div>
         </div>
       </section>
     </>

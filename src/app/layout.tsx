@@ -53,8 +53,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de" className="scroll-smooth">
-      <body className={`${inter.variable} antialiased`}>
+    <html lang="de" className="dark">
+      <body className={`${inter.variable} antialiased bg-background text-foreground`}>
         <ScrollProgress />
         <Navigation />
         <main className="min-h-screen">{children}</main>

@@ -1,39 +1,14 @@
-import { generatePageMetadata } from "@/lib/metadata";
-import PageHero from "@/components/layout/PageHero";
-import SectionHeader from "@/components/ui/SectionHeader";
-import GlowButton from "@/components/ui/GlowButton";
-import GlowCard from "@/components/ui/GlowCard";
-import FadeInView from "@/components/animation/FadeInView";
-import StaggerChildren from "@/components/animation/StaggerChildren";
-import GoldGlow from "@/components/effects/GoldGlow";
-import { deliverables, processSteps, contact } from "@/lib/constants";
+"use client";
+
+import { motion } from "framer-motion";
 import {
-  Dumbbell,
-  Apple,
-  Video,
-  MessageCircle,
-  Phone,
-  Users,
-  ClipboardList,
-  Activity,
-  RotateCcw,
-  Settings,
-  TrendingUp,
-  Shield,
-  MessageSquare,
-  ClipboardCheck,
-  Rocket,
-  Sparkles,
+  Dumbbell, Apple, Video, MessageCircle, Phone, Users,
+  ClipboardList, Activity, RotateCcw, Settings, TrendingUp, Shield,
+  ArrowRight,
 } from "lucide-react";
+import { deliverables, processSteps, contact } from "@/lib/constants";
 
-export const metadata = generatePageMetadata({
-  title: "Leistungen",
-  description:
-    "Alles was du brauchst in einem Coaching: Individueller Trainingsplan, Ernährungsplan, Video-Anleitungen, 24/7 Support und mehr.",
-  path: "/leistungen",
-});
-
-const deliverableIconMap: Record<string, React.ReactNode> = {
+const deliverableIcons: Record<string, React.ReactNode> = {
   dumbbell: <Dumbbell className="w-6 h-6 text-gold" />,
   apple: <Apple className="w-6 h-6 text-gold" />,
   video: <Video className="w-6 h-6 text-gold" />,
@@ -48,187 +23,156 @@ const deliverableIconMap: Record<string, React.ReactNode> = {
   shield: <Shield className="w-6 h-6 text-gold" />,
 };
 
-const processIconMap: Record<string, React.ReactNode> = {
-  messageSquare: <MessageSquare className="w-6 h-6 text-gold" />,
-  clipboardCheck: <ClipboardCheck className="w-6 h-6 text-gold" />,
-  rocket: <Rocket className="w-6 h-6 text-gold" />,
-  trendingUp: <TrendingUp className="w-6 h-6 text-gold" />,
-};
-
 export default function LeistungenPage() {
   return (
     <>
-      <PageHero
-        tag="Leistungen"
-        title="Alles was du brauchst"
-        titleAccent="in einem Coaching"
-        description="Ein ganzheitliches Coaching-Paket, das keine Wünsche offen lässt – maßgeschneidert auf dich als Athlet."
-      />
-
-      {/* ===== DELIVERABLES GRID ===== */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-        <div className="absolute inset-0 gradient-mesh" />
-        <GoldGlow size="lg" position="top-right" className="opacity-20" />
-        <GoldGlow size="sm" position="bottom-left" className="opacity-15" />
-
-        <div className="relative z-10 max-w-7xl mx-auto px-6">
-          <SectionHeader
-            tag="Leistungsumfang"
-            title="Das bekommst du"
-            titleMuted="Alles inklusive"
-            description="Jede Leistung wird individuell auf dich und deine Ziele abgestimmt."
-          />
-
-          <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {deliverables.map((item, i) => (
-              <FadeInView key={i} direction="up" delay={i * 0.05}>
-                <GlowCard className="h-full">
-                  <div className="flex items-center gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gold/[0.08] border border-gold/[0.12] flex items-center justify-center transition-all duration-300 hover:bg-gold/15 hover:border-gold/25">
-                      {deliverableIconMap[item.icon]}
-                    </div>
-                    <span className="text-white font-medium">{item.text}</span>
-                  </div>
-                </GlowCard>
-              </FadeInView>
-            ))}
-          </StaggerChildren>
+      {/* ===== HERO ===== */}
+      <section className="py-20 md:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="tracking-[0.3em] uppercase text-muted text-sm mb-4"
+          >
+            Leistungen
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-5xl md:text-7xl font-black gradient-text-gold mb-6"
+          >
+            Alles was du brauchst
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-muted text-lg md:text-xl max-w-2xl mx-auto"
+          >
+            Ein ganzheitliches Coaching-Paket, das keine Wünsche offen lässt --
+            maßgeschneidert auf dich als Athlet.
+          </motion.p>
         </div>
       </section>
 
-      {/* ===== PROCESS TIMELINE ===== */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-        <div className="absolute inset-0 gradient-mesh-subtle" />
-        <GoldGlow size="md" position="center" className="opacity-20" />
+      {/* ===== DELIVERABLES ===== */}
+      <section className="py-20 md:py-32 bg-surface/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-5xl font-black mb-4">
+              Das bekommst <span className="gradient-text-gold">du</span>
+            </h2>
+            <p className="text-muted max-w-2xl mx-auto">
+              Jede Leistung wird individuell auf dich und deine Ziele abgestimmt.
+            </p>
+          </motion.div>
 
-        <div className="relative z-10 max-w-4xl mx-auto px-6">
-          <SectionHeader
-            tag="Prozess"
-            title="Dein Weg mit uns"
-            titleMuted="Von Erstgespräch bis Peak Performance"
-          />
-
-          <div className="relative">
-            {/* Gold connecting line */}
-            <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-gold/40 via-gold/20 to-transparent hidden sm:block" />
-
-            <div className="space-y-12">
-              {processSteps.map((step, i) => (
-                <FadeInView key={i} direction="left" delay={i * 0.15}>
-                  <div className="flex gap-8 items-start relative">
-                    {/* Timeline node */}
-                    <div className="flex-shrink-0 relative z-10">
-                      <div className="w-12 h-12 rounded-full bg-[#141414]/90 border-2 border-gold/[0.12] flex items-center justify-center shadow-[0_0_15px_rgba(197,165,90,0.15)] transition-all duration-300 hover:border-gold/30 hover:shadow-[0_0_25px_rgba(197,165,90,0.25)]">
-                        {processIconMap[step.icon] || (
-                          <span className="text-gold font-bold text-sm">
-                            {step.step}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Content card */}
-                    <GlowCard padding="large" className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className="text-gold/60 text-sm font-mono">
-                          Schritt {step.step}
-                        </span>
-                      </div>
-                      <h3 className="text-xl font-bold text-white mb-2">
-                        {step.title}
-                      </h3>
-                      <p className="text-gray-400 leading-relaxed">
-                        {step.description}
-                      </p>
-                    </GlowCard>
-                  </div>
-                </FadeInView>
-              ))}
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {deliverables.map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+                className="bg-surface border border-white/5 hover:border-gold/20 rounded-2xl p-8 transition-colors duration-300 flex items-center gap-4"
+              >
+                <div className="w-14 h-14 bg-gold/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  {deliverableIcons[item.icon]}
+                </div>
+                <span className="text-white font-medium">{item.text}</span>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ===== INDIVIDUELL SECTION ===== */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-        <div className="absolute inset-0 gradient-mesh" />
-        <GoldGlow size="md" position="bottom-left" className="opacity-20" />
-
-        <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
-          <FadeInView>
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 rounded-2xl bg-gold/[0.08] border border-gold/[0.12] flex items-center justify-center transition-all duration-300 hover:bg-gold/15 hover:border-gold/25">
-                <Sparkles className="w-8 h-8 text-gold" />
-              </div>
-            </div>
-            <span className="text-gold text-sm font-medium tracking-[0.2em] uppercase">
-              Individuell
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold mt-4 mb-6">
-              <span className="text-gold glow-gold-text">Individuell</span> auf
-              dich abgestimmt
+      {/* ===== PROCESS ===== */}
+      <section className="py-20 md:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-5xl font-black mb-4">
+              Dein Weg <span className="gradient-text-gold">mit uns</span>
             </h2>
-            <p className="text-gray-400 text-lg leading-relaxed mb-4">
-              Jeder Athlet ist anders – deshalb gibt es bei uns keine
-              Standard-Pakete oder feste Preislisten. Wir erstellen ein Coaching,
-              das exakt auf deine Situation, deine Ziele und deinen Zeitplan
-              abgestimmt ist.
+            <p className="text-muted max-w-2xl mx-auto">
+              Von Erstgespräch bis Peak Performance.
             </p>
-            <p className="text-gray-400 text-lg leading-relaxed mb-10">
-              In einem unverbindlichen Erstgespräch lernen wir dich kennen und
-              besprechen, wie wir zusammenarbeiten können. Kein Sales-Pitch –
-              nur ein ehrliches Gespräch auf Augenhöhe.
-            </p>
-            <GlowButton
-              href={contact.calendlyUrl}
-              external
-              size="large"
-              showArrow
-            >
-              Kostenloses Erstgespräch buchen
-            </GlowButton>
-          </FadeInView>
+          </motion.div>
+
+          <div className="max-w-3xl mx-auto space-y-6">
+            {processSteps.map((step, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-surface border border-white/5 hover:border-gold/20 rounded-2xl p-8 transition-colors duration-300 flex gap-6 items-start"
+              >
+                <div className="w-14 h-14 bg-gold/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-gold font-bold text-lg">{step.step}</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2">{step.title}</h3>
+                  <p className="text-muted leading-relaxed">{step.description}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ===== CTA SECTION ===== */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-        <div className="absolute inset-0 gradient-mesh-subtle" />
-        <GoldGlow size="lg" position="center" className="opacity-30" />
-
-        <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
-          <FadeInView>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6">
+      {/* ===== CTA ===== */}
+      <section className="py-20 md:py-32 bg-gradient-to-b from-surface/50 to-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <h2 className="text-3xl md:text-5xl font-black mb-4">
               Starte jetzt mit deinem{" "}
-              <span className="text-gold glow-gold-text">Coaching</span>
+              <span className="gradient-text-gold">Coaching</span>
             </h2>
-            <p className="text-gray-400 text-lg mb-10 leading-relaxed">
+            <p className="text-muted text-lg mb-10 max-w-2xl mx-auto">
               Sichere dir dein kostenloses Erstgespräch und erfahre, wie wir
               gemeinsam deine Performance auf das nächste Level bringen.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <GlowButton
+              <a
                 href={contact.calendlyUrl}
-                external
-                size="large"
-                showArrow
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-8 py-4 bg-gold hover:bg-gold-light text-background font-bold rounded-full transition-all duration-300 hover:scale-105 inline-flex items-center justify-center gap-2"
               >
                 Jetzt Erstgespräch buchen
-              </GlowButton>
-              <GlowButton
+                <ArrowRight className="w-4 h-4" />
+              </a>
+              <a
                 href={contact.instagramUrl}
-                variant="secondary"
-                external
-                size="large"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-3 border border-white/10 hover:border-gold/30 rounded-full text-sm font-medium text-muted hover:text-gold transition-all duration-300 inline-flex items-center justify-center"
               >
                 Mehr auf Instagram
-              </GlowButton>
+              </a>
             </div>
-          </FadeInView>
+          </motion.div>
         </div>
       </section>
     </>

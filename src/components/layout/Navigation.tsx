@@ -1,158 +1,149 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { navLinks, contact } from "@/lib/constants";
 
 export default function Navigation() {
+  const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
-    setMobileOpen(false);
+    setIsOpen(false);
   }, [pathname]);
 
   return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_4px_30px_rgba(0,0,0,0.3)]"
-          : "bg-transparent"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative">
-            <span className="text-gold font-bold text-2xl tracking-tight glow-gold-text">
-              PAA
-            </span>
+    <>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+          scrolled
+            ? "bg-background/90 backdrop-blur-xl border-b border-white/5"
+            : "bg-transparent"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 md:h-20">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-3 group">
+              <span className="text-xl md:text-2xl font-black tracking-wider gradient-text-gold glow-gold-text">
+                PAA
+              </span>
+              <div className="hidden sm:flex flex-col leading-none">
+                <span className="text-[10px] text-muted tracking-[0.2em] uppercase">
+                  Prime Athlete
+                </span>
+                <span className="text-[10px] text-muted tracking-[0.2em] uppercase">
+                  Academy
+                </span>
+              </div>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center gap-1">
+              {navLinks.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`relative px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-300 ${
+                      isActive
+                        ? "text-gold"
+                        : "text-foreground/70 hover:text-foreground"
+                    }`}
+                  >
+                    {item.label}
+                    {isActive && (
+                      <motion.div
+                        layoutId="nav-indicator"
+                        className="absolute bottom-0 left-2 right-2 h-0.5 bg-gold rounded-full"
+                        transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* CTA */}
+            <a
+              href={contact.calendlyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden lg:flex items-center gap-2 px-4 py-2 bg-gold/10 hover:bg-gold/20 border border-gold/30 rounded-full text-sm font-medium text-gold transition-all duration-300 hover:scale-105"
+            >
+              Erstgespräch buchen
+            </a>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="lg:hidden p-2 text-foreground/70 hover:text-foreground transition-colors"
+              aria-label="Toggle menu"
+            >
+              {isOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
-          <div className="hidden sm:flex flex-col leading-none">
-            <span className="text-[10px] text-gray-400 tracking-[0.3em] uppercase font-light">
-              Prime Athlete
-            </span>
-            <span className="text-[10px] text-gray-400 tracking-[0.3em] uppercase font-light">
-              Academy
-            </span>
-          </div>
-        </Link>
-
-        {/* Desktop nav */}
-        <div className="hidden lg:flex items-center gap-1">
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`relative px-4 py-2 text-sm tracking-wide transition-colors duration-200 rounded-lg ${
-                  isActive
-                    ? "text-gold"
-                    : "text-gray-400 hover:text-gray-200"
-                }`}
-              >
-                {link.label}
-                {isActive && (
-                  <motion.div
-                    layoutId="activeNav"
-                    className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-gold shadow-[0_0_8px_rgba(197,165,90,0.6)]"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                )}
-              </Link>
-            );
-          })}
         </div>
+      </nav>
 
-        {/* Desktop CTA */}
-        <div className="hidden lg:block">
-          <a
-            href={contact.calendlyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-5 py-2.5 bg-gold text-gray-950 text-sm font-semibold rounded-xl shadow-[0_0_15px_rgba(197,165,90,0.2)] hover:bg-gold-light hover:shadow-[0_0_30px_rgba(197,165,90,0.4)] transition-all duration-300"
-          >
-            Erstgespräch buchen
-          </a>
-        </div>
-
-        {/* Mobile hamburger */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="lg:hidden text-gray-400 hover:text-gold transition-colors p-2"
-          aria-label={mobileOpen ? "Menü schließen" : "Menü öffnen"}
-        >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
-
-      {/* Mobile menu */}
+      {/* Mobile Menu */}
       <AnimatePresence>
-        {mobileOpen && (
+        {isOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="lg:hidden bg-[#0a0a0a]/95 backdrop-blur-xl border-t border-white/[0.06] overflow-hidden"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-40 bg-background/98 backdrop-blur-xl lg:hidden pt-20"
           >
-            <div className="px-6 py-8 flex flex-col gap-2">
-              {navLinks.map((link, i) => {
-                const isActive = pathname === link.href;
+            <div className="flex flex-col items-center gap-2 p-8">
+              {navLinks.map((item, index) => {
+                const isActive = pathname === item.href;
                 return (
                   <motion.div
-                    key={link.href}
+                    key={item.href}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
+                    transition={{ delay: index * 0.05 }}
                   >
                     <Link
-                      href={link.href}
-                      className={`block py-3 text-lg transition-colors ${
-                        isActive
-                          ? "text-gold font-medium"
-                          : "text-gray-300 hover:text-gold"
+                      href={item.href}
+                      className={`block text-2xl font-bold tracking-wide py-3 transition-colors ${
+                        isActive ? "gradient-text-gold" : "text-foreground/70 hover:text-foreground"
                       }`}
                     >
-                      {link.label}
+                      {item.label}
                     </Link>
                   </motion.div>
                 );
               })}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: navLinks.length * 0.05 }}
-                className="mt-4 pt-4 border-t border-white/[0.06]"
+
+              <motion.a
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                href={contact.calendlyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-8 flex items-center gap-3 px-8 py-4 bg-gold text-background rounded-full text-lg font-bold transition-transform hover:scale-105"
               >
-                <a
-                  href={contact.calendlyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full py-3.5 bg-gold text-gray-950 font-semibold rounded-xl text-center hover:bg-gold-light transition-colors"
-                >
-                  Erstgespräch buchen
-                </a>
-              </motion.div>
+                Erstgespräch buchen
+              </motion.a>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.nav>
+    </>
   );
 }

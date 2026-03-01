@@ -1,39 +1,17 @@
-import { generatePageMetadata } from "@/lib/metadata";
-import PageHero from "@/components/layout/PageHero";
-import SectionHeader from "@/components/ui/SectionHeader";
-import GlowButton from "@/components/ui/GlowButton";
-import GlowCard from "@/components/ui/GlowCard";
-import FadeInView from "@/components/animation/FadeInView";
-import StaggerChildren from "@/components/animation/StaggerChildren";
-import GoldGlow from "@/components/effects/GoldGlow";
+"use client";
+
+import { motion } from "framer-motion";
+import { Zap, Flame, Shield, Heart, Check, ArrowRight, MessageSquare, ClipboardCheck, Rocket, TrendingUp } from "lucide-react";
 import { trainingPillars, processSteps, contact } from "@/lib/constants";
-import {
-  Zap,
-  Flame,
-  Shield,
-  Heart,
-  MessageSquare,
-  ClipboardCheck,
-  Rocket,
-  TrendingUp,
-  CheckCircle,
-} from "lucide-react";
 
-export const metadata = generatePageMetadata({
-  title: "Athletiktraining",
-  description:
-    "Individuelles Athletiktraining für Profifußballer: Schnelligkeit, Explosivkraft, Stabilität und Ausdauer – wissenschaftlich fundiert und praxisorientiert.",
-  path: "/athletiktraining",
-});
-
-const pillarIconMap: Record<string, React.ReactNode> = {
-  zap: <Zap className="w-8 h-8 text-gold" />,
-  flame: <Flame className="w-8 h-8 text-gold" />,
-  shield: <Shield className="w-8 h-8 text-gold" />,
-  heart: <Heart className="w-8 h-8 text-gold" />,
+const pillarIcons: Record<string, React.ReactNode> = {
+  zap: <Zap className="w-7 h-7 text-gold" />,
+  flame: <Flame className="w-7 h-7 text-gold" />,
+  shield: <Shield className="w-7 h-7 text-gold" />,
+  heart: <Heart className="w-7 h-7 text-gold" />,
 };
 
-const processIconMap: Record<string, React.ReactNode> = {
+const stepIcons: Record<string, React.ReactNode> = {
   messageSquare: <MessageSquare className="w-6 h-6 text-gold" />,
   clipboardCheck: <ClipboardCheck className="w-6 h-6 text-gold" />,
   rocket: <Rocket className="w-6 h-6 text-gold" />,
@@ -43,154 +21,159 @@ const processIconMap: Record<string, React.ReactNode> = {
 export default function AthletiktrainingPage() {
   return (
     <>
-      <PageHero
-        tag="Athletiktraining"
-        title="Maximale Performance"
-        titleAccent="auf dem Platz"
-        description="Individualisiertes Athletiktraining, das dich schneller, explosiver und widerstandsfähiger macht – entwickelt von aktiven Profifußballern."
-      />
-
-      {/* ===== PHILOSOPHY INTRO ===== */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-        <GoldGlow size="md" position="top-right" className="opacity-20" />
-
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <FadeInView>
-            <span className="text-gold text-sm font-medium tracking-[0.2em] uppercase">
-              Unser Ansatz
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold mt-4 mb-6">
-              Training, das auf dem Platz
-              <span className="text-gray-500"> den Unterschied macht</span>
-            </h2>
-            <p className="text-gray-400 text-lg leading-relaxed max-w-3xl mx-auto">
-              Kein generisches Fitnessprogramm, sondern fußballspezifisches
-              Athletiktraining, das exakt auf deine Position, deine Stärken und
-              deine Ziele abgestimmt ist. Wir trainieren nicht nur Muskeln – wir
-              trainieren Bewegungsmuster, die dich auf dem Platz besser machen.
-            </p>
-          </FadeInView>
+      {/* ===== HERO ===== */}
+      <section className="py-20 md:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="tracking-[0.3em] uppercase text-muted text-sm mb-4"
+          >
+            Athletiktraining
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-5xl md:text-7xl font-black gradient-text-gold mb-6"
+          >
+            Maximale Performance
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-muted text-lg md:text-xl max-w-2xl mx-auto"
+          >
+            Individualisiertes Athletiktraining, das dich schneller, explosiver und
+            widerstandsfähiger macht -- entwickelt von aktiven Profifußballern.
+          </motion.p>
         </div>
       </section>
 
       {/* ===== TRAINING PILLARS ===== */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-        <div className="absolute inset-0 gradient-mesh" />
-        <GoldGlow size="lg" position="center" className="opacity-20" />
-        <GoldGlow size="sm" position="bottom-right" className="opacity-15" />
+      <section className="py-20 md:py-32 bg-surface/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-5xl font-black mb-4">
+              Die 4 <span className="gradient-text-gold">Säulen</span>
+            </h2>
+            <p className="text-muted max-w-2xl mx-auto">
+              Jede Säule wird individuell auf dich abgestimmt und in deinen
+              Trainingsplan integriert.
+            </p>
+          </motion.div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6">
-          <SectionHeader
-            tag="Die 4 Säulen"
-            title="Unser Trainingsansatz"
-            titleMuted="Vier Säulen der Performance"
-            description="Jede Säule wird individuell auf dich abgestimmt und in deinen Trainingsplan integriert."
-          />
-
-          <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {trainingPillars.map((pillar, i) => (
-              <FadeInView key={i} direction="up" delay={i * 0.1}>
-                <GlowCard padding="large" className="h-full">
-                  <div className="flex items-start gap-4 mb-5">
-                    <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gold/[0.08] border border-gold/[0.12] flex items-center justify-center transition-all duration-300 hover:bg-gold/15 hover:border-gold/25">
-                      {pillarIconMap[pillar.icon]}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-white">
-                        {pillar.title}
-                      </h3>
-                      <p className="text-gold/60 text-sm">{pillar.subtitle}</p>
-                    </div>
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-surface border border-white/5 hover:border-gold/20 rounded-2xl p-8 transition-colors duration-300"
+              >
+                <div className="flex items-start gap-4 mb-5">
+                  <div className="w-14 h-14 bg-gold/10 rounded-xl flex items-center justify-center">
+                    {pillarIcons[pillar.icon]}
                   </div>
-
-                  <p className="text-gray-400 leading-relaxed mb-6">
-                    {pillar.description}
-                  </p>
-
-                  <ul className="space-y-3">
-                    {pillar.features.map((feature, j) => (
-                      <li key={j} className="flex items-center gap-3">
-                        <CheckCircle className="w-4 h-4 text-gold flex-shrink-0" />
-                        <span className="text-gray-300 text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </GlowCard>
-              </FadeInView>
-            ))}
-          </StaggerChildren>
-        </div>
-      </section>
-
-      {/* ===== PROCESS STEPS ===== */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-        <div className="absolute inset-0 gradient-mesh-subtle" />
-        <GoldGlow size="md" position="bottom-left" className="opacity-20" />
-
-        <div className="relative z-10 max-w-4xl mx-auto px-6">
-          <SectionHeader
-            tag="Dein Weg"
-            title="So starten wir zusammen"
-            titleMuted="In 4 Schritten zu deiner besten Performance"
-          />
-
-          <div className="space-y-8">
-            {processSteps.map((step, i) => (
-              <FadeInView key={i} direction="left" delay={i * 0.15}>
-                <div className="flex gap-6 items-start">
-                  <div className="flex-shrink-0 flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-gold/[0.08] border border-gold/[0.12] flex items-center justify-center shadow-[0_0_15px_rgba(197,165,90,0.1)] transition-all duration-300 hover:bg-gold/15 hover:border-gold/25">
-                      <span className="text-gold font-bold text-sm">
-                        {step.step}
-                      </span>
-                    </div>
-                    {i < processSteps.length - 1 && (
-                      <div className="w-px h-16 bg-gradient-to-b from-gold/30 to-transparent mt-2" />
-                    )}
-                  </div>
-                  <div className="pt-1 bg-[#141414]/90 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 flex-1 transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_40px_rgba(197,165,90,0.12)]">
-                    <h3 className="text-xl font-bold text-white mb-2">
-                      {step.title}
-                    </h3>
-                    <p className="text-gray-400 leading-relaxed">
-                      {step.description}
-                    </p>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">{pillar.title}</h3>
+                    <p className="text-gold/60 text-sm">{pillar.subtitle}</p>
                   </div>
                 </div>
-              </FadeInView>
+
+                <p className="text-muted leading-relaxed mb-6">{pillar.description}</p>
+
+                <ul className="space-y-3">
+                  {pillar.features.map((feature, j) => (
+                    <li key={j} className="flex items-center gap-3">
+                      <Check className="w-4 h-4 text-gold flex-shrink-0" />
+                      <span className="text-muted text-sm">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ===== CTA SECTION ===== */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-        <div className="absolute inset-0 gradient-mesh" />
-        <GoldGlow size="lg" position="center" className="opacity-30" />
-
-        <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
-          <FadeInView>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              Bereit für dein{" "}
-              <span className="text-gold glow-gold-text">nächstes Level</span>?
+      {/* ===== PROCESS ===== */}
+      <section className="py-20 md:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-5xl font-black mb-4">
+              So starten wir <span className="gradient-text-gold">zusammen</span>
             </h2>
-            <p className="text-gray-400 text-lg mb-10 leading-relaxed">
-              Lass uns in einem kostenlosen Erstgespräch herausfinden, wie wir
-              dein Athletiktraining optimieren können.
+            <p className="text-muted max-w-2xl mx-auto">
+              In 4 Schritten zu deiner besten Performance.
             </p>
-            <GlowButton
+          </motion.div>
+
+          <div className="max-w-3xl mx-auto space-y-6">
+            {processSteps.map((step, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-surface border border-white/5 hover:border-gold/20 rounded-2xl p-8 transition-colors duration-300 flex gap-6 items-start"
+              >
+                <div className="w-14 h-14 bg-gold/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-gold font-bold text-lg">{step.step}</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2">{step.title}</h3>
+                  <p className="text-muted leading-relaxed">{step.description}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== CTA ===== */}
+      <section className="py-20 md:py-32 bg-gradient-to-b from-surface/50 to-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <h2 className="text-3xl md:text-5xl font-black mb-4">
+              Bereit für dein <span className="gradient-text-gold">nächstes Level</span>?
+            </h2>
+            <p className="text-muted text-lg mb-10 max-w-2xl mx-auto">
+              Lass uns in einem kostenlosen Erstgespräch herausfinden, wie wir dein
+              Athletiktraining optimieren können.
+            </p>
+            <a
               href={contact.calendlyUrl}
-              external
-              size="large"
-              showArrow
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-4 bg-gold hover:bg-gold-light text-background font-bold rounded-full transition-all duration-300 hover:scale-105 inline-flex items-center gap-2"
             >
               Kostenloses Erstgespräch buchen
-            </GlowButton>
-          </FadeInView>
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </motion.div>
         </div>
       </section>
     </>
