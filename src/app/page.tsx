@@ -227,7 +227,7 @@ export default function Home() {
               <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-gold/20 blur-2xl rounded-full" />
             </motion.div>
 
-            {/* Training Images + Info */}
+            {/* Training Images - portrait phone screenshots side by side */}
             <motion.div
               initial={{ opacity: 0, x: 40 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -235,35 +235,37 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="space-y-6"
             >
-              <div className="relative rounded-2xl overflow-hidden border border-white/10">
-                <Image
-                  src="/images/training-1.jpg"
-                  alt="PAA Athletiktraining"
-                  width={600}
-                  height={400}
-                  className="w-full h-64 object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-                <div className="absolute bottom-4 left-4">
-                  <span className="px-3 py-1 bg-gold/20 text-gold text-xs font-bold rounded-full backdrop-blur-sm border border-gold/20">
-                    Athletiktraining
-                  </span>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="relative rounded-2xl overflow-hidden border border-white/10">
+                  <Image
+                    src="/images/training-1.jpg"
+                    alt="PAA Athletiktraining"
+                    width={540}
+                    height={960}
+                    className="w-full aspect-[9/16] object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+                  <div className="absolute bottom-3 left-3">
+                    <span className="px-2 py-1 bg-gold/20 text-gold text-[10px] font-bold rounded-full backdrop-blur-sm border border-gold/20">
+                      Athletiktraining
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="relative rounded-2xl overflow-hidden border border-white/10">
-                <Image
-                  src="/images/training-2.jpg"
-                  alt="PAA Training Session"
-                  width={600}
-                  height={400}
-                  className="w-full h-64 object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-                <div className="absolute bottom-4 left-4">
-                  <span className="px-3 py-1 bg-gold/20 text-gold text-xs font-bold rounded-full backdrop-blur-sm border border-gold/20">
-                    Performance Coaching
-                  </span>
+                <div className="relative rounded-2xl overflow-hidden border border-white/10">
+                  <Image
+                    src="/images/training-2.jpg"
+                    alt="PAA Training Session"
+                    width={540}
+                    height={960}
+                    className="w-full aspect-[9/16] object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+                  <div className="absolute bottom-3 left-3">
+                    <span className="px-2 py-1 bg-gold/20 text-gold text-[10px] font-bold rounded-full backdrop-blur-sm border border-gold/20">
+                      Performance
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -309,29 +311,30 @@ export default function Home() {
                 >
                   <Link
                     href="/ueber-uns"
-                    className="group block bg-surface hover:bg-surface-light border border-white/5 hover:border-gold/20 rounded-3xl overflow-hidden transition-colors duration-300"
+                    className="group flex flex-col sm:flex-row bg-surface hover:bg-surface-light border border-white/5 hover:border-gold/20 rounded-3xl overflow-hidden transition-colors duration-300"
                   >
-                    {/* Coach Image */}
-                    <div className="relative h-64 overflow-hidden">
+                    {/* Coach Image - contained portrait */}
+                    <div className="relative w-full sm:w-44 shrink-0 overflow-hidden">
                       <Image
                         src={imgSrc}
                         alt={coach.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        width={index === 0 ? 626 : 533}
+                        height={799}
+                        className="w-full sm:h-full object-cover aspect-[3/4] sm:aspect-auto group-hover:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/30 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-surface/50 to-transparent" />
                     </div>
 
-                    <div className="p-8 pt-4">
-                      <h3 className="text-2xl font-black group-hover:text-gold transition-colors mb-1">
+                    <div className="p-6 flex-1">
+                      <h3 className="text-xl font-black group-hover:text-gold transition-colors mb-1">
                         {coach.name}
                       </h3>
-                      <p className="text-sm text-gold/80 mb-4">{coach.role}</p>
-                      <p className="text-muted leading-relaxed mb-6 text-sm">
+                      <p className="text-sm text-gold/80 mb-3">{coach.role}</p>
+                      <p className="text-muted leading-relaxed mb-4 text-sm line-clamp-3">
                         {coach.bio}
                       </p>
                       <div className="flex flex-wrap gap-2">
-                        {coach.highlights.map((h) => (
+                        {coach.highlights.slice(0, 3).map((h) => (
                           <span
                             key={h.text}
                             className="px-3 py-1 bg-gold/10 text-gold text-xs font-medium rounded-full"
@@ -340,7 +343,7 @@ export default function Home() {
                           </span>
                         ))}
                       </div>
-                      <div className="mt-6 flex items-center gap-2 text-sm text-gold opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="mt-4 flex items-center gap-2 text-sm text-gold opacity-0 group-hover:opacity-100 transition-opacity">
                         Mehr erfahren <ArrowRight size={14} />
                       </div>
                     </div>

@@ -62,6 +62,7 @@ export default function UeberUnsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {coaches.map((coach, i) => {
               const imgSrc = i === 0 ? "/images/jonas.jpg" : "/images/patrick.jpg";
+              const imgW = i === 0 ? 626 : 533;
               return (
               <motion.div
                 key={i}
@@ -69,53 +70,54 @@ export default function UeberUnsPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.15 }}
-                className="bg-surface border border-white/5 hover:border-gold/20 rounded-2xl overflow-hidden transition-colors duration-300"
+                className="bg-surface border border-white/5 hover:border-gold/20 rounded-2xl overflow-hidden transition-colors duration-300 flex flex-col sm:flex-row"
               >
-                {/* Coach Image */}
-                <div className="relative h-72 overflow-hidden">
+                {/* Coach Image - contained portrait */}
+                <div className="relative w-full sm:w-48 shrink-0 overflow-hidden">
                   <Image
                     src={imgSrc}
                     alt={coach.name}
-                    fill
-                    className="object-cover"
+                    width={imgW}
+                    height={799}
+                    className="w-full sm:h-full object-cover aspect-[3/4] sm:aspect-auto"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/30 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-surface/40 to-transparent" />
                 </div>
 
-                <div className="p-8 pt-4">
-                {/* Name */}
-                <div className="mb-6">
+                <div className="p-6 flex-1">
+                  {/* Name */}
+                  <div className="mb-4">
                     <h3 className="text-xl font-bold text-white">{coach.name}</h3>
                     <p className="text-gold/80 text-sm">{coach.role}</p>
-                </div>
+                  </div>
 
-                {/* Bio */}
-                <p className="text-muted leading-relaxed mb-6">{coach.bio}</p>
+                  {/* Bio */}
+                  <p className="text-muted leading-relaxed mb-4 text-sm">{coach.bio}</p>
 
-                {/* Highlights as tags */}
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {coach.highlights.map((h, j) => (
-                    <span
-                      key={j}
-                      className="px-3 py-1 bg-gold/10 text-gold text-xs font-medium rounded-full"
-                    >
-                      {h.text}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Licenses */}
-                <div>
-                  <p className="text-white text-sm font-semibold mb-2">Lizenzen</p>
-                  <ul className="space-y-1">
-                    {coach.licenses.map((license, j) => (
-                      <li key={j} className="text-muted text-sm flex items-center gap-2">
-                        <Star className="w-3 h-3 text-gold flex-shrink-0" />
-                        {license}
-                      </li>
+                  {/* Highlights as tags */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {coach.highlights.map((h, j) => (
+                      <span
+                        key={j}
+                        className="px-3 py-1 bg-gold/10 text-gold text-xs font-medium rounded-full"
+                      >
+                        {h.text}
+                      </span>
                     ))}
-                  </ul>
-                </div>
+                  </div>
+
+                  {/* Licenses */}
+                  <div>
+                    <p className="text-white text-sm font-semibold mb-2">Lizenzen</p>
+                    <ul className="space-y-1">
+                      {coach.licenses.map((license, j) => (
+                        <li key={j} className="text-muted text-sm flex items-center gap-2">
+                          <Star className="w-3 h-3 text-gold flex-shrink-0" />
+                          {license}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </motion.div>
               );
