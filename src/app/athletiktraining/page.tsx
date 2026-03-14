@@ -69,6 +69,7 @@ export default function AthletiktrainingPage() {
         <img
           src="/images/training/gym.jpg"
           alt=""
+          loading="lazy"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ filter: 'brightness(0.35) saturate(0.4)' }}
         />
@@ -105,6 +106,7 @@ export default function AthletiktrainingPage() {
                 <img
                   src={pillar.imageSrc}
                   alt=""
+                  loading="lazy"
                   className="absolute inset-0 w-full h-full object-cover"
                   style={{ filter: 'brightness(0.3) saturate(0.4)', objectPosition: pillarImagePositions[pillar.title] || 'center center' }}
                 />

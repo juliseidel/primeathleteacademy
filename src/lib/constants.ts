@@ -242,7 +242,7 @@ export const testimonials = [
     league: "Regionalliga",
     quote:
       "Das Training mit PAA hat meine körperliche Leistungsfähigkeit auf ein komplett neues Level gehoben. Die individuelle Betreuung und die professionelle Herangehensweise haben mich als Spieler spürbar weiterentwickelt.",
-    imageSrc: "/images/testimonials/kaan-kurt.png",
+    imageSrc: "/images/testimonials/kaan-kurt.jpg",
   },
   {
     name: "Alexander Prokopenko",

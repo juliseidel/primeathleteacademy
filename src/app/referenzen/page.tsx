@@ -165,6 +165,7 @@ export default function ReferenzenPage() {
         <img
           src="/images/rasenplatz.jpg"
           alt=""
+          loading="lazy"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ filter: 'brightness(0.45) saturate(0.65)' }}
         />
