@@ -55,8 +55,18 @@ export default function AthletiktrainingPage() {
       </section>
 
       {/* ===== TRAINING PILLARS ===== */}
-      <section className="py-12 md:py-32 bg-surface/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-12 md:py-32 overflow-hidden">
+        {/* Background image - gym */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/training/gym.jpg"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: 'brightness(0.35) saturate(0.4)' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background/80" />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -80,28 +90,40 @@ export default function AthletiktrainingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-surface border border-white/5 hover:border-gold/20 rounded-xl md:rounded-2xl p-5 md:p-8 transition-colors duration-300"
+                className="relative overflow-hidden border border-white/5 hover:border-gold/20 rounded-xl md:rounded-2xl transition-colors duration-300"
               >
-                <div className="flex items-start gap-3 md:gap-4 mb-4 md:mb-5">
-                  <div className="w-11 h-11 md:w-14 md:h-14 bg-gold/10 rounded-lg md:rounded-xl flex items-center justify-center">
-                    {pillarIcons[pillar.icon]}
+                {/* Pillar background image */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={pillar.imageSrc}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover"
+                  style={{ filter: 'brightness(0.3) saturate(0.4)' }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+
+                <div className="relative z-10 p-5 md:p-8">
+                  <div className="flex items-start gap-3 md:gap-4 mb-4 md:mb-5">
+                    <div className="w-11 h-11 md:w-14 md:h-14 bg-gold/10 backdrop-blur-sm rounded-lg md:rounded-xl flex items-center justify-center">
+                      {pillarIcons[pillar.icon]}
+                    </div>
+                    <div>
+                      <h3 className="text-base md:text-xl font-bold text-white">{pillar.title}</h3>
+                      <p className="text-gold/60 text-xs md:text-sm">{pillar.subtitle}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-base md:text-xl font-bold text-white">{pillar.title}</h3>
-                    <p className="text-gold/60 text-xs md:text-sm">{pillar.subtitle}</p>
-                  </div>
+
+                  <p className="text-white/70 text-sm leading-relaxed mb-4 md:mb-6">{pillar.description}</p>
+
+                  <ul className="space-y-2 md:space-y-3">
+                    {pillar.features.map((feature, j) => (
+                      <li key={j} className="flex items-center gap-2 md:gap-3">
+                        <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-gold flex-shrink-0" />
+                        <span className="text-white/70 text-xs md:text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-
-                <p className="text-muted text-sm leading-relaxed mb-4 md:mb-6">{pillar.description}</p>
-
-                <ul className="space-y-2 md:space-y-3">
-                  {pillar.features.map((feature, j) => (
-                    <li key={j} className="flex items-center gap-2 md:gap-3">
-                      <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-gold flex-shrink-0" />
-                      <span className="text-muted text-xs md:text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
               </motion.div>
             ))}
           </div>
