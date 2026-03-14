@@ -36,7 +36,7 @@ export default function Home() {
 
         {/* Player Images - Background (full height) */}
         {/* Jonas - Left Side */}
-        <div className="absolute left-0 inset-y-0 w-[50%] lg:w-[45%] z-[2]">
+        <div className="absolute left-0 inset-y-0 w-[50%] z-[2]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/jonas-action.jpg"
@@ -50,7 +50,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         </div>
         {/* Patrick - Right Side */}
-        <div className="absolute right-0 inset-y-0 w-[50%] lg:w-[45%] z-[2]">
+        <div className="absolute right-0 inset-y-0 w-[50%] z-[2]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/patrick-action.jpg"
@@ -482,42 +482,50 @@ export default function Home() {
 
 /* ===== TESTIMONIAL VIDEO COMPONENT ===== */
 function TestimonialVideo({ src }: { src: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    const container = containerRef.current;
+    if (!container) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          video.play().catch(() => {});
+          setShouldLoad(true);
+          observer.disconnect();
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.1, rootMargin: "300px" }
     );
 
-    observer.observe(video);
-
-    // Also try playing immediately
-    video.play().catch(() => {});
-
+    observer.observe(container);
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (!shouldLoad || !videoRef.current) return;
+    videoRef.current.play().catch(() => {});
+  }, [shouldLoad]);
+
   return (
-    <video
-      ref={videoRef}
-      autoPlay
-      loop
-      muted
-      playsInline
-      preload="auto"
-      className="absolute inset-0 w-full h-full object-cover"
-      style={{ filter: "brightness(0.55) saturate(0.5)" }}
-    >
-      <source src={src} type="video/mp4" />
-    </video>
+    <div ref={containerRef} className="absolute inset-0">
+      {shouldLoad && (
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: "brightness(0.45) saturate(0.4)" }}
+        >
+          <source src={src} type="video/mp4" />
+        </video>
+      )}
+    </div>
   );
 }
 
