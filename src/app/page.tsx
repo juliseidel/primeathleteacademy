@@ -7,20 +7,24 @@ import Link from "next/link";
 import { ArrowRight, Zap, Apple, Trophy, Quote, Instagram, Star } from "lucide-react";
 import { coaches, testimonials, stats, contact } from "@/lib/constants";
 
-const jonasImages = [
-  "/images/slideshow/jonas-1.jpg",
-  "/images/slideshow/jonas-2.png",
-  "/images/slideshow/jonas-3.jpg",
-  "/images/slideshow/jonas-4.jpg",
-  "/images/slideshow/jonas-5.jpg",
+const trainingVideos = [
+  "/videos/training-1.mp4",
+  "/videos/training-2.mp4",
+  "/videos/training-3.mp4",
 ];
 
-const patrickImages = [
+const showcaseImages = [
   "/images/slideshow/patrick-1.jpg",
+  "/images/slideshow/jonas-1.jpg",
   "/images/slideshow/patrick-2.jpg",
+  "/images/slideshow/jonas-2.jpg",
   "/images/slideshow/patrick-3.jpg",
+  "/images/slideshow/jonas-3.jpg",
   "/images/slideshow/patrick-4.jpg",
+  "/images/slideshow/jonas-4.jpg",
   "/images/slideshow/patrick-5.jpg",
+  "/images/slideshow/jonas-5.jpg",
+  "/images/slideshow/jonas-6.jpg",
 ];
 
 export default function Home() {
@@ -531,45 +535,51 @@ function TestimonialVideo({ src }: { src: string }) {
 
 /* ===== TRAINING SHOWCASE COMPONENT ===== */
 function TrainingShowcase() {
-  const [jonasIndex, setJonasIndex] = useState(0);
-  const [patrickIndex, setPatrickIndex] = useState(0);
+  const [videoIndex, setVideoIndex] = useState(0);
+  const [imageIndex, setImageIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Randomize starting video on mount (client-only)
+  useEffect(() => {
+    setVideoIndex(Math.floor(Math.random() * trainingVideos.length));
+  }, []);
 
   useEffect(() => {
-    // Jonas wechselt alle 10 Sekunden
-    const jonasTimer = setInterval(() => {
-      setJonasIndex((prev) => (prev + 1) % jonasImages.length);
-    }, 10000);
-    // Patrick wechselt alle 10 Sekunden, aber 5s versetzt
-    let patrickInterval: NodeJS.Timeout;
-    const patrickTimer = setTimeout(() => {
-      patrickInterval = setInterval(() => {
-        setPatrickIndex((prev) => (prev + 1) % patrickImages.length);
-      }, 10000);
+    // Images cycle every 5 seconds (Patrick/Jonas abwechselnd)
+    const imageTimer = setInterval(() => {
+      setImageIndex((prev) => (prev + 1) % showcaseImages.length);
     }, 5000);
 
-    return () => {
-      clearInterval(jonasTimer);
-      clearTimeout(patrickTimer);
-      if (patrickInterval) clearInterval(patrickInterval);
+    return () => clearInterval(imageTimer);
+  }, []);
+
+  // When video ends, play the next one
+  const handleVideoEnded = () => {
+    setVideoIndex((prev) => (prev + 1) % trainingVideos.length);
+  };
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
+  }, [videoIndex]);
+
+  // On tab visibility change or page revisit, randomize starting video
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        setVideoIndex(Math.floor(Math.random() * trainingVideos.length));
+      }
     };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, []);
 
   const slideVariants = {
-    enter: {
-      x: 40,
-      opacity: 0,
-      scale: 0.98,
-    },
-    center: {
-      x: 0,
-      opacity: 1,
-      scale: 1,
-    },
-    exit: {
-      x: -40,
-      opacity: 0,
-      scale: 0.98,
-    },
+    enter: { x: 40, opacity: 0, scale: 0.98 },
+    center: { x: 0, opacity: 1, scale: 1 },
+    exit: { x: -40, opacity: 0, scale: 0.98 },
   };
 
   return (
@@ -590,7 +600,7 @@ function TrainingShowcase() {
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-center">
-          {/* Video - Left (same position as before) */}
+          {/* Original Reel Video - Left (same position as before) */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -611,7 +621,7 @@ function TrainingShowcase() {
             <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-3/4 h-6 md:h-8 bg-gold/20 blur-2xl rounded-full" />
           </motion.div>
 
-          {/* Slideshow Images - Right */}
+          {/* Right side - 2 columns: Training Videos + Patrick Slideshow */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -620,36 +630,28 @@ function TrainingShowcase() {
             className="space-y-3 md:space-y-4"
           >
             <div className="grid grid-cols-2 gap-3 md:gap-4">
-              {/* Jonas Slideshow */}
+              {/* Training Videos (replaces Jonas slideshow) */}
               <div className="relative rounded-xl md:rounded-2xl overflow-hidden border border-white/10 aspect-[9/16]">
-                <AnimatePresence mode="wait">
-                  <motion.img
-                    key={`jonas-${jonasIndex}`}
-                    src={jonasImages[jonasIndex]}
-                    alt={`Jonas Training ${jonasIndex + 1}`}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                </AnimatePresence>
+                <video
+                  ref={videoRef}
+                  key={videoIndex}
+                  src={trainingVideos[videoIndex]}
+                  autoPlay
+                  muted
+                  playsInline
+                  onEnded={handleVideoEnded}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-                <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 z-10">
-                  <span className="px-2 py-0.5 md:py-1 bg-gold/20 text-gold text-[8px] md:text-[10px] font-bold rounded-full backdrop-blur-sm border border-gold/20">
-                    Jonas Kehl
-                  </span>
-                </div>
               </div>
 
-              {/* Patrick Slideshow */}
+              {/* Image Slideshow (Patrick & Jonas abwechselnd) */}
               <div className="relative rounded-xl md:rounded-2xl overflow-hidden border border-white/10 aspect-[9/16]">
                 <AnimatePresence mode="wait">
                   <motion.img
-                    key={`patrick-${patrickIndex}`}
-                    src={patrickImages[patrickIndex]}
-                    alt={`Patrick Training ${patrickIndex + 1}`}
+                    key={`showcase-${imageIndex}`}
+                    src={showcaseImages[imageIndex]}
+                    alt={`Training ${imageIndex + 1}`}
                     variants={slideVariants}
                     initial="enter"
                     animate="center"
@@ -659,11 +661,6 @@ function TrainingShowcase() {
                   />
                 </AnimatePresence>
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-                <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 z-10">
-                  <span className="px-2 py-0.5 md:py-1 bg-gold/20 text-gold text-[8px] md:text-[10px] font-bold rounded-full backdrop-blur-sm border border-gold/20">
-                    Patrick Scheder
-                  </span>
-                </div>
               </div>
             </div>
 
