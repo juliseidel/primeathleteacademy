@@ -36,7 +36,7 @@ export default function Home() {
 
         {/* Player Images - Background (full height) */}
         {/* Jonas - Left Side */}
-        <div className="absolute left-0 inset-y-0 w-[50%] z-[2]">
+        <div className="absolute left-0 inset-y-0 w-[52%] z-[2]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/jonas-action.jpg"
@@ -44,24 +44,20 @@ export default function Home() {
             className="absolute inset-0 w-full h-full object-cover object-[70%_30%] md:object-[center_30%]"
             style={{ filter: 'brightness(0.55) saturate(0.15)' }}
           />
-          {/* Fade to center/right */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-background" />
           {/* Fade to bottom */}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         </div>
         {/* Patrick - Right Side */}
-        <div className="absolute right-0 inset-y-0 w-[50%] z-[2]">
+        <div className="absolute right-0 inset-y-0 w-[52%] z-[3]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/patrick-action.jpg"
             alt="Patrick Action"
             className="absolute inset-0 w-full h-full object-cover object-[30%_20%] md:object-[center_20%]"
-            style={{ filter: 'brightness(0.55) saturate(0.15)' }}
+            style={{ filter: 'brightness(0.55) saturate(0.15)', maskImage: 'linear-gradient(to left, black 70%, transparent 95%)', WebkitMaskImage: 'linear-gradient(to left, black 70%, transparent 95%)' }}
           />
-          {/* Fade to center/left */}
-          <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-background" />
           {/* Fade to bottom */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" style={{ maskImage: 'linear-gradient(to left, black 70%, transparent 95%)', WebkitMaskImage: 'linear-gradient(to left, black 70%, transparent 95%)' }} />
         </div>
 
         {/* Gradient orbs */}
