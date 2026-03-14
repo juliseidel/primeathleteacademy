@@ -62,15 +62,15 @@ export default function HomeHero() {
 
         {/* Main heading */}
         <RevealText
-          text="Entfessle dein"
+          text="PRIME ATHLETE"
           as="h1"
-          className="text-5xl sm:text-6xl md:text-8xl font-bold leading-[1.1]"
+          className="text-5xl sm:text-6xl md:text-8xl font-bold leading-[1.1] tracking-tight"
           delay={0.3}
         />
         <RevealText
-          text="volles Potenzial"
+          text="ACADEMY"
           as="p"
-          className="text-5xl sm:text-6xl md:text-8xl font-bold text-gold glow-gold-text leading-[1.1] mt-2"
+          className="text-4xl sm:text-5xl md:text-7xl font-bold text-gold glow-gold-text leading-[1.1] mt-2 tracking-[0.15em]"
           delay={0.5}
         />
 

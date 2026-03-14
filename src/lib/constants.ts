@@ -26,15 +26,15 @@ export const coaches = [
     imageSrc: "/images/coaches/jonas-kehl.jpg",
     actionImageSrc: "/images/coaches/jonas-kehl-action.jpg",
     initials: "JK",
-    bio: "Nach 8 Jahren beim FC Bayern München weiß Jonas, was es braucht, um auf höchstem Niveau zu performen. Als aktiver Profifußballer und studierter Sportwissenschaftler verbindet er Praxiserfahrung mit wissenschaftlicher Expertise.",
+    bio: "Nach 8 Jahren beim FC Bayern München weiß ich genau, was es braucht, um auf höchstem Niveau zu performen. Als aktiver Profifußballer und studierter Sportwissenschaftler verbinde ich Praxiserfahrung mit wissenschaftlicher Expertise – und genau das gebe ich an meine Athleten weiter.",
     highlights: [
       { text: "8 Jahre FC Bayern München", icon: "trophy" },
       { text: "Aktiver Profifußballer (4. Liga)", icon: "football" },
       { text: "Sportwissenschaft-Studium", icon: "graduation" },
     ],
     licenses: [
-      "Athletiktrainer A-Lizenz",
       "Ernährungsberater A-Lizenz",
+      "Athletiktrainer A-Lizenz",
       "Personal Trainer Lizenz",
     ],
   },
@@ -44,15 +44,15 @@ export const coaches = [
     imageSrc: "/images/coaches/patrick-scheder.jpg",
     actionImageSrc: "/images/coaches/patrick-scheder-action.jpg",
     initials: "PS",
-    bio: "Patrick durchlief die Jugendabteilungen des 1. FC Nürnberg und FC Carl Zeiss Jena. Als aktiver Profi und Social-Media-Persönlichkeit mit über 150.000 Followern inspiriert er täglich Athleten, ihr volles Potenzial auszuschöpfen.",
+    bio: "Ich habe die Jugendabteilungen des 1. FC Nürnberg und FC Carl Zeiss Jena durchlaufen und spiele aktuell als Profi in der 4. Liga. Mit über 150.000 Followern auf Social Media inspiriere ich täglich Athleten, ihr volles Potenzial auszuschöpfen – und helfe ihnen dabei, es auch wirklich zu erreichen.",
     highlights: [
       { text: "Jugend bei 1. FC Nürnberg & FC Carl Zeiss Jena", icon: "football" },
       { text: "Aktiver Profifußballer (4. Liga)", icon: "trophy" },
       { text: "150k+ Social Media Follower", icon: "users" },
     ],
     licenses: [
-      "Athletiktrainer A-Lizenz",
       "Ernährungsberater A-Lizenz",
+      "Athletiktrainer A-Lizenz",
       "Personal Trainer Lizenz",
     ],
   },
@@ -229,12 +229,12 @@ export const testimonials = [
     imageSrc: "/images/testimonials/jannick-hofmann.jpg",
   },
   {
-    name: "Alexander Prokopenko",
+    name: "Veron Dobruna",
     team: "Aktiver Profifußballer",
     league: "4. Liga",
     quote:
-      "Die Kombination aus Athletik- und Ernährungscoaching ist perfekt. Man merkt, dass die Jungs wissen, wovon sie reden – weil sie es selbst leben.",
-    imageSrc: "/images/testimonials/alexander-prokopenko.jpg",
+      "Jonas hat mich die letzten 2 Jahre in der Sommer- und Winterpause trainiert. Mit der intensiveren Betreuung durch PAA und der Ernährungsoptimierung sehe ich nun noch deutlichere Verbesserungen in meiner Leistung.",
+    imageSrc: "/images/testimonials/veron-dobruna.jpg",
   },
 ] as const;
 

@@ -1,33 +1,81 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Zap, Apple, Trophy, Quote, Instagram } from "lucide-react";
+import { ArrowRight, Zap, Apple, Trophy, Quote, Instagram, Star } from "lucide-react";
 import { coaches, testimonials, stats, contact } from "@/lib/constants";
+
+const jonasImages = [
+  "/images/slideshow/jonas-1.jpg",
+  "/images/slideshow/jonas-2.png",
+  "/images/slideshow/jonas-3.jpg",
+  "/images/slideshow/jonas-4.jpg",
+  "/images/slideshow/jonas-5.jpg",
+];
+
+const patrickImages = [
+  "/images/slideshow/patrick-1.jpg",
+  "/images/slideshow/patrick-2.jpg",
+  "/images/slideshow/patrick-3.jpg",
+  "/images/slideshow/patrick-4.jpg",
+  "/images/slideshow/patrick-5.jpg",
+];
 
 export default function Home() {
   return (
     <>
       {/* ===== HERO ===== */}
-      <section className="relative min-h-[90vh] md:min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-0 md:min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-8 md:py-0">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-surface" />
         <div className="absolute inset-0 opacity-[0.03]" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C5A55A' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }} />
 
-        {/* Gradient orbs */}
-        <div className="absolute top-1/4 left-1/4 w-64 md:w-96 h-64 md:h-96 bg-gold/10 rounded-full blur-[80px] md:blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-48 md:w-72 h-48 md:h-72 bg-gold-dark/10 rounded-full blur-[60px] md:blur-[100px]" />
+        {/* Player Images - Background (full height) */}
+        {/* Jonas - Left Side */}
+        <div className="absolute left-0 inset-y-0 w-[50%] lg:w-[45%] z-[2]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/jonas-action.jpg"
+            alt="Jonas Action"
+            className="absolute inset-0 w-full h-full object-cover object-[70%_30%] md:object-[center_30%]"
+            style={{ filter: 'brightness(0.55) saturate(0.15)' }}
+          />
+          {/* Fade to center/right */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-background" />
+          {/* Fade to bottom */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+        </div>
+        {/* Patrick - Right Side */}
+        <div className="absolute right-0 inset-y-0 w-[50%] lg:w-[45%] z-[2]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/patrick-action.jpg"
+            alt="Patrick Action"
+            className="absolute inset-0 w-full h-full object-cover object-[30%_20%] md:object-[center_20%]"
+            style={{ filter: 'brightness(0.55) saturate(0.15)' }}
+          />
+          {/* Fade to center/left */}
+          <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-background" />
+          {/* Fade to bottom */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+        </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-16 md:pt-0">
+        {/* Gradient orbs */}
+        <div className="absolute top-1/4 left-1/4 w-64 md:w-96 h-64 md:h-96 bg-gold/10 rounded-full blur-[80px] md:blur-[120px] z-[3]" />
+        <div className="absolute bottom-1/4 right-1/4 w-48 md:w-72 h-48 md:h-72 bg-gold-dark/10 rounded-full blur-[60px] md:blur-[100px] z-[3]" />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-4 md:pt-0">
           {/* Subtitle */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-[10px] md:text-sm tracking-[0.2em] md:tracking-[0.3em] uppercase text-muted mb-3 md:mb-6"
+            className="text-[10px] md:text-sm tracking-[0.2em] md:tracking-[0.3em] uppercase text-white/80 mb-3 md:mb-6"
+            style={{ textShadow: '0 2px 10px rgba(0,0,0,0.9), 0 4px 20px rgba(0,0,0,0.7)' }}
           >
             Elite Athletik-Coaching
           </motion.p>
@@ -37,9 +85,10 @@ export default function Home() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-            className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tight gradient-text-gold glow-gold-text mb-4 md:mb-8"
+            className="font-black tracking-tight gradient-text-gold glow-gold-text mb-4 md:mb-8"
           >
-            PRIME ATHLETE
+            <span className="block text-3xl sm:text-5xl md:text-7xl lg:text-8xl leading-[1.1]">PRIME ATHLETE</span>
+            <span className="block text-3xl sm:text-5xl md:text-7xl lg:text-8xl leading-[1.1] tracking-tight">ACADEMY</span>
           </motion.h1>
 
           {/* Description */}
@@ -47,7 +96,8 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="text-sm md:text-lg text-muted max-w-2xl mx-auto mb-6 md:mb-10 leading-relaxed px-2"
+            className="text-sm md:text-lg text-white/80 max-w-2xl mx-auto mb-6 md:mb-10 leading-relaxed px-2"
+            style={{ textShadow: '0 2px 10px rgba(0,0,0,0.9), 0 4px 20px rgba(0,0,0,0.7)' }}
           >
             Individuelles Athletik- und Ernährungscoaching von Profifußballern.
             <br className="hidden md:block" />
@@ -84,7 +134,7 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.2 }}
-            className="mt-10 md:mt-20 flex flex-wrap items-center justify-center gap-6 md:gap-12"
+            className="mt-6 md:mt-20 mb-4 md:mb-0 flex flex-wrap items-center justify-center gap-6 md:gap-12"
           >
             {stats.map((stat, i) => (
               <div key={i} className="text-center">
@@ -155,7 +205,7 @@ export default function Home() {
               {
                 icon: Trophy,
                 title: "Proven Results",
-                description: "Unsere Athleten spielen in der 2. Bundesliga, 3. Liga und darüber hinaus. Messbare Ergebnisse, die für sich sprechen.",
+                description: "Von der Kreisliga bis zur 2. Bundesliga – wir bringen jeden Athleten auf sein nächstes Level. Messbare Ergebnisse, egal wo du gerade stehst.",
                 href: "/referenzen",
               },
             ].map((item, index) => (
@@ -188,99 +238,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== VIDEO / TRAINING SHOWCASE ===== */}
-      <section className="py-12 md:py-32 bg-surface/50 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-8 md:mb-16"
-          >
-            <h2 className="text-2xl md:text-5xl font-black mb-2 md:mb-4">
-              So trainieren wir <span className="gradient-text-gold">Profis</span>
-            </h2>
-            <p className="text-muted text-sm md:text-base max-w-xl mx-auto">
-              Ein Einblick in unser Training. Jeden Tag arbeiten wir daran, Athleten aufs nächste Level zu bringen.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-center">
-            {/* Video - autoplay, muted, loop */}
-            <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="relative"
-            >
-              <div className="relative rounded-xl md:rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-gold/5 bg-surface mx-auto w-full max-w-[260px] md:max-w-[340px]">
-                <video
-                  src="/images/reel.mp4"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  className="w-full aspect-[9/16] object-cover"
-                />
-              </div>
-              {/* Gold glow beneath video */}
-              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-3/4 h-6 md:h-8 bg-gold/20 blur-2xl rounded-full" />
-            </motion.div>
-
-            {/* Training Images */}
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="space-y-4 md:space-y-6"
-            >
-              <div className="grid grid-cols-2 gap-3 md:gap-4">
-                <div className="relative rounded-xl md:rounded-2xl overflow-hidden border border-white/10">
-                  <Image
-                    src="/images/training-1.jpg"
-                    alt="PAA Athletiktraining"
-                    width={540}
-                    height={960}
-                    className="w-full aspect-[9/16] object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-                  <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3">
-                    <span className="px-2 py-0.5 md:py-1 bg-gold/20 text-gold text-[8px] md:text-[10px] font-bold rounded-full backdrop-blur-sm border border-gold/20">
-                      Athletiktraining
-                    </span>
-                  </div>
-                </div>
-
-                <div className="relative rounded-xl md:rounded-2xl overflow-hidden border border-white/10">
-                  <Image
-                    src="/images/training-2.jpg"
-                    alt="PAA Training Session"
-                    width={540}
-                    height={960}
-                    className="w-full aspect-[9/16] object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-                  <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3">
-                    <span className="px-2 py-0.5 md:py-1 bg-gold/20 text-gold text-[8px] md:text-[10px] font-bold rounded-full backdrop-blur-sm border border-gold/20">
-                      Performance
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <Link
-                href="/athletiktraining"
-                className="inline-flex items-center gap-2 text-gold hover:text-gold-light transition-colors font-medium text-sm"
-              >
-                Mehr über unser Training erfahren
-                <ArrowRight size={14} />
-              </Link>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      {/* ===== TRAINING SHOWCASE WITH SLIDESHOW ===== */}
+      <TrainingShowcase />
 
       {/* ===== COACHES SECTION ===== */}
       <section className="py-12 md:py-32">
@@ -302,6 +261,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
             {coaches.map((coach, index) => {
               const imgSrc = index === 0 ? "/images/jonas.jpg" : "/images/patrick.jpg";
+              const imgW = index === 0 ? 626 : 533;
               return (
                 <motion.div
                   key={coach.name}
@@ -309,46 +269,55 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.1 + index * 0.15 }}
+                  className="bg-surface border border-white/5 hover:border-gold/20 rounded-xl md:rounded-2xl overflow-hidden transition-colors duration-300 flex flex-row"
                 >
-                  <Link
-                    href="/ueber-uns"
-                    className="group flex flex-row bg-surface hover:bg-surface-light border border-white/5 hover:border-gold/20 rounded-xl md:rounded-3xl overflow-hidden transition-colors duration-300"
-                  >
-                    {/* Coach Image - contained portrait */}
-                    <div className="relative w-28 sm:w-44 shrink-0 overflow-hidden">
-                      <Image
-                        src={imgSrc}
-                        alt={coach.name}
-                        width={index === 0 ? 626 : 533}
-                        height={799}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-r from-surface/30 to-transparent" />
+                  {/* Coach Image - contained portrait */}
+                  <div className="relative w-28 sm:w-44 shrink-0 overflow-hidden">
+                    <Image
+                      src={imgSrc}
+                      alt={coach.name}
+                      width={imgW}
+                      height={799}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-surface/40 to-transparent" />
+                  </div>
+
+                  <div className="p-4 md:p-6 flex-1 min-w-0">
+                    {/* Name */}
+                    <div className="mb-3 md:mb-4">
+                      <h3 className="text-base md:text-xl font-bold text-white">{coach.name}</h3>
+                      <p className="text-gold/80 text-xs md:text-sm">{coach.role}</p>
                     </div>
 
-                    <div className="p-4 md:p-6 flex-1 min-w-0">
-                      <h3 className="text-base md:text-xl font-black group-hover:text-gold transition-colors mb-0.5 md:mb-1">
-                        {coach.name}
-                      </h3>
-                      <p className="text-xs md:text-sm text-gold/80 mb-2 md:mb-3">{coach.role}</p>
-                      <p className="text-muted leading-relaxed mb-3 md:mb-4 text-xs md:text-sm line-clamp-2 md:line-clamp-3">
-                        {coach.bio}
-                      </p>
-                      <div className="flex flex-wrap gap-1.5 md:gap-2">
-                        {coach.highlights.slice(0, 2).map((h) => (
-                          <span
-                            key={h.text}
-                            className="px-2 md:px-3 py-0.5 md:py-1 bg-gold/10 text-gold text-[10px] md:text-xs font-medium rounded-full"
-                          >
-                            {h.text}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="mt-3 md:mt-4 flex items-center gap-2 text-xs md:text-sm text-gold opacity-70 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                        Mehr erfahren <ArrowRight size={12} />
-                      </div>
+                    {/* Bio */}
+                    <p className="text-muted leading-relaxed mb-3 md:mb-4 text-xs md:text-sm">{coach.bio}</p>
+
+                    {/* Highlights as tags */}
+                    <div className="flex flex-wrap gap-1.5 md:gap-2 mb-3 md:mb-4">
+                      {coach.highlights.map((h, j) => (
+                        <span
+                          key={j}
+                          className="px-2 md:px-3 py-0.5 md:py-1 bg-gold/10 text-gold text-[10px] md:text-xs font-medium rounded-full"
+                        >
+                          {h.text}
+                        </span>
+                      ))}
                     </div>
-                  </Link>
+
+                    {/* Licenses */}
+                    <div>
+                      <p className="text-white text-xs md:text-sm font-semibold mb-1.5 md:mb-2">Lizenzen</p>
+                      <ul className="space-y-1">
+                        {coach.licenses.map((license, j) => (
+                          <li key={j} className="text-muted text-xs md:text-sm flex items-center gap-1.5 md:gap-2">
+                            <Star className="w-3 h-3 text-gold flex-shrink-0" />
+                            {license}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
                 </motion.div>
               );
             })}
@@ -371,31 +340,56 @@ export default function Home() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            {testimonials.slice(0, 4).map((t, index) => (
+            {testimonials.slice(0, 4).map((t, index) => {
+              const videoMap: Record<string, string> = {
+                "Kolja Oudenne": "/videos/testimonials/kolja-oudenne.mp4",
+                "Robin Heußer": "/videos/testimonials/robin-heusser.mp4",
+                "Jannick Hofmann": "/videos/testimonials/jannick-hofmann.mp4",
+                "Veron Dobruna": "/videos/testimonials/veron-dobruna.mp4",
+              };
+              const videoSrc = videoMap[t.name] || "";
+              return (
               <motion.div
                 key={t.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-surface border border-white/5 rounded-xl md:rounded-2xl p-5 md:p-8 hover:border-gold/20 transition-colors duration-300"
+                className="relative rounded-xl md:rounded-2xl overflow-hidden border border-white/5 hover:border-gold/20 transition-colors duration-300 group"
               >
-                <Quote size={18} className="text-gold/30 mb-3 md:mb-4 md:hidden" />
-                <Quote size={24} className="text-gold/30 mb-3 md:mb-4 hidden md:block" />
-                <p className="text-foreground/90 leading-relaxed mb-4 md:mb-6 italic text-sm md:text-base">
-                  &quot;{t.quote}&quot;
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center text-gold text-[10px] md:text-xs font-bold">
-                    {t.name.split(" ").map(n => n[0]).join("")}
-                  </div>
-                  <div>
-                    <p className="font-bold text-xs md:text-sm">{t.name}</p>
-                    <p className="text-[10px] md:text-xs text-muted">{t.team} &middot; {t.league}</p>
+                {/* Background Video */}
+                {videoSrc ? (
+                  <TestimonialVideo src={videoSrc} />
+                ) : (
+                  <div className="absolute inset-0 bg-surface" />
+                )}
+                {/* Gradient overlays for readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/40 z-[1]" />
+
+                {/* Content */}
+                <div className="relative z-[2] p-5 md:p-8">
+                  <Quote size={18} className="text-gold/40 mb-3 md:mb-4 md:hidden" />
+                  <Quote size={24} className="text-gold/40 mb-3 md:mb-4 hidden md:block" />
+                  <p className="text-white leading-relaxed mb-4 md:mb-6 italic text-sm md:text-base" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
+                    &quot;{t.quote}&quot;
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border-2 border-gold/40 flex-shrink-0">
+                      <img
+                        src={t.imageSrc}
+                        alt={t.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-bold text-xs md:text-sm text-white" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>{t.name}</p>
+                      <p className="text-[10px] md:text-xs text-white/70" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>{t.team} &middot; {t.league}</p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
-            ))}
+              );
+            })}
           </div>
 
           <motion.div
@@ -483,5 +477,198 @@ export default function Home() {
         </div>
       </section>
     </>
+  );
+}
+
+/* ===== TESTIMONIAL VIDEO COMPONENT ===== */
+function TestimonialVideo({ src }: { src: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {});
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    observer.observe(video);
+
+    // Also try playing immediately
+    video.play().catch(() => {});
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <video
+      ref={videoRef}
+      autoPlay
+      loop
+      muted
+      playsInline
+      preload="auto"
+      className="absolute inset-0 w-full h-full object-cover"
+      style={{ filter: "brightness(0.55) saturate(0.5)" }}
+    >
+      <source src={src} type="video/mp4" />
+    </video>
+  );
+}
+
+/* ===== TRAINING SHOWCASE COMPONENT ===== */
+function TrainingShowcase() {
+  const [jonasIndex, setJonasIndex] = useState(0);
+  const [patrickIndex, setPatrickIndex] = useState(0);
+
+  useEffect(() => {
+    // Jonas wechselt alle 10 Sekunden
+    const jonasTimer = setInterval(() => {
+      setJonasIndex((prev) => (prev + 1) % jonasImages.length);
+    }, 10000);
+    // Patrick wechselt alle 10 Sekunden, aber 5s versetzt
+    let patrickInterval: NodeJS.Timeout;
+    const patrickTimer = setTimeout(() => {
+      patrickInterval = setInterval(() => {
+        setPatrickIndex((prev) => (prev + 1) % patrickImages.length);
+      }, 10000);
+    }, 5000);
+
+    return () => {
+      clearInterval(jonasTimer);
+      clearTimeout(patrickTimer);
+      if (patrickInterval) clearInterval(patrickInterval);
+    };
+  }, []);
+
+  const slideVariants = {
+    enter: {
+      x: 40,
+      opacity: 0,
+      scale: 0.98,
+    },
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+    },
+    exit: {
+      x: -40,
+      opacity: 0,
+      scale: 0.98,
+    },
+  };
+
+  return (
+    <section className="py-12 md:py-32 bg-surface/50 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-8 md:mb-16"
+        >
+          <h2 className="text-2xl md:text-5xl font-black mb-2 md:mb-4">
+            So trainieren wir <span className="gradient-text-gold">Profis</span>
+          </h2>
+          <p className="text-muted text-sm md:text-base max-w-xl mx-auto">
+            Ein Einblick in unser Training. Jeden Tag arbeiten wir daran, Athleten aufs nächste Level zu bringen.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-center">
+          {/* Video - Left (same position as before) */}
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="relative"
+          >
+            <div className="relative rounded-xl md:rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-gold/5 bg-surface mx-auto w-full max-w-[260px] md:max-w-[340px]">
+              <video
+                src="/images/reel.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full aspect-[9/16] object-cover"
+              />
+            </div>
+            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-3/4 h-6 md:h-8 bg-gold/20 blur-2xl rounded-full" />
+          </motion.div>
+
+          {/* Slideshow Images - Right */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="space-y-3 md:space-y-4"
+          >
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
+              {/* Jonas Slideshow */}
+              <div className="relative rounded-xl md:rounded-2xl overflow-hidden border border-white/10 aspect-[9/16]">
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={`jonas-${jonasIndex}`}
+                    src={jonasImages[jonasIndex]}
+                    alt={`Jonas Training ${jonasIndex + 1}`}
+                    variants={slideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                </AnimatePresence>
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+                <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 z-10">
+                  <span className="px-2 py-0.5 md:py-1 bg-gold/20 text-gold text-[8px] md:text-[10px] font-bold rounded-full backdrop-blur-sm border border-gold/20">
+                    Jonas Kehl
+                  </span>
+                </div>
+              </div>
+
+              {/* Patrick Slideshow */}
+              <div className="relative rounded-xl md:rounded-2xl overflow-hidden border border-white/10 aspect-[9/16]">
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={`patrick-${patrickIndex}`}
+                    src={patrickImages[patrickIndex]}
+                    alt={`Patrick Training ${patrickIndex + 1}`}
+                    variants={slideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                </AnimatePresence>
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+                <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 z-10">
+                  <span className="px-2 py-0.5 md:py-1 bg-gold/20 text-gold text-[8px] md:text-[10px] font-bold rounded-full backdrop-blur-sm border border-gold/20">
+                    Patrick Scheder
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <Link
+              href="/athletiktraining"
+              className="inline-flex items-center gap-2 text-gold hover:text-gold-light transition-colors font-medium text-sm"
+            >
+              Mehr über unser Training erfahren
+              <ArrowRight size={14} />
+            </Link>
+          </motion.div>
+        </div>
+      </div>
+    </section>
   );
 }
