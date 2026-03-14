@@ -5,6 +5,15 @@ import { motion } from "framer-motion";
 import { Quote, ArrowRight } from "lucide-react";
 import { testimonials, stats, contact } from "@/lib/constants";
 
+// Video mapping for testimonials (some athletes have videos, some don't)
+const testimonialVideos: Record<string, string> = {
+  "Kolja Oudenne": "/videos/testimonials/kolja-oudenne.mp4",
+  "Robin Heußer": "/videos/testimonials/robin-heusser.mp4",
+  "Jannick Hofmann": "/videos/testimonials/jannick-hofmann.mp4",
+  "Veron Dobruna": "/videos/testimonials/veron-dobruna.mp4",
+  "Kaan Kurt": "/videos/testimonials/kaan-kurt.mp4",
+};
+
 function useCounter(target: number, duration = 2000) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
@@ -36,6 +45,54 @@ function useCounter(target: number, duration = 2000) {
   }, [target, duration]);
 
   return { count, ref };
+}
+
+function LazyVideo({ src, className, style }: { src: string; className?: string; style?: React.CSSProperties }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoad(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!shouldLoad || !videoRef.current) return;
+    videoRef.current.play().catch(() => {});
+  }, [shouldLoad]);
+
+  return (
+    <div ref={containerRef} className={className}>
+      {shouldLoad && (
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          className="w-full h-full object-cover"
+          style={style}
+        >
+          <source src={src} type="video/mp4" />
+        </video>
+      )}
+    </div>
+  );
 }
 
 export default function ReferenzenPage() {
@@ -102,8 +159,18 @@ export default function ReferenzenPage() {
       </section>
 
       {/* ===== TESTIMONIALS ===== */}
-      <section className="py-12 md:py-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-12 md:py-32 overflow-hidden">
+        {/* Background image - rasenplatz */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/rasenplatz.jpg"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: 'brightness(0.45) saturate(0.65)' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background/80" />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -116,32 +183,65 @@ export default function ReferenzenPage() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-            {testimonials.map((testimonial, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-surface border border-white/5 hover:border-gold/20 rounded-xl md:rounded-2xl p-5 md:p-8 transition-colors duration-300 flex flex-col"
-              >
-                <div className="mb-4 md:mb-6">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-gold/10 rounded-lg md:rounded-xl flex items-center justify-center">
-                    <Quote className="w-5 h-5 md:w-6 md:h-6 text-gold/40" />
+            {testimonials.map((testimonial, i) => {
+              const videoSrc = testimonialVideos[testimonial.name];
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="overflow-hidden border border-white/5 hover:border-gold/20 rounded-xl md:rounded-2xl transition-colors duration-300 flex flex-col bg-surface/80 backdrop-blur-sm"
+                >
+                  {/* Video or image header */}
+                  <div className="relative w-full aspect-[4/3] bg-black/50 overflow-hidden">
+                    {videoSrc ? (
+                      <LazyVideo
+                        src={videoSrc}
+                        className="w-full h-full"
+                      />
+                    ) : (
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={testimonial.imageSrc}
+                          alt={testimonial.name}
+                          className="w-full h-full object-cover"
+                          style={{ filter: "brightness(0.7) saturate(0.6)" }}
+                        />
+                      </>
+                    )}
                   </div>
-                </div>
 
-                <p className="text-white/80 text-sm md:text-lg leading-relaxed mb-5 md:mb-8 flex-1">
-                  &ldquo;{testimonial.quote}&rdquo;
-                </p>
+                  {/* Text content */}
+                  <div className="p-5 md:p-8 flex flex-col flex-1">
+                    <div className="mb-3 md:mb-4">
+                      <Quote className="w-6 h-6 md:w-8 md:h-8 text-gold/30" />
+                    </div>
 
-                <div className="border-t border-white/5 pt-4 md:pt-6">
-                  <p className="text-white font-semibold text-base md:text-lg">{testimonial.name}</p>
-                  <p className="text-gold/80 text-xs md:text-sm mt-0.5 md:mt-1">{testimonial.team}</p>
-                  <p className="text-muted text-xs md:text-sm">{testimonial.league}</p>
-                </div>
-              </motion.div>
-            ))}
+                    <p className="text-white/80 text-sm md:text-base leading-relaxed mb-5 md:mb-8 flex-1">
+                      &ldquo;{testimonial.quote}&rdquo;
+                    </p>
+
+                    <div className="border-t border-white/10 pt-4 md:pt-5 flex items-center gap-3 md:gap-4">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={testimonial.imageSrc}
+                        alt={testimonial.name}
+                        className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-gold/30"
+                      />
+                      <div>
+                        <p className="text-white font-semibold text-sm md:text-base">{testimonial.name}</p>
+                        <p className="text-gold/80 text-xs md:text-sm">
+                          {testimonial.team} · {testimonial.league}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>

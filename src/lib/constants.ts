@@ -236,6 +236,22 @@ export const testimonials = [
       "Jonas hat mich die letzten 2 Jahre in der Sommer- und Winterpause trainiert. Mit der intensiveren Betreuung durch PAA und der Ernährungsoptimierung sehe ich nun noch deutlichere Verbesserungen in meiner Leistung.",
     imageSrc: "/images/testimonials/veron-dobruna.jpg",
   },
+  {
+    name: "Kaan Kurt",
+    team: "Aktiver Profifußballer",
+    league: "Regionalliga",
+    quote:
+      "Das Training mit PAA hat meine körperliche Leistungsfähigkeit auf ein komplett neues Level gehoben. Die individuelle Betreuung und die professionelle Herangehensweise haben mich als Spieler spürbar weiterentwickelt.",
+    imageSrc: "/images/testimonials/kaan-kurt.png",
+  },
+  {
+    name: "Alexander Prokopenko",
+    team: "Aktiver Profifußballer",
+    league: "Regionalliga",
+    quote:
+      "Ich arbeite schon lange mit Patrick an meiner Athletik und Ernährung. Durch die intensivere Zusammenarbeit mit PAA in den letzten Monaten habe ich nochmals spürbare Fortschritte gemacht.",
+    imageSrc: "/images/testimonials/alexander-prokopenko.jpg",
+  },
 ] as const;
 
 // ===== STATS =====
@@ -266,11 +282,6 @@ export const nutritionFaq = [
     question: "Bekomme ich einen festen Ernährungsplan?",
     answer:
       "Ja, du bekommst einen individuellen Plan, der auf deinen Bedarf, dein Training und deine Ziele abgestimmt ist. Wir passen ihn regelmäßig an deine Fortschritte und Saisonphase an.",
-  },
-  {
-    question: "Brauche ich spezielle Supplements?",
-    answer:
-      "Nicht unbedingt. Wir empfehlen nur evidenzbasierte Supplements, die nachweislich einen Unterschied machen. Die Basis ist immer eine solide Ernährung – Supplements sind das i-Tüpfelchen.",
   },
   {
     question: "Wie sieht die Ernährung an Spieltagen aus?",
