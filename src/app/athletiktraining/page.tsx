@@ -4,6 +4,14 @@ import { motion } from "framer-motion";
 import { Zap, Flame, Shield, Heart, Check, ArrowRight, MessageSquare, ClipboardCheck, Rocket, TrendingUp } from "lucide-react";
 import { trainingPillars, processSteps, contact } from "@/lib/constants";
 
+// Custom image positions per pillar to ensure subjects are visible
+const pillarImagePositions: Record<string, string> = {
+  "Schnelligkeit": "center 30%",
+  "Explosivkraft": "center center",
+  "Stabilität": "center center",
+  "Ausdauer": "center 20%",
+};
+
 const pillarIcons: Record<string, React.ReactNode> = {
   zap: <Zap className="w-6 md:w-7 h-6 md:h-7 text-gold" />,
   flame: <Flame className="w-6 md:w-7 h-6 md:h-7 text-gold" />,
@@ -98,7 +106,7 @@ export default function AthletiktrainingPage() {
                   src={pillar.imageSrc}
                   alt=""
                   className="absolute inset-0 w-full h-full object-cover"
-                  style={{ filter: 'brightness(0.3) saturate(0.4)' }}
+                  style={{ filter: 'brightness(0.3) saturate(0.4)', objectPosition: pillarImagePositions[pillar.title] || 'center center' }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
 
