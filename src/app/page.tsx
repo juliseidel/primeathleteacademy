@@ -533,7 +533,7 @@ function TestimonialVideo({ src }: { src: string }) {
           playsInline
           preload="auto"
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: "brightness(0.45) saturate(0.4)" }}
+          style={{ filter: "brightness(0.6) saturate(0.5)" }}
         >
           <source src={src} type="video/mp4" />
         </video>
