@@ -14,15 +14,18 @@ const trainingVideos = [
 ];
 
 const showcaseImages = [
+  "/images/slideshow/jonas-9.jpg",
   "/images/slideshow/patrick-1.jpg",
-  "/images/slideshow/jonas-1.jpg",
+  "/images/slideshow/jonas-7.jpg",
   "/images/slideshow/patrick-2.jpg",
-  "/images/slideshow/jonas-2.jpg",
+  "/images/slideshow/jonas-8.jpg",
   "/images/slideshow/patrick-3.jpg",
-  "/images/slideshow/jonas-3.jpg",
+  "/images/slideshow/jonas-1.jpg",
   "/images/slideshow/patrick-4.jpg",
-  "/images/slideshow/jonas-4.jpg",
+  "/images/slideshow/jonas-2.jpg",
   "/images/slideshow/patrick-5.jpg",
+  "/images/slideshow/jonas-3.jpg",
+  "/images/slideshow/jonas-4.jpg",
   "/images/slideshow/jonas-5.jpg",
   "/images/slideshow/jonas-6.jpg",
 ];
