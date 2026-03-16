@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Zap, Apple, Trophy, Quote, Instagram, Star } from "lucide-react";
+import { ArrowRight, Zap, Apple, Trophy, Quote, Instagram, Star, Volume2, VolumeX } from "lucide-react";
 import { coaches, testimonials, stats, contact } from "@/lib/constants";
 
 const trainingVideos = [
@@ -550,7 +550,9 @@ function TestimonialVideo({ src }: { src: string }) {
 function TrainingShowcase() {
   const [videoIndex, setVideoIndex] = useState(0);
   const [imageIndex, setImageIndex] = useState(0);
+  const [reelMuted, setReelMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const reelRef = useRef<HTMLVideoElement>(null);
 
   // Randomize starting video on mount (client-only)
   useEffect(() => {
@@ -622,7 +624,9 @@ function TrainingShowcase() {
             className="relative"
           >
             <div className="relative rounded-xl md:rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-gold/5 bg-surface mx-auto w-full max-w-[260px] md:max-w-[340px]">
+              {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
               <video
+                ref={reelRef}
                 src="/images/reel.mp4"
                 autoPlay
                 muted
@@ -630,6 +634,18 @@ function TrainingShowcase() {
                 playsInline
                 className="w-full aspect-[9/16] object-cover"
               />
+              <button
+                onClick={() => {
+                  if (reelRef.current) {
+                    reelRef.current.muted = !reelRef.current.muted;
+                    setReelMuted(reelRef.current.muted);
+                  }
+                }}
+                className="absolute bottom-3 right-3 md:bottom-4 md:right-4 w-9 h-9 md:w-10 md:h-10 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-black/80 transition-colors"
+                aria-label={reelMuted ? "Ton einschalten" : "Ton ausschalten"}
+              >
+                {reelMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+              </button>
             </div>
             <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-3/4 h-6 md:h-8 bg-gold/20 blur-2xl rounded-full" />
           </motion.div>
