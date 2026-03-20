@@ -12,7 +12,7 @@ export const navLinks = [
 export const contact = {
   email: "primeathleteacademy@primeathleteacademy.com",
   location: "95448 Bayreuth",
-  calendlyUrl: "https://calendly.com/kehl-jonas/30min?month=2026-03",
+  calendlyUrl: "https://calendar.app.google/teKHdYdEhyQeTbNEA",
   instagramUrl: "https://www.instagram.com/prime_athlete_academy?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   instagramHandle: "@prime_athlete_academy",
   websiteUrl: "https://primeathleteacademy.com",
