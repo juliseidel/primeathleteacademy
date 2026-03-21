@@ -38,203 +38,260 @@ export default function DatenschutzPage() {
             viewport={{ once: true }}
             className="space-y-10 text-muted"
           >
-            {/* 1. Verantwortlicher */}
+            <p className="text-sm italic">
+              Datenschutzerklärung der PAA Prime Athlete Academy GmbH &amp; Co. KG
+            </p>
+
+            {/* 1. Information über die Erhebung personenbezogener Daten */}
             <div>
               <h2 className="text-2xl font-bold text-white mb-4">
-                1. Verantwortlicher
+                1. Information über die Erhebung personenbezogener Daten
               </h2>
+
               <p>
-                Verantwortlich für die Datenverarbeitung auf dieser Website ist:
+                (1) Im Folgenden informieren wir über die Erhebung personenbezogener
+                Daten bei Nutzung unserer Angebote und unserer Website.
+                Personenbezogene Daten sind alle Daten, die auf Sie persönlich
+                beziehbar sind, z.&nbsp;B. Name, Adresse, E-Mail-Adressen,
+                Nutzerverhalten. Wir verarbeiten personenbezogene Daten im Einklang
+                mit den Bestimmungen der EU-Datenschutzgrundverordnung (DSGVO) und
+                dem Bundesdatenschutzgesetz (BDSG) ausschließlich zur Erfüllung von
+                vertraglichen Pflichten (Art. 6 Abs. 1 b DSGVO), aufgrund Ihrer
+                Einwilligung (Art. 6 Abs. 1 a DSGVO) oder aufgrund gesetzlicher
+                Vorgaben (Art. 6 Abs. 1 c DSGVO).
               </p>
+
               <p className="mt-3">
-                Prime Athlete Academy GbR
-                <br />
-                Jonas Kehl &amp; Patrick Scheder
-                <br />
-                {contact.location}
-                <br />
-                <br />
-                E-Mail:{" "}
+                (2) Verantwortlicher gem. Art. 4 Abs. 7 EU-Datenschutz-Grundverordnung
+                (DS-GVO) ist die PAA Prime Athlete Academy GmbH &amp; Co. KG, Am
+                Aubach 4, 95448 Bayreuth, vertreten durch die PAA Prime Athlete
+                Academy Verwaltung GmbH, diese vertreten durch Patrick Scheder und
+                Jonas Kehl (siehe unser{" "}
                 <a
-                  href={`mailto:${contact.email}`}
+                  href="/impressum"
                   className="text-gold hover:text-gold-light transition-colors"
                 >
-                  {contact.email}
+                  Impressum
+                </a>
+                ).
+              </p>
+
+              <p className="mt-3">
+                (3) Die Verarbeitung von Daten erfolgt zur Begründung von Verträgen
+                für vertragliche Leistungen, die Erfüllung von vertraglichen
+                Verpflichtungen der Leistungserbringung im Rahmen des
+                Leistungsangebotes zur Büroorganisation sowie zur Erfüllung
+                steuerrechtlicher Verpflichtungen. Die Zwecke der Datenverarbeitung
+                richten sich in erster Linie nach der konkreten Dienstleistung.
+                Soweit erforderlich, verarbeiten wir Ihre Daten über die eigentliche
+                Erfüllung des Vertrages hinaus zur Wahrung berechtigter Interessen
+                von uns (z.B. Geltendmachung rechtlicher Ansprüche und Verteidigung
+                bei rechtlichen Streitigkeiten).
+              </p>
+
+              <p className="mt-3">
+                (4) Die PAA Prime Athlete Academy GmbH &amp; Co. KG verarbeitet
+                folgende Kategorien Ihrer Daten: Name, Adresse, Telefon, E-Mail,
+                IP-Adresse, Bankdaten.
+              </p>
+            </div>
+
+            {/* 2. Betroffenenrechte */}
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-4">
+                2. Betroffenenrechte
+              </h2>
+
+              <p>
+                Wir informieren Sie hiermit über Ihre nachfolgend aufgeführten Rechte
+                als Betroffene der Datenverarbeitung:
+              </p>
+              <ul className="list-disc list-inside mt-3 space-y-2">
+                <li>
+                  Bestehen eines Rechts auf Auskunft nach den Voraussetzungen von
+                  Art. 15 DSGVO, Berichtigung nach Maßgabe von Art. 16 DSGVO,
+                  Löschung nach Maßgabe von Art. 17 DSGVO, Einschränkung der
+                  Verarbeitung nach den Voraussetzungen von Art. 18 DSGVO oder eines
+                  Widerspruchsrechts gegen die Verarbeitung nach Maßgabe von Art. 21
+                  DSGVO bei einem berechtigten Interesse sowie des Rechts auf
+                  Datenübertragbarkeit nach den Voraussetzungen von Art. 20 DSGVO.
+                </li>
+                <li>
+                  Bestehen eines Rechts, die datenschutzrechtliche Einwilligung im
+                  Sinne von Art. 6 Abs. 1 lit. a oder Art. 9 Abs. 2 lit. a jederzeit
+                  ohne Angabe von Gründen und ohne Wahrung einer Form zu widerrufen,
+                  ohne dass die Rechtmäßigkeit der aufgrund der Einwilligung bis zum
+                  Widerruf erfolgten Verarbeitung berührt wird.
+                </li>
+                <li>
+                  Jeder Betroffene hat bei Datenschutzrechtsverstößen des
+                  Verantwortlichen oder einer seiner Auftragsdatenverarbeiter das
+                  Recht zur Beschwerde bei der zuständigen Behörde. Dies ist:
+                  <br />
+                  <br />
+                  Bayerisches Landesamt für Datenschutzaufsicht (BayLDA)
+                  <br />
+                  Promenade 18
+                  <br />
+                  91522 Ansbach
+                  <br />
+                  <a
+                    href="https://www.lda.bayern.de/de/index.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gold hover:text-gold-light transition-colors"
+                  >
+                    https://www.lda.bayern.de/de/index.html
+                  </a>
+                  <br />
+                  <br />
+                  Darüber hinaus haben Betroffene die Möglichkeit, sich an die
+                  Aufsichtsbehörde an ihrem gewöhnlichen Aufenthaltsort (Wohnort) zu
+                  wenden.
+                </li>
+              </ul>
+            </div>
+
+            {/* 3. Sicherheitsmaßnahmen */}
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-4">
+                3. Sicherheitsmaßnahmen
+              </h2>
+              <p>
+                Wir treffen organisatorische, vertragliche und technische
+                Sicherheitsmaßnahmen entsprechend dem Stand der Technik, um
+                sicherzustellen, dass die Vorschriften der Datenschutzgesetze
+                eingehalten werden, und um damit die durch uns verarbeiteten Daten
+                gegen zufällige oder vorsätzliche Manipulationen, Verlust, Zerstörung
+                oder gegen den Zugriff unberechtigter Personen zu schützen. Zu den
+                Sicherheitsmaßnahmen gehört insbesondere die verschlüsselte
+                Übertragung von Daten zwischen Ihrem Browser und unserem Server.
+              </p>
+            </div>
+
+            {/* 4. Löschkonzept */}
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-4">
+                4. Löschkonzept
+              </h2>
+              <p>
+                Wir löschen rechnungsrelevante Daten nach 10 Jahren, im Übrigen
+                löschen wir Daten binnen einer Frist von 4 Wochen nach Ablauf einer
+                Frist von drei Jahren beginnend mit dem Ende des Jahres in dem die
+                letzte vertragliche Leistung erbracht worden ist.
+              </p>
+            </div>
+
+            {/* 5. Erhebung personenbezogener Daten bei Besuch unserer Website */}
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-4">
+                5. Erhebung personenbezogener Daten bei Besuch unserer Website
+              </h2>
+
+              <p>
+                (1) Bei der bloß informatorischen Nutzung der Website, also wenn Sie
+                sich nicht registrieren oder uns anderweitig Informationen übermitteln,
+                erheben wir nur die personenbezogenen Daten, die Ihr Browser an
+                unseren Server übermittelt. Wenn Sie unsere Website betrachten möchten,
+                erheben wir die folgenden Daten, die für uns technisch erforderlich
+                sind, um Ihnen unsere Website anzuzeigen und die Stabilität und
+                Sicherheit zu gewährleisten (Rechtsgrundlage ist Art. 6 Abs. 1 S. 1
+                lit. f DS-GVO):
+              </p>
+              <ul className="list-disc list-inside mt-3 space-y-1">
+                <li>IP-Adresse</li>
+                <li>Datum und Uhrzeit der Anfrage</li>
+                <li>Zeitzonendifferenz zur Greenwich Mean Time (GMT)</li>
+                <li>Inhalt der Anforderung (konkrete Seite)</li>
+                <li>Zugriffsstatus / HTTP-Statuscode</li>
+                <li>jeweils übertragene Datenmenge</li>
+                <li>Website, von der die Anforderung kommt</li>
+                <li>Browser</li>
+                <li>Betriebssystem und dessen Oberfläche</li>
+                <li>Sprache und Version der Browsersoftware</li>
+              </ul>
+
+              <p className="mt-3">
+                (2) Bei Ihrer Kontaktaufnahme mit uns per E-Mail oder über ein
+                Kontaktformular werden die von Ihnen mitgeteilten Daten (Ihre
+                E-Mail-Adresse, ggf. Ihr Name und Ihre Telefonnummer) von uns
+                gespeichert, um Ihre Fragen zu beantworten. Die in diesem
+                Zusammenhang anfallenden Daten löschen wir, nachdem die Speicherung
+                nicht mehr erforderlich ist, oder schränken die Verarbeitung ein,
+                falls gesetzliche Aufbewahrungspflichten bestehen.
+              </p>
+
+              <p className="mt-3">
+                (3) Das Hosting unserer Website erfolgt durch die Squarespace Ireland
+                Limited, Squarespace House, Ship Street Great, Dublin 8, D08 N12C.
+                Die Datenschutzerklärung finden Sie hier:{" "}
+                <a
+                  href="https://de.squarespace.com/datenschutz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gold hover:text-gold-light transition-colors"
+                >
+                  https://de.squarespace.com/datenschutz
                 </a>
               </p>
             </div>
 
-            {/* 2. Hosting */}
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-4">2. Hosting</h2>
-              <p>
-                Diese Website wird extern gehostet. Die personenbezogenen Daten,
-                die auf dieser Website erfasst werden, werden auf den Servern des
-                Hosters gespeichert. Hierbei kann es sich v. a. um IP-Adressen,
-                Kontaktanfragen, Meta- und Kommunikationsdaten, Vertragsdaten,
-                Kontaktdaten, Namen, Websitezugriffe und sonstige Daten, die über
-                eine Website generiert werden, handeln.
-              </p>
-              <p className="mt-3">
-                Das externe Hosting erfolgt zum Zwecke der Vertragserfüllung
-                gegenüber unseren potenziellen und bestehenden Kunden (Art. 6 Abs.
-                1 lit. b DSGVO) und im Interesse einer sicheren, schnellen und
-                effizienten Bereitstellung unseres Online-Angebots durch einen
-                professionellen Anbieter (Art. 6 Abs. 1 lit. f DSGVO).
-              </p>
-            </div>
-
-            {/* 3. Cookies */}
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-4">3. Cookies</h2>
-              <p>
-                Unsere Website verwendet Cookies. Cookies sind kleine Textdateien,
-                die auf Ihrem Endgerät gespeichert werden und die Ihr Browser
-                speichert. Die meisten der von uns verwendeten Cookies sind
-                sogenannte Session-Cookies, die nach Ende Ihres Besuchs
-                automatisch gelöscht werden. Andere Cookies bleiben auf Ihrem
-                Endgerät gespeichert, bis Sie diese löschen.
-              </p>
-              <p className="mt-3">
-                Technisch notwendige Cookies werden auf Grundlage von Art. 6 Abs.
-                1 lit. f DSGVO gespeichert. Der Websitebetreiber hat ein
-                berechtigtes Interesse an der Speicherung von Cookies zur
-                technisch fehlerfreien und optimierten Bereitstellung seiner
-                Dienste. Soweit andere Cookies (z. B. Cookies zur Analyse Ihres
-                Surfverhaltens) gespeichert werden, werden diese in dieser
-                Datenschutzerklärung gesondert behandelt.
-              </p>
-            </div>
-
-            {/* 4. Server-Log-Dateien */}
+            {/* 6. Auftragsverarbeiter */}
             <div>
               <h2 className="text-2xl font-bold text-white mb-4">
-                4. Server-Log-Dateien
-              </h2>
-              <p>
-                Der Provider der Seiten erhebt und speichert automatisch
-                Informationen in so genannten Server-Log-Dateien, die Ihr Browser
-                automatisch an uns übermittelt. Dies sind:
-              </p>
-              <ul className="list-disc list-inside mt-3 space-y-1">
-                <li>Browsertyp und Browserversion</li>
-                <li>verwendetes Betriebssystem</li>
-                <li>Referrer URL</li>
-                <li>Hostname des zugreifenden Rechners</li>
-                <li>Uhrzeit der Serveranfrage</li>
-                <li>IP-Adresse</li>
-              </ul>
-              <p className="mt-3">
-                Eine Zusammenführung dieser Daten mit anderen Datenquellen wird
-                nicht vorgenommen. Die Erfassung dieser Daten erfolgt auf
-                Grundlage von Art. 6 Abs. 1 lit. f DSGVO.
-              </p>
-            </div>
-
-            {/* 5. Kontaktformular */}
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-4">
-                5. Kontaktaufnahme
-              </h2>
-              <p>
-                Wenn Sie uns per E-Mail oder über soziale Medien kontaktieren,
-                wird Ihre Anfrage inklusive aller daraus hervorgehenden
-                personenbezogenen Daten (Name, Anfrage) zum Zwecke der
-                Bearbeitung Ihres Anliegens bei uns gespeichert und verarbeitet.
-                Diese Daten geben wir nicht ohne Ihre Einwilligung weiter.
-              </p>
-              <p className="mt-3">
-                Die Verarbeitung dieser Daten erfolgt auf Grundlage von Art. 6
-                Abs. 1 lit. b DSGVO, sofern Ihre Anfrage mit der Erfüllung eines
-                Vertrags zusammenhängt oder zur Durchführung vorvertraglicher
-                Maßnahmen erforderlich ist. In allen übrigen Fällen beruht die
-                Verarbeitung auf unserem berechtigten Interesse an der effektiven
-                Bearbeitung der an uns gerichteten Anfragen (Art. 6 Abs. 1 lit. f
-                DSGVO).
-              </p>
-            </div>
-
-            {/* 6. Externe Dienste */}
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-4">
-                6. Externe Dienste
+                6. Auftragsverarbeiter
               </h2>
 
               <h3 className="text-lg font-semibold text-white mt-4 mb-2">
-                Calendly
+                Hosting
               </h3>
               <p>
-                Wir nutzen den Dienst Calendly für die Terminbuchung. Anbieter
-                ist Calendly LLC, 3423 Piedmont Road NE, Atlanta, GA 30305, USA.
-                Wenn Sie über Calendly einen Termin buchen, werden Ihre
-                eingegebenen Daten (Name, E-Mail, ggf. Telefonnummer) an Calendly
-                übermittelt und dort gespeichert.
-              </p>
-              <p className="mt-3">
-                Die Nutzung von Calendly erfolgt auf Grundlage von Art. 6 Abs. 1
-                lit. b DSGVO (Vertragserfüllung) bzw. Art. 6 Abs. 1 lit. f DSGVO
-                (berechtigtes Interesse an einer effizienten Terminplanung).
+                Das Hosting unserer Website erfolgt durch die Squarespace Ireland
+                Limited, Squarespace House, Ship Street Great, Dublin 8, D08 N12C.
+                Die Datenschutzerklärung finden Sie hier:{" "}
+                <a
+                  href="https://de.squarespace.com/datenschutz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gold hover:text-gold-light transition-colors"
+                >
+                  https://de.squarespace.com/datenschutz
+                </a>
               </p>
 
               <h3 className="text-lg font-semibold text-white mt-6 mb-2">
-                Instagram
+                Google Workspace
               </h3>
               <p>
-                Auf dieser Website sind Funktionen des Dienstes Instagram
-                eingebunden. Diese Funktionen werden angeboten durch die Meta
-                Platforms Ireland Limited, Merrion Road, Dublin 4, D04 X2K5,
-                Irland. Die Speicherung und Analyse der Daten erfolgt auf
-                Grundlage von Art. 6 Abs. 1 lit. f DSGVO.
+                Wir nutzen Google Workspace, konkret Google Drive und Google Mail zur
+                Organisation unserer Bürotätigkeiten, sowie zum Mailversand. Die
+                Dienste werden bereitgestellt von Google Ireland Limited, Gordon House,
+                Barrow Street, Dublin 4, Irland.
+              </p>
+              <p className="mt-3">
+                Google Drive ist ein Cloudspeicher, wir nutzen den Dienst zur Ablage
+                und Koordination unserer internen Dokumente sowie zur Strukturierung
+                von Kundendaten. Google Mail (Gmail) nutzen wir für unsere
+                geschäftlichen E-Mail-Kommunikation. Nachrichten, deren Inhalt und
+                Metadaten werden auf Servern von Google gespeichert.
+              </p>
+              <p className="mt-3">
+                Die Verwendung der Google Workspace-Dienste erfolgt auf Grundlage von
+                Art. 6 Abs. 1 lit. f DSGVO. Unser berechtigtes Interesse liegt in der
+                effizienten und gut zugänglichen, gleichwohl sicheren Organisation
+                unserer Bürotätigkeiten. Die Google Ireland Limited ist eine
+                Tochterfirma der Google LLC. mit Sitz in Amerika. Die Google LLC. ist
+                zertifiziert nach dem EU-US Data Privacy Framework. Mit der Google
+                Ireland Limited wurde außerdem ein Auftragsverarbeitungsvertrag
+                geschlossen, der die Standardvertragsklauseln der EU enthält.
               </p>
             </div>
 
-            {/* 7. Google Analytics (optional) */}
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-4">
-                7. Google Analytics (optional)
-              </h2>
+            {/* Kontakt */}
+            <div className="border-t border-white/5 pt-8">
               <p>
-                Sofern aktiviert, verwendet diese Website Google Analytics, einen
-                Webanalysedienst der Google Ireland Limited, Gordon House, Barrow
-                Street, Dublin 4, Irland. Google Analytics verwendet Cookies, die
-                eine Analyse Ihrer Benutzung der Website ermöglichen.
-              </p>
-              <p className="mt-3">
-                Die durch das Cookie erzeugten Informationen über Ihre Benutzung
-                dieser Website werden in der Regel an einen Server von Google in
-                den USA übertragen und dort gespeichert. Wir haben die
-                IP-Anonymisierung aktiviert, sodass Ihre IP-Adresse von Google
-                innerhalb der EU gekürzt wird. Die Nutzung erfolgt auf Grundlage
-                von Art. 6 Abs. 1 lit. a DSGVO (Einwilligung).
-              </p>
-            </div>
-
-            {/* 8. Rechte der Betroffenen */}
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-4">
-                8. Rechte der Betroffenen
-              </h2>
-              <p>Sie haben folgende Rechte gegenüber uns:</p>
-              <ul className="list-disc list-inside mt-3 space-y-1">
-                <li>Recht auf Auskunft über Ihre gespeicherten Daten</li>
-                <li>Recht auf Berichtigung unrichtiger Daten</li>
-                <li>Recht auf Löschung Ihrer Daten</li>
-                <li>Recht auf Einschränkung der Verarbeitung</li>
-                <li>Recht auf Datenübertragbarkeit</li>
-                <li>
-                  Widerspruchsrecht gegen die Verarbeitung Ihrer Daten
-                </li>
-                <li>
-                  Recht auf Widerruf einer erteilten Einwilligung jederzeit für
-                  die Zukunft
-                </li>
-                <li>
-                  Beschwerderecht bei einer Aufsichtsbehörde
-                </li>
-              </ul>
-              <p className="mt-3">
-                Wenn Sie Fragen zum Datenschutz haben, können Sie sich jederzeit
-                an uns wenden:{" "}
+                Wenn Sie Fragen zum Datenschutz haben, können Sie sich jederzeit an
+                uns wenden:{" "}
                 <a
                   href={`mailto:${contact.email}`}
                   className="text-gold hover:text-gold-light transition-colors"
