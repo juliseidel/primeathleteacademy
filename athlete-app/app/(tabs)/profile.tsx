@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/lib/auth/AuthContext';
-import { firstName, initialsFor, useMyAthleteProfile, useMyProfile } from '@/lib/data/profile';
+import { initialsFor, useMyAthleteProfile, useMyProfile } from '@/lib/data/profile';
 import { GlassCard } from '@/lib/design/components/GlassCard';
 import { color, font, radius, space } from '@/lib/design/tokens';
 
@@ -21,6 +23,7 @@ const SECTIONS: {
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { session, signOut } = useAuth();
   const userId = session?.user.id;
 
@@ -37,6 +40,8 @@ export default function ProfileScreen() {
     ? [athlete.position, athlete.club, athlete.league].filter(Boolean).join(' · ')
     : '';
 
+  const hasAvatar = !!athlete?.avatar_data_uri;
+
   return (
     <View style={styles.root}>
       <ScrollView
@@ -49,11 +54,36 @@ export default function ProfileScreen() {
         <Text style={styles.eyebrow}>PROFIL</Text>
 
         <GlassCard variant="premium" style={styles.headerCard}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{initials}</Text>
-          </View>
+          <Pressable
+            onPress={() => router.push('/onboarding/avatar')}
+            style={({ pressed }) => [styles.avatarWrap, pressed && { opacity: 0.85 }]}
+          >
+            {hasAvatar ? (
+              <Image source={{ uri: athlete!.avatar_data_uri! }} style={styles.avatarImage} />
+            ) : (
+              <View style={styles.avatarFallback}>
+                <Text style={styles.avatarText}>{initials}</Text>
+              </View>
+            )}
+            <View style={styles.avatarBadge}>
+              <Ionicons
+                name={hasAvatar ? 'pencil' : 'sparkles'}
+                size={12}
+                color={color.bg}
+              />
+            </View>
+          </Pressable>
           <Text style={styles.name}>{fullName}</Text>
           {subline ? <Text style={styles.subline}>{subline}</Text> : null}
+          {!hasAvatar ? (
+            <Pressable
+              onPress={() => router.push('/onboarding/avatar')}
+              style={({ pressed }) => [styles.createAvatarBtn, pressed && { opacity: 0.92 }]}
+            >
+              <Ionicons name="sparkles" size={14} color={color.bg} />
+              <Text style={styles.createAvatarLabel}>Avatar erstellen</Text>
+            </Pressable>
+          ) : null}
         </GlassCard>
 
         <View style={styles.list}>
@@ -99,22 +129,66 @@ const styles = StyleSheet.create({
     padding: space[6],
     alignItems: 'center',
   },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+  avatarWrap: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    marginBottom: space[3],
+    position: 'relative',
+  },
+  avatarFallback: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
     backgroundColor: color.surfaceLight,
     borderWidth: 1,
     borderColor: color.goldA30,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: space[3],
+  },
+  avatarImage: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    borderWidth: 1.5,
+    borderColor: color.goldA50,
+    backgroundColor: '#0A0A0A',
+  },
+  avatarBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: color.gold,
+    borderWidth: 2,
+    borderColor: color.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   avatarText: {
     fontFamily: font.family,
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700',
     color: color.gold,
+    letterSpacing: 0.4,
+  },
+  createAvatarBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: space[3],
+    paddingVertical: 10,
+    paddingHorizontal: space[4],
+    borderRadius: radius.pill,
+    backgroundColor: color.gold,
+  },
+  createAvatarLabel: {
+    fontFamily: font.family,
+    fontSize: 13,
+    fontWeight: '700',
+    color: color.bg,
     letterSpacing: 0.4,
   },
   name: {

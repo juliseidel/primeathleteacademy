@@ -19,6 +19,7 @@ import 'react-native-reanimated';
 
 import { AuthProvider, useAuth } from '@/lib/auth/AuthContext';
 import { queryClient } from '@/lib/data/queryClient';
+import { useMyAthleteProfile } from '@/lib/data/profile';
 import { WelcomeSplash } from '@/lib/design/components/WelcomeSplash';
 import { color } from '@/lib/design/tokens';
 import { AthleteNavProvider, useAthleteNav } from '@/lib/nav/AthleteNavContext';
@@ -87,16 +88,29 @@ function RootNav() {
   const { session, loading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+  const athleteQuery = useMyAthleteProfile(session?.user.id);
+  const athlete = athleteQuery.data;
 
   useEffect(() => {
     if (loading) return;
     const isOnLogin = segments[0] === 'login';
-    if (!session && !isOnLogin) {
-      router.replace('/login');
-    } else if (session && isOnLogin) {
-      router.replace('/');
+    const isOnOnboarding = segments[0] === 'onboarding';
+
+    if (!session) {
+      if (!isOnLogin) router.replace('/login');
+      return;
     }
-  }, [session, loading, segments, router]);
+
+    if (isOnLogin) {
+      router.replace('/');
+      return;
+    }
+
+    // Avatar-Onboarding: nur athletes ohne Avatar werden geführt
+    if (athlete && !athlete.avatar_data_uri && !isOnOnboarding) {
+      router.replace('/onboarding/avatar');
+    }
+  }, [session, loading, segments, router, athlete]);
 
   if (loading) {
     return <View style={{ flex: 1, backgroundColor: color.bg }} />;
@@ -123,6 +137,16 @@ function RootNav() {
             headerShown: false,
             animation: 'slide_from_right',
             contentStyle: { backgroundColor: color.bg },
+          }}
+        />
+        <Stack.Screen
+          name="onboarding/avatar"
+          options={{
+            presentation: 'fullScreenModal',
+            headerShown: false,
+            animation: 'fade',
+            contentStyle: { backgroundColor: color.bg },
+            gestureEnabled: false,
           }}
         />
         <Stack.Screen
