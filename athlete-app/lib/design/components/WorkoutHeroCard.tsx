@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { color, font, radius, space } from '@/lib/design/tokens';
 import { displaySerif } from '@/lib/design/light';
-import { workoutImageSource, WORKOUT_TYPE_LABEL, type WorkoutType } from '@/lib/training/mockData';
+import { workoutImageSource, workoutShortLabel, type WorkoutTypeDb } from '@/lib/training/workoutTypes';
 
 type MetaPill = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -13,7 +13,7 @@ type MetaPill = {
 };
 
 type Props = {
-  type: WorkoutType;
+  type: WorkoutTypeDb;
   title: string;
   eyebrow?: string;
   pills?: MetaPill[];
@@ -31,7 +31,7 @@ export function WorkoutHeroCard({
   ctaLabel = 'Session starten',
   onCtaPress,
 }: Props) {
-  const eyebrowText = eyebrow ?? WORKOUT_TYPE_LABEL[type].toUpperCase();
+  const eyebrowText = eyebrow ?? workoutShortLabel(type);
 
   return (
     <View style={styles.card}>

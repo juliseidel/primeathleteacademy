@@ -11,7 +11,7 @@ export type DayCell = {
   dayNumber: number;
   isToday?: boolean;
   isInPast?: boolean;
-  status: 'completed' | 'planned' | 'rest' | 'matchday';
+  status: 'completed' | 'in_progress' | 'planned' | 'skipped' | 'rest' | 'matchday';
 };
 
 type Props = {
@@ -113,6 +113,16 @@ function StatusDot({
         style={[styles.dot, onSelected ? styles.dotCompletedOnSelected : styles.dotCompleted]}
       />
     );
+  }
+  if (status === 'in_progress') {
+    return (
+      <View style={[styles.dot, styles.dotInProgressOuter, onSelected && { borderColor: color.bg }]}>
+        <View style={[styles.dotInProgressInner, onSelected && { backgroundColor: color.bg }]} />
+      </View>
+    );
+  }
+  if (status === 'skipped') {
+    return <View style={[styles.dot, styles.dotSkipped]} />;
   }
   return (
     <View
@@ -239,5 +249,25 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     backgroundColor: color.warning,
+  },
+  dotInProgressOuter: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    borderWidth: 1.2,
+    borderColor: color.gold,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dotInProgressInner: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: color.gold,
+  },
+  dotSkipped: {
+    backgroundColor: color.danger,
+    opacity: 0.7,
   },
 });
