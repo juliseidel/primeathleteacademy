@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "primeathleteacademy",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
@@ -18,7 +18,7 @@
     "android": {
       "package": "de.primeathleteacademy.athlete",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0A0A0A",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -39,12 +39,57 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "backgroundColor": "#0A0A0A"
         }
-      ]
+      ],
+      "expo-asset",
+      "expo-secure-store",
+      "expo-localization",
+      "@react-native-community/datetimepicker",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Prime Athlete Academy nutzt deine Kamera, damit du Mahlzeiten und Übungen aufnehmen kannst.",
+          "microphonePermission": "Prime Athlete Academy nutzt dein Mikrofon für Aufnahmen mit Ton.",
+          "recordAudioAndroid": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Prime Athlete Academy braucht Zugriff auf deine Fotos, damit du Mahlzeit-Bilder hochladen kannst.",
+          "cameraPermission": "Prime Athlete Academy nutzt deine Kamera, damit du Mahlzeiten direkt fotografieren kannst."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Prime Athlete Academy braucht Zugriff auf deine Fotos und Videos.",
+          "savePhotosPermission": "Prime Athlete Academy speichert Trainings-Aufnahmen in deiner Foto-Bibliothek.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Prime Athlete Academy nutzt dein Mikrofon für Voice-Memos im Coach-Chat."
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Prime Athlete Academy synchronisiert deine Spieltermine mit deinem Kalender."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#C5A55A",
+          "defaultChannel": "default"
+        }
+      ],
+      "expo-tracking-transparency",
+      "expo-build-properties"
     ],
     "experiments": {
       "typedRoutes": true,
