@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useAuth } from '@/lib/auth/AuthContext';
+import { firstName, initialsFor, useMyAthleteProfile, useMyProfile } from '@/lib/data/profile';
 import { GlassCard } from '@/lib/design/components/GlassCard';
 import { color, font, radius, space } from '@/lib/design/tokens';
 
@@ -13,12 +15,27 @@ const SECTIONS: {
   { title: 'Mein Profil', icon: 'person-circle-outline', hint: 'Stammdaten, Sport, Position' },
   { title: 'Spieltermine', icon: 'calendar-outline', hint: 'Kommende & vergangene' },
   { title: 'Mein Fortschritt', icon: 'trending-up-outline', hint: 'Stats, Streak, Historie' },
-  { title: 'Meine Coaches', icon: 'people-outline', hint: 'Jonas Kehl & Patrick Schetter' },
+  { title: 'Meine Coaches', icon: 'people-outline', hint: 'Jonas Kehl & Patrick Scheder' },
   { title: 'Einstellungen', icon: 'settings-outline', hint: 'Push, Sprache, Account' },
 ];
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const { session, signOut } = useAuth();
+  const userId = session?.user.id;
+
+  const profileQuery = useMyProfile(userId);
+  const athleteQuery = useMyAthleteProfile(userId);
+
+  const profile = profileQuery.data;
+  const athlete = athleteQuery.data;
+
+  const fullName = profile?.full_name ?? '...';
+  const initials = profile ? initialsFor(profile.full_name) : '–';
+
+  const subline = athlete
+    ? [athlete.position, athlete.club, athlete.league].filter(Boolean).join(' · ')
+    : '';
 
   return (
     <View style={styles.root}>
@@ -33,16 +50,10 @@ export default function ProfileScreen() {
 
         <GlassCard variant="premium" style={styles.headerCard}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>RH</Text>
+            <Text style={styles.avatarText}>{initials}</Text>
           </View>
-          <Text style={styles.name}>Robin Heußer</Text>
-          <Text style={styles.subline}>Mittelfeld · Eintracht Braunschweig · 2. BL</Text>
-
-          <View style={styles.statsRow}>
-            <Stat label="Trainings" value="48" />
-            <Stat label="Streak" value="12" />
-            <Stat label="Spiele" value="6" />
-          </View>
+          <Text style={styles.name}>{fullName}</Text>
+          {subline ? <Text style={styles.subline}>{subline}</Text> : null}
         </GlassCard>
 
         <View style={styles.list}>
@@ -59,16 +70,15 @@ export default function ProfileScreen() {
             </GlassCard>
           ))}
         </View>
-      </ScrollView>
-    </View>
-  );
-}
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.stat}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+        <Pressable
+          onPress={() => signOut()}
+          style={({ pressed }) => [styles.signOut, pressed && { opacity: 0.6 }]}
+        >
+          <Ionicons name="log-out-outline" size={18} color={color.danger} />
+          <Text style={styles.signOutLabel}>Abmelden</Text>
+        </Pressable>
+      </ScrollView>
     </View>
   );
 }
@@ -120,28 +130,6 @@ const styles = StyleSheet.create({
     marginTop: space[1],
     textAlign: 'center',
   },
-  statsRow: {
-    flexDirection: 'row',
-    width: '100%',
-    marginTop: space[5],
-    paddingTop: space[4],
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.08)',
-  },
-  stat: { flex: 1, alignItems: 'center' },
-  statValue: {
-    fontFamily: font.family,
-    fontSize: 22,
-    fontWeight: '700',
-    color: color.gold,
-  },
-  statLabel: {
-    fontFamily: font.family,
-    fontSize: 11,
-    color: color.textMuted,
-    marginTop: 2,
-    letterSpacing: 1.2,
-  },
   list: { gap: space[3] },
   row: {
     width: '100%',
@@ -171,5 +159,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: color.textMuted,
     marginTop: 2,
+  },
+  signOut: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space[2],
+    paddingVertical: space[4],
+    marginTop: space[5],
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(229, 90, 76, 0.25)',
+  },
+  signOutLabel: {
+    fontFamily: font.family,
+    fontSize: 14,
+    fontWeight: '600',
+    color: color.danger,
+    letterSpacing: 0.4,
   },
 });

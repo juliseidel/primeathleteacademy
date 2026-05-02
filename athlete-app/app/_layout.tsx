@@ -7,7 +7,8 @@ import {
   useFonts,
 } from '@expo-google-fonts/inter';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -16,9 +17,12 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
 
+import { AuthProvider, useAuth } from '@/lib/auth/AuthContext';
+import { queryClient } from '@/lib/data/queryClient';
 import { WelcomeSplash } from '@/lib/design/components/WelcomeSplash';
 import { color } from '@/lib/design/tokens';
 import { AthleteNavProvider, useAthleteNav } from '@/lib/nav/AthleteNavContext';
+import { SessionProvider } from '@/lib/session/SessionContext';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -62,26 +66,68 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: color.bg }}>
       <SafeAreaProvider>
-        <AthleteNavProvider>
-          <ThemeProvider value={PaaDarkTheme}>
-            <Stack screenOptions={{ contentStyle: { backgroundColor: color.bg } }}>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="modal"
-                options={{
-                  presentation: 'modal',
-                  title: 'Modal',
-                  headerStyle: { backgroundColor: color.surface },
-                  headerTintColor: color.text,
-                }}
-              />
-            </Stack>
-            <SplashOverlay />
-            <StatusBar style="light" />
-          </ThemeProvider>
-        </AthleteNavProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <SessionProvider>
+              <AthleteNavProvider>
+                <ThemeProvider value={PaaDarkTheme}>
+                  <RootNav />
+                  <StatusBar style="light" />
+                </ThemeProvider>
+              </AthleteNavProvider>
+            </SessionProvider>
+          </AuthProvider>
+        </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
+  );
+}
+
+function RootNav() {
+  const { session, loading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+    const isOnLogin = segments[0] === 'login';
+    if (!session && !isOnLogin) {
+      router.replace('/login');
+    } else if (session && isOnLogin) {
+      router.replace('/');
+    }
+  }, [session, loading, segments, router]);
+
+  if (loading) {
+    return <View style={{ flex: 1, backgroundColor: color.bg }} />;
+  }
+
+  return (
+    <>
+      <Stack screenOptions={{ contentStyle: { backgroundColor: color.bg } }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen
+          name="session/[workoutId]"
+          options={{
+            presentation: 'fullScreenModal',
+            headerShown: false,
+            animation: 'slide_from_bottom',
+            contentStyle: { backgroundColor: color.bg },
+          }}
+        />
+        <Stack.Screen
+          name="modal"
+          options={{
+            presentation: 'modal',
+            title: 'Modal',
+            headerStyle: { backgroundColor: color.surface },
+            headerTintColor: color.text,
+          }}
+        />
+      </Stack>
+      <SplashOverlay />
+    </>
   );
 }
 
