@@ -15,7 +15,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
 
+import { WelcomeSplash } from '@/lib/design/components/WelcomeSplash';
 import { color } from '@/lib/design/tokens';
+import { AthleteNavProvider, useAthleteNav } from '@/lib/nav/AthleteNavContext';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -58,22 +60,30 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: color.bg }}>
       <SafeAreaProvider>
-        <ThemeProvider value={PaaDarkTheme}>
-          <Stack screenOptions={{ contentStyle: { backgroundColor: color.bg } }}>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="modal"
-              options={{
-                presentation: 'modal',
-                title: 'Modal',
-                headerStyle: { backgroundColor: color.surface },
-                headerTintColor: color.text,
-              }}
-            />
-          </Stack>
-          <StatusBar style="light" />
-        </ThemeProvider>
+        <AthleteNavProvider>
+          <ThemeProvider value={PaaDarkTheme}>
+            <Stack screenOptions={{ contentStyle: { backgroundColor: color.bg } }}>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="modal"
+                options={{
+                  presentation: 'modal',
+                  title: 'Modal',
+                  headerStyle: { backgroundColor: color.surface },
+                  headerTintColor: color.text,
+                }}
+              />
+            </Stack>
+            <SplashOverlay />
+            <StatusBar style="light" />
+          </ThemeProvider>
+        </AthleteNavProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
+}
+
+function SplashOverlay() {
+  const { splashLabel } = useAthleteNav();
+  return <WelcomeSplash label={splashLabel} />;
 }

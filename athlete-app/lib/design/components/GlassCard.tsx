@@ -1,7 +1,7 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
-import { Platform, StyleSheet, View, type ViewStyle } from 'react-native';
+import { Platform, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { glass } from '@/lib/design/tokens';
 
@@ -9,7 +9,7 @@ type Variant = 'subtle' | 'standard' | 'premium';
 
 type Props = {
   variant?: Variant;
-  style?: ViewStyle | ViewStyle[];
+  style?: StyleProp<ViewStyle>;
   children?: ReactNode;
 };
 
@@ -32,7 +32,7 @@ export function GlassCard({ variant = 'standard', style, children }: Props) {
             borderWidth: v.borderWidth,
             elevation: glass.androidFallback.elevation,
           },
-          style as ViewStyle,
+          style,
         ]}
       >
         {variant === 'premium' ? <PearlGloss /> : null}
@@ -42,7 +42,7 @@ export function GlassCard({ variant = 'standard', style, children }: Props) {
   }
 
   return (
-    <View style={[containerStyle, style as ViewStyle]}>
+    <View style={[containerStyle, style]}>
       <BlurView
         intensity={glass.blurIntensity}
         tint={glass.blurTintIOS}
