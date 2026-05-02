@@ -8,28 +8,72 @@ import Svg, { Defs, LinearGradient as SvgLinearGradient, Path, Stop } from 'reac
 
 import { CenterButton } from './CenterButton';
 import { color, font } from '@/lib/design/tokens';
+import {
+  useAthleteNav,
+  type NutritionSubTab,
+  type TrainingSubTab,
+} from '@/lib/nav/AthleteNavContext';
 
-const ICON_FOR: Record<
-  string,
-  { active: keyof typeof Ionicons.glyphMap; inactive: keyof typeof Ionicons.glyphMap }
-> = {
+// ─────────────────────────────────────────────────────────────────────────────
+// Tab definitions
+// ─────────────────────────────────────────────────────────────────────────────
+
+type IconPair = { active: keyof typeof Ionicons.glyphMap; inactive: keyof typeof Ionicons.glyphMap };
+
+const MAIN_ICON_FOR: Record<string, IconPair> = {
   training:  { active: 'barbell',    inactive: 'barbell-outline' },
   nutrition: { active: 'restaurant', inactive: 'restaurant-outline' },
   coach:     { active: 'chatbubble', inactive: 'chatbubble-outline' },
   profile:   { active: 'person',     inactive: 'person-outline' },
 };
 
-const LABEL_FOR: Record<string, string> = {
+const MAIN_LABEL_FOR: Record<string, string> = {
   training: 'Training',
   nutrition: 'Ernährung',
   coach: 'Coach',
   profile: 'Profil',
 };
 
+const TRAINING_SUB_ICON: Record<TrainingSubTab, IconPair> = {
+  heute:       { active: 'flash',        inactive: 'flash-outline' },
+  woche:       { active: 'calendar',     inactive: 'calendar-outline' },
+  historie:    { active: 'time',         inactive: 'time-outline' },
+  fortschritt: { active: 'trending-up',  inactive: 'trending-up-outline' },
+};
+
+const TRAINING_SUB_LABEL: Record<TrainingSubTab, string> = {
+  heute: 'Heute',
+  woche: 'Woche',
+  historie: 'Historie',
+  fortschritt: 'Fortschritt',
+};
+
+const TRAINING_SUB_ORDER: TrainingSubTab[] = ['heute', 'woche', 'historie', 'fortschritt'];
+
+const NUTRITION_SUB_ICON: Record<NutritionSubTab, IconPair> = {
+  heute:    { active: 'flash',    inactive: 'flash-outline' },
+  plan:     { active: 'list',     inactive: 'list-outline' },
+  matchday: { active: 'trophy',   inactive: 'trophy-outline' },
+  historie: { active: 'time',     inactive: 'time-outline' },
+};
+
+const NUTRITION_SUB_LABEL: Record<NutritionSubTab, string> = {
+  heute: 'Heute',
+  plan: 'Plan',
+  matchday: 'Matchday',
+  historie: 'Historie',
+};
+
+const NUTRITION_SUB_ORDER: NutritionSubTab[] = ['heute', 'plan', 'matchday', 'historie'];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Bar geometry
+// ─────────────────────────────────────────────────────────────────────────────
+
 const SIDE_MARGIN = 14;
 const BOTTOM_GAP = 8;
 const BAR_HEIGHT = 82;
-const CORNER_RADIUS = 38; // pill shape
+const CORNER_RADIUS = 38;
 const NOTCH_OUTER = 60;
 const NOTCH_DEPTH = 28;
 const NOTCH_INNER = 36;
@@ -66,14 +110,58 @@ function buildTopEdgePath(width: number) {
   `;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Main Bar
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function AthleteTabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
+  const nav = useAthleteNav();
+
   const barWidth = screenWidth - SIDE_MARGIN * 2;
   const barPath = buildBarPath(barWidth);
   const topEdge = buildTopEdgePath(barWidth);
-
   const bottomOffset = Math.max(insets.bottom, 12) + BOTTOM_GAP;
+
+  const handleMainTabPress = (routeName: string, routeKey: string) => {
+    const isFocused = state.routes[state.index]?.name === routeName;
+
+    const event = navigation.emit({
+      type: 'tabPress',
+      target: routeKey,
+      canPreventDefault: true,
+    });
+
+    if (event.defaultPrevented) return;
+
+    if (routeName === 'training') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      nav.enterTrainingSub();
+      navigation.navigate(routeName as never);
+      return;
+    }
+    if (routeName === 'nutrition') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      nav.enterNutritionSub();
+      navigation.navigate(routeName as never);
+      return;
+    }
+    if (!isFocused) {
+      Haptics.impactAsync(
+        routeName === 'index'
+          ? Haptics.ImpactFeedbackStyle.Medium
+          : Haptics.ImpactFeedbackStyle.Light
+      );
+      navigation.navigate(routeName as never);
+    }
+  };
+
+  const handleCenterFromSub = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    nav.exitToMain();
+    navigation.navigate('index' as never);
+  };
 
   return (
     <View
@@ -89,13 +177,11 @@ export function AthleteTabBar({ state, navigation }: BottomTabBarProps) {
               <Stop offset="0.55" stopColor="#0F0E0A" stopOpacity="0.92" />
               <Stop offset="1" stopColor="#070605" stopOpacity="0.96" />
             </SvgLinearGradient>
-
             <SvgLinearGradient id="topGlow" x1="0" y1="0" x2="0" y2="1">
               <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0.20" />
               <Stop offset="0.18" stopColor="#FFFFFF" stopOpacity="0.05" />
               <Stop offset="0.35" stopColor="#FFFFFF" stopOpacity="0" />
             </SvgLinearGradient>
-
             <SvgLinearGradient id="hairline" x1="0" y1="0" x2="1" y2="0">
               <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0.10" />
               <Stop offset="0.35" stopColor="#C5A55A" stopOpacity="0.45" />
@@ -108,63 +194,198 @@ export function AthleteTabBar({ state, navigation }: BottomTabBarProps) {
           <Path d={barPath} fill="url(#glassFill)" />
           <Path d={barPath} fill="url(#topGlow)" />
           <Path d={topEdge} stroke="url(#hairline)" strokeWidth={1.2} fill="none" />
-          <Path
-            d={barPath}
-            stroke="rgba(197,165,90,0.18)"
-            strokeWidth={0.6}
-            fill="none"
-          />
+          <Path d={barPath} stroke="rgba(197,165,90,0.18)" strokeWidth={0.6} fill="none" />
         </Svg>
 
         <View style={[styles.row, { width: barWidth, height: BAR_HEIGHT }]}>
-          {state.routes.map((route, index) => {
-            const isFocused = state.index === index;
-            const isCenter = route.name === 'index';
-
-            const onPress = () => {
-              const event = navigation.emit({
-                type: 'tabPress',
-                target: route.key,
-                canPreventDefault: true,
-              });
-
-              if (!isFocused && !event.defaultPrevented) {
-                Haptics.impactAsync(
-                  isCenter
-                    ? Haptics.ImpactFeedbackStyle.Medium
-                    : Haptics.ImpactFeedbackStyle.Light
-                );
-                navigation.navigate(route.name as never);
-              }
-            };
-
-            if (isCenter) {
-              return (
-                <View key={route.key} style={styles.centerSlot}>
-                  <CenterButton focused={isFocused} onPress={onPress} />
-                </View>
-              );
-            }
-
-            const icons = ICON_FOR[route.name];
-            const label = LABEL_FOR[route.name] ?? route.name;
-            if (!icons) return null;
-
-            return (
-              <TabItem
-                key={route.key}
-                focused={isFocused}
-                icon={isFocused ? icons.active : icons.inactive}
-                label={label}
-                onPress={onPress}
-              />
-            );
-          })}
+          {nav.mode === 'main' ? (
+            <MainRow state={state} onTabPress={handleMainTabPress} />
+          ) : nav.mode === 'training-sub' ? (
+            <TrainingSubRow
+              activeSub={nav.trainingSubTab}
+              onSubPress={nav.setTrainingSub}
+              onCenterPress={handleCenterFromSub}
+            />
+          ) : (
+            <NutritionSubRow
+              activeSub={nav.nutritionSubTab}
+              onSubPress={nav.setNutritionSub}
+              onCenterPress={handleCenterFromSub}
+            />
+          )}
         </View>
       </View>
     </View>
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main mode row
+// ─────────────────────────────────────────────────────────────────────────────
+
+function MainRow({
+  state,
+  onTabPress,
+}: {
+  state: BottomTabBarProps['state'];
+  onTabPress: (routeName: string, routeKey: string) => void;
+}) {
+  return (
+    <>
+      {state.routes.map((route, index) => {
+        const isFocused = state.index === index;
+        const isCenter = route.name === 'index';
+
+        if (isCenter) {
+          return (
+            <View key={route.key} style={styles.centerSlot}>
+              <CenterButton
+                focused={isFocused}
+                onPress={() => onTabPress(route.name, route.key)}
+              />
+            </View>
+          );
+        }
+
+        const icons = MAIN_ICON_FOR[route.name];
+        const label = MAIN_LABEL_FOR[route.name] ?? route.name;
+        if (!icons) return null;
+
+        return (
+          <TabItem
+            key={route.key}
+            focused={isFocused}
+            icon={isFocused ? icons.active : icons.inactive}
+            label={label}
+            onPress={() => onTabPress(route.name, route.key)}
+          />
+        );
+      })}
+    </>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Training sub-mode row
+// ─────────────────────────────────────────────────────────────────────────────
+
+function TrainingSubRow({
+  activeSub,
+  onSubPress,
+  onCenterPress,
+}: {
+  activeSub: TrainingSubTab;
+  onSubPress: (tab: TrainingSubTab) => void;
+  onCenterPress: () => void;
+}) {
+  const left = TRAINING_SUB_ORDER.slice(0, 2);
+  const right = TRAINING_SUB_ORDER.slice(2);
+
+  return (
+    <>
+      {left.map((tab) => {
+        const focused = activeSub === tab;
+        const icons = TRAINING_SUB_ICON[tab];
+        return (
+          <TabItem
+            key={tab}
+            focused={focused}
+            icon={focused ? icons.active : icons.inactive}
+            label={TRAINING_SUB_LABEL[tab]}
+            onPress={() => {
+              if (!focused) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onSubPress(tab);
+            }}
+          />
+        );
+      })}
+
+      <View style={styles.centerSlot}>
+        <CenterButton focused={false} onPress={onCenterPress} />
+      </View>
+
+      {right.map((tab) => {
+        const focused = activeSub === tab;
+        const icons = TRAINING_SUB_ICON[tab];
+        return (
+          <TabItem
+            key={tab}
+            focused={focused}
+            icon={focused ? icons.active : icons.inactive}
+            label={TRAINING_SUB_LABEL[tab]}
+            onPress={() => {
+              if (!focused) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onSubPress(tab);
+            }}
+          />
+        );
+      })}
+    </>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Nutrition sub-mode row
+// ─────────────────────────────────────────────────────────────────────────────
+
+function NutritionSubRow({
+  activeSub,
+  onSubPress,
+  onCenterPress,
+}: {
+  activeSub: NutritionSubTab;
+  onSubPress: (tab: NutritionSubTab) => void;
+  onCenterPress: () => void;
+}) {
+  const left = NUTRITION_SUB_ORDER.slice(0, 2);
+  const right = NUTRITION_SUB_ORDER.slice(2);
+
+  return (
+    <>
+      {left.map((tab) => {
+        const focused = activeSub === tab;
+        const icons = NUTRITION_SUB_ICON[tab];
+        return (
+          <TabItem
+            key={tab}
+            focused={focused}
+            icon={focused ? icons.active : icons.inactive}
+            label={NUTRITION_SUB_LABEL[tab]}
+            onPress={() => {
+              if (!focused) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onSubPress(tab);
+            }}
+          />
+        );
+      })}
+
+      <View style={styles.centerSlot}>
+        <CenterButton focused={false} onPress={onCenterPress} />
+      </View>
+
+      {right.map((tab) => {
+        const focused = activeSub === tab;
+        const icons = NUTRITION_SUB_ICON[tab];
+        return (
+          <TabItem
+            key={tab}
+            focused={focused}
+            icon={focused ? icons.active : icons.inactive}
+            label={NUTRITION_SUB_LABEL[tab]}
+            onPress={() => {
+              if (!focused) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onSubPress(tab);
+            }}
+          />
+        );
+      })}
+    </>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tab item
+// ─────────────────────────────────────────────────────────────────────────────
 
 function TabItem({
   focused,
@@ -227,17 +448,9 @@ function TabItem({
     >
       <Animated.View style={[styles.tabInner, { transform: [{ scale: press }] }]}>
         <View style={styles.iconWrap}>
-          {/* Active gold-pill background — fades in via opacity (native driver safe) */}
-          <Animated.View
-            pointerEvents="none"
-            style={[styles.activePill, { opacity: focusOpacity }]}
-          />
+          <Animated.View pointerEvents="none" style={[styles.activePill, { opacity: focusOpacity }]} />
           <Animated.View style={{ transform: [{ scale: iconScale }] }}>
-            <Ionicons
-              name={icon}
-              size={22}
-              color={focused ? color.gold : color.textMuted}
-            />
+            <Ionicons name={icon} size={22} color={focused ? color.gold : color.textMuted} />
           </Animated.View>
         </View>
         <Text
@@ -256,6 +469,10 @@ function TabItem({
     </Pressable>
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Styles
+// ─────────────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   outer: {
