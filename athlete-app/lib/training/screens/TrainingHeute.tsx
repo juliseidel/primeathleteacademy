@@ -1,18 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/lib/auth/AuthContext';
 import { localIso, startOfWeek } from '@/lib/data/dates';
+import { useWeekMatches, type MatchRow } from '@/lib/data/matches';
 import { firstName, initialsFor, useMyProfile } from '@/lib/data/profile';
 import { useWeekWorkouts, type WorkoutWithExercises } from '@/lib/data/workouts';
 import { useEntrance } from '@/lib/design/animations/useEntrance';
 import { CoachQuoteCard } from '@/lib/design/components/CoachQuoteCard';
+import { CompletedWorkoutCard } from '@/lib/design/components/CompletedWorkoutCard';
 import { DarkGlassCard } from '@/lib/design/components/DarkGlassCard';
 import { GreetingHeader } from '@/lib/design/components/GreetingHeader';
+import { MatchdayHeroCard } from '@/lib/design/components/MatchdayHeroCard';
 import { WeekStrip, type DayCell } from '@/lib/design/components/WeekStrip';
 import { WorkoutHeroCard } from '@/lib/design/components/WorkoutHeroCard';
 import { displaySerif } from '@/lib/design/light';
@@ -23,6 +26,23 @@ const WEEKDAYS_DE = ['SO', 'MO', 'DI', 'MI', 'DO', 'FR', 'SA'] as const;
 const WEEKDAYS_FULL = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'] as const;
 const MONTH_DE = ['JAN', 'FEB', 'MÄR', 'APR', 'MAI', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEZ'];
 
+type DayItem =
+  | {
+      kind: 'workout';
+      sortKey: number;
+      workout: WorkoutWithExercises;
+      workoutIndex: number;
+      workoutTotal: number;
+    }
+  | { kind: 'match'; sortKey: number; match: MatchRow };
+
+function parseTimeToMinutes(t: string | null | undefined): number | null {
+  if (!t) return null;
+  const [h, m] = t.split(':').map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return null;
+  return h * 60 + m;
+}
+
 export function TrainingHeute() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -31,6 +51,7 @@ export function TrainingHeute() {
 
   const profileQuery = useMyProfile(userId);
   const weekQuery = useWeekWorkouts(userId);
+  const matchesQuery = useWeekMatches(userId);
 
   const today = useMemo(() => new Date(), []);
   const todayIso = localIso(today);
@@ -40,14 +61,19 @@ export function TrainingHeute() {
 
   const weekCells: DayCell[] = useMemo(() => {
     const workouts: WorkoutWithExercises[] = weekQuery.data ?? [];
+    const matches: MatchRow[] = matchesQuery.data ?? [];
     return Array.from({ length: 7 }).map((_, i) => {
       const d = new Date(weekStart);
       d.setDate(weekStart.getDate() + i);
       const iso = localIso(d);
       const dayWorkouts = workouts.filter((w: WorkoutWithExercises) => w.planned_date === iso);
+      const dayMatches = matches.filter((m: MatchRow) => m.match_date === iso);
 
       let status: DayCell['status'] = 'rest';
-      if (dayWorkouts.length > 0) {
+      if (dayMatches.length > 0) {
+        // Match überlagert Workout-Status — der Spieltag ist visuell der Anker
+        status = 'matchday';
+      } else if (dayWorkouts.length > 0) {
         const allCompleted = dayWorkouts.every((w: WorkoutWithExercises) => w.status === 'completed');
         const anyInProgress = dayWorkouts.some((w: WorkoutWithExercises) => w.status === 'in_progress');
         const allSkipped = dayWorkouts.every((w: WorkoutWithExercises) => w.status === 'skipped');
@@ -65,7 +91,7 @@ export function TrainingHeute() {
         status,
       };
     });
-  }, [weekQuery.data, weekStart, todayIso]);
+  }, [weekQuery.data, matchesQuery.data, weekStart, todayIso]);
 
   const monthLabel = useMemo(() => {
     const start = weekStart;
@@ -90,10 +116,38 @@ export function TrainingHeute() {
     return d;
   }, [selectedDay, weekStart]);
 
-  const selectedWorkouts: WorkoutWithExercises[] = useMemo(() => {
-    const workouts: WorkoutWithExercises[] = weekQuery.data ?? [];
-    return workouts.filter((w: WorkoutWithExercises) => w.planned_date === localIso(selectedDate));
-  }, [weekQuery.data, selectedDate]);
+  const selectedItems: DayItem[] = useMemo(() => {
+    const dateIso = localIso(selectedDate);
+    const workouts = (weekQuery.data ?? []).filter(
+      (w: WorkoutWithExercises) => w.planned_date === dateIso
+    );
+    const matches = (matchesQuery.data ?? []).filter(
+      (m: MatchRow) => m.match_date === dateIso
+    );
+
+    const totalWorkouts = workouts.length;
+    const items: DayItem[] = [];
+
+    workouts.forEach((w, idx) => {
+      items.push({
+        kind: 'workout',
+        sortKey: (w.day_session_order ?? idx + 1) * 60,
+        workout: w,
+        workoutIndex: idx,
+        workoutTotal: totalWorkouts,
+      });
+    });
+
+    for (const m of matches) {
+      items.push({
+        kind: 'match',
+        sortKey: parseTimeToMinutes(m.match_time) ?? 24 * 60,
+        match: m,
+      });
+    }
+
+    return items.sort((a, b) => a.sortKey - b.sortKey);
+  }, [weekQuery.data, matchesQuery.data, selectedDate]);
 
   const isShowingToday = selectedDay.isToday === true;
 
@@ -127,53 +181,81 @@ export function TrainingHeute() {
           />
         </Animated.View>
 
-        {weekQuery.isLoading ? (
+        {weekQuery.isLoading || matchesQuery.isLoading ? (
           <LoadingHero />
         ) : weekQuery.error ? (
           <ErrorHero message="Konnte Workouts nicht laden." />
-        ) : selectedWorkouts.length > 0 ? (
+        ) : selectedItems.length > 0 ? (
           <>
-            {selectedWorkouts.map((w, idx) => (
-              <View key={w.id} style={styles.workoutBlock}>
-                {selectedWorkouts.length > 1 ? (
-                  <Text style={styles.reizLabel}>
-                    TRAININGSREIZ {idx + 1} / {selectedWorkouts.length}
-                  </Text>
-                ) : null}
-                <Animated.View style={idx === 0 ? heroEntrance : undefined}>
-                  {w.status === 'completed' ? (
-                    <CompletedWorkoutCard
-                      workout={w}
-                      weekday={WEEKDAYS_FULL[selectedDate.getDay()]}
-                      onPress={() => router.push(`/session/${w.id}`)}
-                    />
-                  ) : (
-                    <WorkoutHeroCard
-                      type={w.type}
-                      title={w.title}
-                      eyebrow={`${WEEKDAYS_FULL[selectedDate.getDay()].toUpperCase()} · ${workoutShortLabel(w.type)}`}
-                      pills={buildPills(w)}
-                      ctaLabel={
-                        w.status === 'in_progress'
-                          ? 'Session fortsetzen'
-                          : isShowingToday
-                            ? 'Session starten'
-                            : 'Plan ansehen'
-                      }
-                      onCtaPress={() => router.push(`/session/${w.id}`)}
-                    />
-                  )}
-                </Animated.View>
+            {selectedItems.map((item, idx) => {
+              const isFirst = idx === 0;
 
-                {w.status !== 'completed' && w.coach_global_note ? (
-                  <CoachQuoteCard
-                    coachName="Patrick"
-                    coachInitials="PS"
-                    message={w.coach_global_note}
-                  />
-                ) : null}
-              </View>
-            ))}
+              if (item.kind === 'match') {
+                const m = item.match;
+                return (
+                  <View key={`match-${m.id}`} style={styles.workoutBlock}>
+                    <Animated.View style={isFirst ? heroEntrance : undefined}>
+                      <MatchdayHeroCard
+                        eyebrow={`${WEEKDAYS_FULL[selectedDate.getDay()].toUpperCase()} · MATCHDAY`}
+                        opponent={m.opponent}
+                        matchTime={m.match_time}
+                        location={m.location}
+                        notes={m.notes}
+                      />
+                    </Animated.View>
+                  </View>
+                );
+              }
+
+              const w = item.workout;
+              return (
+                <View key={`workout-${w.id}`} style={styles.workoutBlock}>
+                  {item.workoutTotal > 1 ? (
+                    <Text style={styles.reizLabel}>
+                      TRAININGSREIZ {item.workoutIndex + 1} / {item.workoutTotal}
+                    </Text>
+                  ) : null}
+                  <Animated.View style={isFirst ? heroEntrance : undefined}>
+                    {w.status === 'completed' ? (
+                      <CompletedWorkoutCard
+                        workout={w}
+                        weekday={WEEKDAYS_FULL[selectedDate.getDay()]}
+                        onPress={() => router.push(`/session/${w.id}`)}
+                      />
+                    ) : (
+                      <WorkoutHeroCard
+                        type={w.type}
+                        title={w.title}
+                        eyebrow={`${WEEKDAYS_FULL[selectedDate.getDay()].toUpperCase()} · ${workoutShortLabel(w.type)}`}
+                        pills={buildPills(w)}
+                        ctaLabel={
+                          w.status === 'in_progress'
+                            ? 'Session fortsetzen'
+                            : isShowingToday
+                              ? 'Session starten'
+                              : 'Plan ansehen'
+                        }
+                        onCtaPress={() =>
+                          router.push(
+                            isShowingToday || w.status === 'in_progress'
+                              ? `/session/${w.id}`
+                              : `/plan/${w.id}`,
+                          )
+                        }
+                      />
+                    )}
+                  </Animated.View>
+
+                  {w.status !== 'completed' && w.coach_global_note ? (
+                    <CoachQuoteCard
+                      coachName="Patrick"
+                      coachInitials="PS"
+                      message={w.coach_global_note}
+                    />
+                  ) : null}
+                </View>
+              );
+            })}
           </>
         ) : (
           <Animated.View style={heroEntrance}>
@@ -235,99 +317,6 @@ function RestDayCard({ date, isToday }: { date: Date; isToday: boolean }) {
       </View>
     </DarkGlassCard>
   );
-}
-
-function CompletedWorkoutCard({
-  workout,
-  weekday,
-  onPress,
-}: {
-  workout: WorkoutWithExercises;
-  weekday: string;
-  onPress: () => void;
-}) {
-  const totals = useMemo(() => {
-    let setsTotal = 0;
-    let setsDone = 0;
-    let totalVolumeKg = 0;
-    for (const ex of workout.exercises) {
-      for (const s of ex.sets) {
-        setsTotal += 1;
-        if (s.completed) setsDone += 1;
-        if (s.actual_reps && s.actual_load_kg) {
-          totalVolumeKg += s.actual_reps * Number(s.actual_load_kg);
-        }
-      }
-    }
-    return { setsTotal, setsDone, totalVolumeKg };
-  }, [workout.exercises]);
-
-  return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.completedCard, pressed && { opacity: 0.92 }]}>
-      <View style={styles.completedHeader}>
-        <View style={styles.completedBadge}>
-          <Ionicons name="checkmark" size={18} color={color.bg} />
-        </View>
-        <Text style={styles.completedEyebrow}>
-          {weekday.toUpperCase()} · ABGESCHLOSSEN
-        </Text>
-      </View>
-
-      <Text style={styles.completedTitle}>{workout.title}</Text>
-
-      <View style={styles.statsGrid}>
-        <StatBlock
-          label="Dauer"
-          value={workout.actual_duration_min ? `${workout.actual_duration_min}` : '–'}
-          unit={workout.actual_duration_min ? 'Min' : ''}
-        />
-        <StatBlock
-          label="Sätze"
-          value={`${totals.setsDone}`}
-          unit={`/ ${totals.setsTotal}`}
-        />
-        {workout.athlete_rpe ? (
-          <StatBlock label="RPE" value={`${workout.athlete_rpe}`} unit="/ 10" />
-        ) : null}
-      </View>
-
-      {totals.totalVolumeKg > 0 ? (
-        <Text style={styles.completedVolume}>
-          {formatKg(totals.totalVolumeKg)} kg Gesamtvolumen
-        </Text>
-      ) : null}
-
-      {workout.athlete_summary_notes ? (
-        <View style={styles.completedNote}>
-          <Ionicons name="chatbox-ellipses-outline" size={13} color={color.gold} />
-          <Text style={styles.completedNoteText} numberOfLines={2}>
-            {workout.athlete_summary_notes}
-          </Text>
-        </View>
-      ) : null}
-
-      <View style={styles.completedCta}>
-        <Text style={styles.completedCtaLabel}>Werte ansehen oder anpassen</Text>
-        <Ionicons name="arrow-forward" size={14} color={color.gold} />
-      </View>
-    </Pressable>
-  );
-}
-
-function StatBlock({ label, value, unit }: { label: string; value: string; unit?: string }) {
-  return (
-    <View style={styles.statBlock}>
-      <View style={styles.statValueRow}>
-        <Text style={styles.statValue}>{value}</Text>
-        {unit ? <Text style={styles.statUnit}>{unit}</Text> : null}
-      </View>
-      <Text style={styles.statLabel}>{label.toUpperCase()}</Text>
-    </View>
-  );
-}
-
-function formatKg(n: number): string {
-  return n.toLocaleString('de-DE');
 }
 
 const styles = StyleSheet.create({
@@ -393,125 +382,5 @@ const styles = StyleSheet.create({
     letterSpacing: 2.6,
     paddingHorizontal: space[2],
     marginTop: space[2],
-  },
-
-  // Completed-Workout-Card
-  completedCard: {
-    backgroundColor: 'rgba(20, 20, 20, 0.65)',
-    borderRadius: radius.xl,
-    borderWidth: 1,
-    borderColor: color.goldA30,
-    paddingVertical: space[6],
-    paddingHorizontal: space[5],
-    gap: space[4],
-  },
-  completedHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space[3],
-  },
-  completedBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: color.gold,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  completedEyebrow: {
-    fontFamily: font.family,
-    fontSize: 11,
-    fontWeight: '700',
-    color: color.gold,
-    letterSpacing: 2.6,
-  },
-  completedTitle: {
-    fontFamily: displaySerif as string,
-    fontSize: 32,
-    fontStyle: 'italic',
-    fontWeight: '400',
-    color: color.text,
-    letterSpacing: -0.6,
-    lineHeight: 38,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    gap: space[3],
-    paddingVertical: space[3],
-    paddingHorizontal: space[3],
-    backgroundColor: 'rgba(0, 0, 0, 0.30)',
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.04)',
-  },
-  statBlock: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 4,
-  },
-  statValueRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 4,
-  },
-  statValue: {
-    fontFamily: displaySerif as string,
-    fontSize: 26,
-    fontStyle: 'italic',
-    fontWeight: '400',
-    color: color.gold,
-    letterSpacing: -0.4,
-  },
-  statUnit: {
-    fontFamily: font.family,
-    fontSize: 12,
-    color: color.textMuted,
-  },
-  statLabel: {
-    fontFamily: font.family,
-    fontSize: 9,
-    fontWeight: '600',
-    color: color.textMuted,
-    letterSpacing: 1.6,
-  },
-  completedVolume: {
-    fontFamily: font.family,
-    fontSize: 12,
-    color: color.textMuted,
-    letterSpacing: 0.4,
-    textAlign: 'center',
-  },
-  completedNote: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: space[2],
-    paddingVertical: space[2],
-    paddingHorizontal: space[3],
-    borderRadius: radius.md,
-    backgroundColor: color.goldA04,
-    borderWidth: 1,
-    borderColor: color.goldA20,
-  },
-  completedNoteText: {
-    flex: 1,
-    fontFamily: displaySerif as string,
-    fontStyle: 'italic',
-    fontSize: 13,
-    color: color.text,
-    lineHeight: 19,
-  },
-  completedCta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingTop: space[2],
-  },
-  completedCtaLabel: {
-    fontFamily: font.family,
-    fontSize: 13,
-    fontWeight: '600',
-    color: color.gold,
-    letterSpacing: 0.4,
   },
 });

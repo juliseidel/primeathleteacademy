@@ -117,6 +117,15 @@ function RootNav() {
           }}
         />
         <Stack.Screen
+          name="plan/[workoutId]"
+          options={{
+            presentation: 'card',
+            headerShown: false,
+            animation: 'slide_from_right',
+            contentStyle: { backgroundColor: color.bg },
+          }}
+        />
+        <Stack.Screen
           name="modal"
           options={{
             presentation: 'modal',
