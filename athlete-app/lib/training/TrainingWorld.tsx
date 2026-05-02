@@ -13,13 +13,10 @@ import { TrainingWoche } from './screens/TrainingWoche';
 export function TrainingWorld() {
   const nav = useAthleteNav();
 
-  // Make sure mode is in training-sub when this screen mounts
-  // (handles direct navigation, hot-reload, deep links)
   useEffect(() => {
     if (nav.mode !== 'training-sub') {
       nav.enterTrainingSub();
     }
-    // intentionally only run on mount — re-runs would loop the splash
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -39,11 +36,12 @@ function BackgroundDecor() {
     <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
       <LinearGradient
         colors={[color.surfaceDeep, color.bg, color.bg]}
-        locations={[0, 0.5, 1]}
+        locations={[0, 0.4, 1]}
         style={StyleSheet.absoluteFill}
       />
-      <View style={[styles.orb, { top: -120, right: -120, ...glow.goldHaloOuter }]} />
-      <View style={[styles.orb, { bottom: -180, left: -150, ...glow.goldHaloInner }]} />
+      {/* Subtle warm gold ambience — adds depth without distraction */}
+      <View style={[styles.orb, { top: -180, right: -160, ...glow.goldHaloOuter }]} />
+      <View style={[styles.orb, styles.orbBottomLeft]} />
     </View>
   );
 }
@@ -55,10 +53,15 @@ const styles = StyleSheet.create({
   },
   orb: {
     position: 'absolute',
-    width: 360,
-    height: 360,
-    borderRadius: 180,
+    width: 380,
+    height: 380,
+    borderRadius: 190,
     backgroundColor: color.goldA10,
     opacity: 0.55,
+  },
+  orbBottomLeft: {
+    bottom: -220,
+    left: -180,
+    opacity: 0.35,
   },
 });

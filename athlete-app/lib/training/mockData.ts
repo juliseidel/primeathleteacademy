@@ -318,6 +318,12 @@ export const TRENDS: ExerciseTrend[] = [
   },
 ];
 
+// Local branded images (PAA-eigene Premium-Fotos). Wenn vorhanden, werden diese
+// gegenüber den Unsplash-Fallbacks bevorzugt.
+const WORKOUT_IMAGE_LOCAL: Partial<Record<WorkoutType, number>> = {
+  krafttraining: require('@/assets/images/workout-krafttraining.png'),
+};
+
 export const WORKOUT_IMAGE_URL: Record<WorkoutType, string> = {
   krafttraining:  'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=900&q=80&fit=crop&auto=format',
   athletik:       'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=900&q=80&fit=crop&auto=format',
@@ -330,6 +336,11 @@ export const WORKOUT_IMAGE_URL: Record<WorkoutType, string> = {
   recovery:       'https://images.unsplash.com/photo-1588286840104-8957b019727f?w=900&q=80&fit=crop&auto=format',
   mixed:          'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=900&q=80&fit=crop&auto=format',
 };
+
+/** Source resolver — local asset if available, otherwise remote URL */
+export function workoutImageSource(type: WorkoutType): number | string {
+  return WORKOUT_IMAGE_LOCAL[type] ?? WORKOUT_IMAGE_URL[type];
+}
 
 export const WORKOUT_TYPE_LABEL: Record<WorkoutType, string> = {
   krafttraining: 'Krafttraining',

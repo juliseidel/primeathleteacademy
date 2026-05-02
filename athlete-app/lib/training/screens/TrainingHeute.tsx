@@ -1,218 +1,169 @@
-import { Ionicons } from '@expo/vector-icons';
+import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { GlassCard } from '@/lib/design/components/GlassCard';
-import { WorkoutCard } from '@/lib/design/components/WorkoutCard';
+import { useEntrance } from '@/lib/design/animations/useEntrance';
+import { CoachQuoteCard } from '@/lib/design/components/CoachQuoteCard';
+import { DarkGlassCard } from '@/lib/design/components/DarkGlassCard';
+import { GreetingHeader } from '@/lib/design/components/GreetingHeader';
+import { WeekStrip, type DayCell } from '@/lib/design/components/WeekStrip';
+import { WorkoutHeroCard } from '@/lib/design/components/WorkoutHeroCard';
+import { displaySerif } from '@/lib/design/light';
 import { color, font, radius, space } from '@/lib/design/tokens';
 import { TODAY_WORKOUT } from '@/lib/training/mockData';
 
-const DATE_LABEL = new Date().toLocaleDateString('de-DE', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-});
+const WEEK_DAYS: DayCell[] = [
+  { weekday: 'MO', dayNumber: 27, isInPast: true,  status: 'completed' },
+  { weekday: 'DI', dayNumber: 28, isInPast: true,  status: 'completed' },
+  { weekday: 'MI', dayNumber: 29, isInPast: true,  status: 'rest' },
+  { weekday: 'DO', dayNumber: 30, isInPast: true,  status: 'completed' },
+  { weekday: 'FR', dayNumber: 1,  isInPast: true,  status: 'completed' },
+  { weekday: 'SA', dayNumber: 2,  isToday: true,   status: 'planned' },
+  { weekday: 'SO', dayNumber: 3,  isInPast: false, status: 'rest' },
+];
+
+const dayKey = (d: DayCell) => `${d.weekday}-${d.dayNumber}`;
 
 export function TrainingHeute() {
   const insets = useSafeAreaInsets();
+
+  const todayDay = useMemo(() => WEEK_DAYS.find((d) => d.isToday) ?? WEEK_DAYS[0], []);
+  const [selectedKey, setSelectedKey] = useState<string>(dayKey(todayDay));
+  const selectedDay = useMemo(
+    () => WEEK_DAYS.find((d) => dayKey(d) === selectedKey) ?? todayDay,
+    [selectedKey, todayDay]
+  );
+
+  const isShowingToday = selectedDay.isToday === true;
+
+  const headerEntrance = useEntrance(0);
+  const calendarEntrance = useEntrance(80);
+  const heroEntrance = useEntrance(160);
+  const coachEntrance = useEntrance(260);
 
   return (
     <ScrollView
       contentContainerStyle={[
         styles.scroll,
-        { paddingTop: insets.top + space[4], paddingBottom: 160 },
+        { paddingTop: insets.top + space[2], paddingBottom: 160 },
       ]}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.eyebrow}>HEUTE</Text>
-      <Text style={styles.headline}>{capitalize(DATE_LABEL)}</Text>
+      <Animated.View style={headerEntrance}>
+        <GreetingHeader firstName="Robin" initials="RH" variant="dark" />
+      </Animated.View>
 
-      <WorkoutCard
-        type={TODAY_WORKOUT.type}
-        title={TODAY_WORKOUT.title}
-        metaLeft={`${TODAY_WORKOUT.exercises.length} Übungen`}
-        metaRight={`~${TODAY_WORKOUT.estimatedDurationMin} Min · RPE ${TODAY_WORKOUT.rpeTarget ?? '—'}`}
-        cta="Session starten"
-        height={210}
-      />
+      <View style={styles.body}>
+        <Animated.View style={calendarEntrance}>
+          <WeekStrip
+            monthLabel="APR – MAI 2026"
+            days={WEEK_DAYS}
+            selectedKey={selectedKey}
+            onDayPress={(d) => setSelectedKey(dayKey(d))}
+          />
+        </Animated.View>
 
-      {TODAY_WORKOUT.coachNotes ? (
-        <GlassCard variant="standard" style={styles.coachCard}>
-          <View style={styles.coachRow}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>JK</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.coachName}>Jonas</Text>
-              <Text style={styles.coachStatus}>dein Coach</Text>
-            </View>
-          </View>
-          <Text style={styles.coachMessage}>{TODAY_WORKOUT.coachNotes}</Text>
-        </GlassCard>
-      ) : null}
+        <Animated.View style={heroEntrance}>
+          {isShowingToday ? (
+            <WorkoutHeroCard
+              type={TODAY_WORKOUT.type}
+              title={TODAY_WORKOUT.title}
+              eyebrow={`SAMSTAG · ${TODAY_WORKOUT.type.toUpperCase()}`}
+              pills={[
+                { icon: 'time-outline', label: `${TODAY_WORKOUT.estimatedDurationMin} Min` },
+                { icon: 'list-outline', label: `${TODAY_WORKOUT.exercises.length} Übungen` },
+                ...(TODAY_WORKOUT.rpeTarget
+                  ? [{ icon: 'flame-outline' as const, label: `RPE ${TODAY_WORKOUT.rpeTarget}` }]
+                  : []),
+              ]}
+              ctaLabel="Session starten"
+            />
+          ) : (
+            <OtherDayPreview day={selectedDay} />
+          )}
+        </Animated.View>
 
-      <Text style={styles.sectionLabel}>ÜBUNGEN</Text>
-
-      <View style={styles.exerciseList}>
-        {TODAY_WORKOUT.exercises.map((ex, i) => (
-          <GlassCard key={ex.id} variant="standard" style={styles.exerciseCard}>
-            <View style={styles.exerciseRow}>
-              <View style={styles.numberCircle}>
-                <Text style={styles.numberText}>{i + 1}</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.exerciseName}>{ex.name}</Text>
-                <Text style={styles.exerciseDetail}>
-                  {summarizeExercise(ex)}
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color={color.textDim} />
-            </View>
-          </GlassCard>
-        ))}
+        {isShowingToday && TODAY_WORKOUT.coachNotes ? (
+          <Animated.View style={coachEntrance}>
+            <CoachQuoteCard
+              coachName="Jonas"
+              coachInitials="JK"
+              message={TODAY_WORKOUT.coachNotes}
+            />
+          </Animated.View>
+        ) : null}
       </View>
     </ScrollView>
   );
 }
 
-function summarizeExercise(ex: typeof TODAY_WORKOUT.exercises[number]) {
-  const setCount = ex.sets.length;
-  const first = ex.sets[0];
-  if (!first) return `${setCount} Sätze`;
+function OtherDayPreview({ day }: { day: DayCell }) {
+  const isRest = day.status === 'rest';
+  const labelMap: Record<string, string> = {
+    MO: 'Montag', DI: 'Dienstag', MI: 'Mittwoch', DO: 'Donnerstag',
+    FR: 'Freitag', SA: 'Samstag', SO: 'Sonntag',
+  };
+  const fullDay = labelMap[day.weekday] ?? day.weekday;
 
-  if (first.plannedReps && first.plannedLoadKg) {
-    return `${setCount} × ${first.plannedReps} Wdh · ${first.plannedLoadKg} kg`;
-  }
-  if (first.plannedReps) {
-    return `${setCount} × ${first.plannedReps} Wdh`;
-  }
-  if (first.plannedDistanceM) {
-    return `${setCount} × ${first.plannedDistanceM} m`;
-  }
-  if (first.plannedTimeSec) {
-    return `${setCount} × ${first.plannedTimeSec} s`;
-  }
-  return `${setCount} Sätze`;
-}
-
-function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
+  return (
+    <DarkGlassCard variant="premium" borderRadius={radius.xl}>
+      <View style={styles.previewBody}>
+        <Text style={styles.previewEyebrow}>{fullDay.toUpperCase()} · {day.dayNumber}.</Text>
+        <Text style={styles.previewTitle}>
+          {isRest
+            ? 'Ruhetag'
+            : day.status === 'completed'
+              ? 'Bereits trainiert'
+              : day.status === 'matchday'
+                ? 'Spieltag'
+                : 'Geplant'}
+        </Text>
+        <Text style={styles.previewBodyText}>
+          {isRest
+            ? 'Erholung gehört zum Plan. Schlaf gut, iss sauber.'
+            : day.status === 'completed'
+              ? 'Schau dir die Details in der Historie an.'
+              : 'Workout-Details werden vom Coach erstellt.'}
+        </Text>
+      </View>
+    </DarkGlassCard>
+  );
 }
 
 const styles = StyleSheet.create({
   scroll: {
+    paddingHorizontal: 0,
+  },
+  body: {
     paddingHorizontal: space[5],
     gap: space[4],
-  },
-  eyebrow: {
-    fontFamily: font.family,
-    fontSize: 11,
-    fontWeight: '600',
-    color: color.gold,
-    letterSpacing: 3.2,
-  },
-  headline: {
-    fontFamily: font.family,
-    fontSize: 30,
-    fontWeight: '700',
-    color: color.text,
-    marginTop: space[2],
-    marginBottom: space[3],
-    letterSpacing: -0.4,
-  },
-  coachCard: {
-    width: '100%',
-    padding: space[4],
-  },
-  coachRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space[3],
-    marginBottom: space[3],
-  },
-  avatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: color.surfaceLight,
-    borderWidth: 1,
-    borderColor: color.goldA30,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
-    fontFamily: font.family,
-    fontSize: 12,
-    fontWeight: '700',
-    color: color.gold,
-    letterSpacing: 0.4,
-  },
-  coachName: {
-    fontFamily: font.family,
-    fontSize: 15,
-    fontWeight: '600',
-    color: color.text,
-  },
-  coachStatus: {
-    fontFamily: font.family,
-    fontSize: 11,
-    color: color.textMuted,
-    marginTop: 1,
-  },
-  coachMessage: {
-    fontFamily: font.family,
-    fontSize: 14,
-    lineHeight: 20,
-    color: color.text,
-  },
-  sectionLabel: {
-    fontFamily: font.family,
-    fontSize: 10,
-    fontWeight: '600',
-    color: color.textMuted,
-    letterSpacing: 2.4,
     marginTop: space[3],
   },
-  exerciseList: { gap: space[2] },
-  exerciseCard: {
-    width: '100%',
-    padding: space[4],
+  previewBody: {
+    padding: space[5],
   },
-  exerciseRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space[3],
-  },
-  numberCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: color.goldA10,
-    borderWidth: 1,
-    borderColor: color.goldA30,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  numberText: {
+  previewEyebrow: {
     fontFamily: font.family,
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '700',
-    color: color.gold,
-  },
-  exerciseName: {
-    fontFamily: font.family,
-    fontSize: 15,
-    fontWeight: '600',
-    color: color.text,
-  },
-  exerciseDetail: {
-    fontFamily: font.family,
-    fontSize: 12,
     color: color.textMuted,
-    marginTop: 2,
-    letterSpacing: 0.3,
+    letterSpacing: 2.6,
+    marginBottom: space[2],
   },
-  exerciseRadiusFix: {
-    borderRadius: radius.lg,
+  previewTitle: {
+    fontFamily: displaySerif as string,
+    fontSize: 28,
+    fontWeight: '400',
+    fontStyle: 'italic',
+    color: color.text,
+    letterSpacing: -0.5,
+    marginBottom: space[2],
+  },
+  previewBodyText: {
+    fontFamily: font.family,
+    fontSize: 14,
+    color: color.textMuted,
+    lineHeight: 21,
   },
 });
