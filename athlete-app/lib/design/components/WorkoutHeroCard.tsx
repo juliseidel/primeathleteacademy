@@ -49,14 +49,14 @@ export function WorkoutHeroCard({
 
       {/* Top dark wash — strong enough that the title is always crisp */}
       <LinearGradient
-        colors={['rgba(10,10,10,0.78)', 'rgba(10,10,10,0.30)', 'rgba(10,10,10,0)']}
+        colors={['rgba(10,10,10,0.62)', 'rgba(10,10,10,0.18)', 'rgba(10,10,10,0)']}
         locations={[0, 0.45, 1]}
         style={styles.topGradient}
       />
 
       {/* Bottom dark wash — for the action area */}
       <LinearGradient
-        colors={['rgba(10,10,10,0)', 'rgba(10,10,10,0.65)', 'rgba(10,10,10,0.96)']}
+        colors={['rgba(10,10,10,0)', 'rgba(10,10,10,0.55)', 'rgba(10,10,10,0.94)']}
         locations={[0, 0.55, 1]}
         style={styles.bottomGradient}
       />
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0A0A0A',
   },
   image: {
-    opacity: 0.72,
+    opacity: 0.82,
   },
   topGradient: {
     position: 'absolute',
