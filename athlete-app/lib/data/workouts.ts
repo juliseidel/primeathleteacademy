@@ -69,6 +69,22 @@ export function useTodayWorkouts(athleteId: string | undefined) {
   });
 }
 
+export function useCompletedWorkoutsCount(athleteId: string | undefined) {
+  return useQuery<number>({
+    queryKey: ['workouts', 'completed-count', athleteId],
+    enabled: !!athleteId,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('workouts')
+        .select('id', { count: 'exact', head: true })
+        .eq('athlete_id', athleteId!)
+        .eq('status', 'completed');
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+}
+
 export function useWeekWorkouts(athleteId: string | undefined, anchorDate?: Date) {
   const monday = startOfWeekIso(anchorDate);
   const sunday = addDaysIso(monday, 6);
