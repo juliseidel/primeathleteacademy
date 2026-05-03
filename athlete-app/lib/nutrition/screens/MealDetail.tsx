@@ -15,7 +15,7 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -79,10 +79,18 @@ type DetailTab = 'meal' | 'recent' | 'frequent';
 export default function MealDetailScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const params = useLocalSearchParams<{ slotKey: string; label: string; coachMealId?: string }>();
+  const params = useLocalSearchParams<{
+    slotKey: string;
+    label: string;
+    coachMealId?: string;
+    openItem?: string;
+    openKind?: string;
+  }>();
   const slotKey = params.slotKey ?? 'snack-x';
   const label = params.label ?? 'Mahlzeit';
   const coachMealId = params.coachMealId;
+  const openItem = params.openItem;
+  const openKind = params.openKind;
 
   const { session } = useAuth();
   const userId = session?.user.id;
@@ -119,6 +127,9 @@ export default function MealDetailScreen() {
   const [activeTab, setActiveTab] = useState<DetailTab>('meal');
   const recentQuery = useRecentLogs(userId, 30);
   const frequentQuery = useFrequentLogs(userId, 30);
+
+  // Auto-open sheet, wenn vom Heute-Tab ein spezifisches Item übergeben wurde
+  const autoOpenedRef = useRef(false);
 
   // Suche
   const [query, setQuery] = useState('');
@@ -185,6 +196,31 @@ export default function MealDetailScreen() {
 
   // Sheet-State
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>(null);
+
+  // Auto-open Sheet wenn ein Item via Heute-Tab Klick übergeben wurde
+  useEffect(() => {
+    if (autoOpenedRef.current) return;
+    if (!openItem || !openKind) return;
+    if (openKind === 'log') {
+      const log = (logQuery.data ?? []).find((l) => l.id === openItem);
+      if (log) {
+        setActiveSheet({ kind: 'log', log });
+        autoOpenedRef.current = true;
+      }
+    } else if (openKind === 'coach') {
+      const comp = coachMeal?.components.find((c) => c.id === openItem);
+      if (comp) {
+        setActiveSheet({ kind: 'coach', component: comp, snack: null });
+        autoOpenedRef.current = true;
+        return;
+      }
+      const snack = coachMeal?.snacks.find((s) => s.id === openItem);
+      if (snack) {
+        setActiveSheet({ kind: 'coach', component: null, snack });
+        autoOpenedRef.current = true;
+      }
+    }
+  }, [openItem, openKind, logQuery.data, coachMeal]);
 
   // Macros: Coach-Plan + selbst getrackt (wird zur Slot-Summe addiert)
   const coachPlannedMacros = useMemo(() => {

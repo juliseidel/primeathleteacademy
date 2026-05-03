@@ -24,10 +24,13 @@ type Props = {
   loggedItems: MealLog[];
   onAdd?: () => void;
   onOpen?: () => void;
+  onItemPress?: (itemId: string, kind: 'coach' | 'log') => void;
 };
 
 type Row = {
   key: string;
+  itemId: string;
+  kind: 'coach' | 'log';
   name: string;
   amount: string;
   kcal: number;
@@ -37,13 +40,15 @@ type Row = {
   isCoach: boolean;
 };
 
-export function MealSlotCard({ slotLabel, meal, loggedItems, onAdd, onOpen }: Props) {
+export function MealSlotCard({ slotLabel, meal, loggedItems, onAdd, onOpen, onItemPress }: Props) {
   // Coach-Macros
   const componentRows: Row[] =
     meal?.components.map((c) => {
       const macros = calcComponentMacros(c.food, Number(c.amount_g));
       return {
         key: `comp-${c.id}`,
+        itemId: c.id,
+        kind: 'coach',
         name: c.food?.name ?? c.food_name_override ?? '—',
         amount: c.amount_display ?? `${Number(c.amount_g)}g`,
         kcal: macros.kcal,
@@ -58,6 +63,8 @@ export function MealSlotCard({ slotLabel, meal, loggedItems, onAdd, onOpen }: Pr
       const macros = calcComponentMacros(s.food, Number(s.amount_g));
       return {
         key: `snack-${s.id}`,
+        itemId: s.id,
+        kind: 'coach',
         name: s.food?.name ?? s.food_name_override ?? '—',
         amount: s.amount_display ?? (Number(s.amount_g) > 0 ? `${Number(s.amount_g)}g` : ''),
         kcal: macros.kcal,
@@ -74,6 +81,8 @@ export function MealSlotCard({ slotLabel, meal, loggedItems, onAdd, onOpen }: Pr
     const amt = meta ? `${meta.amountG}g${meta.servings > 1 ? ` × ${meta.servings}` : ''}` : '';
     return {
       key: `log-${log.id}`,
+      itemId: log.id,
+      kind: 'log',
       name: log.display_name,
       amount: amt,
       kcal: Number(log.total_kcal ?? 0),
@@ -90,8 +99,8 @@ export function MealSlotCard({ slotLabel, meal, loggedItems, onAdd, onOpen }: Pr
   const hasItems = allRows.length > 0;
 
   return (
-    <Pressable onPress={onOpen} style={({ pressed }) => [styles.card, pressed && { opacity: 0.92 }]}>
-      <View style={styles.header}>
+    <View style={styles.card}>
+      <Pressable onPress={onOpen} style={({ pressed }) => [styles.header, pressed && { opacity: 0.7 }]}>
         <Text style={styles.slotLabel}>{slotLabel}</Text>
         <View style={styles.headerRight}>
           {totalKcal > 0 ? (
@@ -105,12 +114,16 @@ export function MealSlotCard({ slotLabel, meal, loggedItems, onAdd, onOpen }: Pr
             <Ionicons name="add" size={20} color={color.bg} />
           </Pressable>
         </View>
-      </View>
+      </Pressable>
 
       {hasItems ? (
         <View style={styles.itemsList}>
           {allRows.map((row, i) => (
-            <View key={row.key} style={[styles.itemBlock, i > 0 && styles.itemBlockDivider]}>
+            <Pressable
+              key={row.key}
+              onPress={() => onItemPress?.(row.itemId, row.kind)}
+              style={({ pressed }) => [styles.itemBlock, i > 0 && styles.itemBlockDivider, pressed && { opacity: 0.6 }]}
+            >
               <View style={styles.itemHeaderRow}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.itemName} numberOfLines={1}>
@@ -132,7 +145,7 @@ export function MealSlotCard({ slotLabel, meal, loggedItems, onAdd, onOpen }: Pr
                   <MacroDot color={color.macroFat} value={`${Math.round(row.fat)}g`} />
                 </View>
               ) : null}
-            </View>
+            </Pressable>
           ))}
         </View>
       ) : (
@@ -140,7 +153,7 @@ export function MealSlotCard({ slotLabel, meal, loggedItems, onAdd, onOpen }: Pr
           <Text style={styles.emptyHint}>+ Hinzufügen</Text>
         </Pressable>
       )}
-    </Pressable>
+    </View>
   );
 }
 

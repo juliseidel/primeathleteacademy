@@ -179,13 +179,14 @@ export function NutritionHeute() {
         <View style={styles.mealsList}>
           {standardSlots.map((slot, idx) => {
             const slotKey = slotKeyFor(slot.label, idx);
-            const goToDetail = () =>
+            const goToDetail = (extra?: { openItem?: string; openKind?: string }) =>
               router.push({
                 pathname: '/nutrition/meal/[slotKey]',
                 params: {
                   slotKey,
                   label: slot.label,
                   coachMealId: slot.coachMeal?.id ?? '',
+                  ...(extra ?? {}),
                 },
               });
             return (
@@ -195,8 +196,9 @@ export function NutritionHeute() {
                 slotLabel={slot.label}
                 meal={slot.coachMeal}
                 loggedItems={logsBySlot.get(slotKey) ?? []}
-                onOpen={goToDetail}
-                onAdd={goToDetail}
+                onOpen={() => goToDetail()}
+                onAdd={() => goToDetail()}
+                onItemPress={(itemId, kind) => goToDetail({ openItem: itemId, openKind: kind })}
               />
             );
           })}
