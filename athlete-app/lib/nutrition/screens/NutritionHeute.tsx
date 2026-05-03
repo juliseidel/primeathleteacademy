@@ -32,10 +32,12 @@ import { OverviewCard } from '@/lib/nutrition/components/OverviewCard';
 import { WeekCalendar } from '@/lib/nutrition/components/WeekCalendar';
 import {
   extractLogMeta,
+  useCoachChecksForDate,
   useCoachSkipsForDate,
   useDeleteMealLog,
   useMealLogForDate,
   useSkipCoachItem,
+  useToggleCoachCheck,
   useUpdateMealLog,
   type MealLog,
 } from '@/lib/nutrition/mealLogData';
@@ -55,7 +57,15 @@ import {
 
 type ActiveSheet =
   | { kind: 'log'; log: MealLog }
-  | { kind: 'coach'; food: CoachFood; amountG: number; name: string }
+  | {
+      kind: 'coach';
+      food: CoachFood;
+      amountG: number;
+      name: string;
+      itemId: string;
+      itemKind: 'comp' | 'snack';
+      slotKey: string;
+    }
   | null;
 
 export function NutritionHeute() {
@@ -114,8 +124,11 @@ export function NutritionHeute() {
   const deleteMealMut = useDeleteMealLog(userId, todayIso);
   const coachSkipsQuery = useCoachSkipsForDate(userId, todayIso);
   const skipCoachMut = useSkipCoachItem(userId, todayIso);
+  const coachChecksQuery = useCoachChecksForDate(userId, todayIso);
+  const toggleCheckMut = useToggleCoachCheck(userId, todayIso);
 
   const skips = coachSkipsQuery.data ?? { comp: new Set<string>(), snack: new Set<string>() };
+  const checks = coachChecksQuery.data ?? { comp: new Set<string>(), snack: new Set<string>() };
 
   // Sheet-State für inline Item-Detail (kein Navigieren — Sheet öffnet direkt im Heute-Tab)
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>(null);
@@ -126,25 +139,33 @@ export function NutritionHeute() {
       if (log) setActiveSheet({ kind: 'log', log });
       return;
     }
-    // Coach-Item: in allen Mahlzeiten des Tages-Templates suchen
-    for (const meal of templateQuery.data?.meals ?? []) {
-      const comp = meal.components.find((c) => c.id === itemId);
+    // Coach-Item: durch standardSlots iterieren, um auch slotKey zu kennen
+    for (let idx = 0; idx < standardSlots.length; idx++) {
+      const slot = standardSlots[idx];
+      const slotKey = slotKeyFor(slot.label, idx);
+      const comp = slot.coachMeal?.components.find((c) => c.id === itemId);
       if (comp?.food) {
         setActiveSheet({
           kind: 'coach',
           food: comp.food,
           amountG: Number(comp.amount_g),
           name: comp.food.name,
+          itemId: comp.id,
+          itemKind: 'comp',
+          slotKey,
         });
         return;
       }
-      const snack = meal.snacks.find((s) => s.id === itemId);
+      const snack = slot.coachMeal?.snacks.find((s) => s.id === itemId);
       if (snack?.food) {
         setActiveSheet({
           kind: 'coach',
           food: snack.food,
           amountG: Number(snack.amount_g),
           name: snack.food.name,
+          itemId: snack.id,
+          itemKind: 'snack',
+          slotKey,
         });
         return;
       }
@@ -170,24 +191,25 @@ export function NutritionHeute() {
 
   const handleSkipCoachFromSheet = () => {
     if (activeSheet?.kind !== 'coach') return;
-    // Im Heute-Tab brauchen wir den slotKey — den ermitteln wir aus dem Item via Suche
-    if (!template) return;
-    for (let idx = 0; idx < standardSlots.length; idx++) {
-      const slot = standardSlots[idx];
-      const slotKey = slotKeyFor(slot.label, idx);
-      const compMatch = slot.coachMeal?.components.some((c) => c.food?.id === activeSheet.food.id);
-      const snackMatch = slot.coachMeal?.snacks.some((s) => s.food?.id === activeSheet.food.id);
-      if (compMatch) {
-        const comp = slot.coachMeal!.components.find((c) => c.food?.id === activeSheet.food.id)!;
-        skipCoachMut.mutate({ slotKey, kind: 'comp', itemId: comp.id });
-        return;
-      }
-      if (snackMatch) {
-        const snack = slot.coachMeal!.snacks.find((s) => s.food?.id === activeSheet.food.id)!;
-        skipCoachMut.mutate({ slotKey, kind: 'snack', itemId: snack.id });
-        return;
-      }
-    }
+    skipCoachMut.mutate({
+      slotKey: activeSheet.slotKey,
+      kind: activeSheet.itemKind,
+      itemId: activeSheet.itemId,
+    });
+  };
+
+  const handleToggleCoachCheckFromSheet = () => {
+    if (activeSheet?.kind !== 'coach') return;
+    const isChecked =
+      activeSheet.itemKind === 'comp'
+        ? checks.comp.has(activeSheet.itemId)
+        : checks.snack.has(activeSheet.itemId);
+    toggleCheckMut.mutate({
+      slotKey: activeSheet.slotKey,
+      kind: activeSheet.itemKind,
+      itemId: activeSheet.itemId,
+      nowChecked: !isChecked,
+    });
   };
 
   const handleItemDelete = (slot: { label: string; coachMeal: FullMeal | null }, slotIdx: number) =>
@@ -200,6 +222,13 @@ export function NutritionHeute() {
       } else if (kind === 'coach-snack') {
         skipCoachMut.mutate({ slotKey, kind: 'snack', itemId });
       }
+    };
+
+  const handleItemCheckToggle = (slot: { label: string; coachMeal: FullMeal | null }, slotIdx: number) =>
+    (itemId: string, kind: 'coach-comp' | 'coach-snack', nowChecked: boolean) => {
+      const slotKey = slotKeyFor(slot.label, slotIdx);
+      const checkKind = kind === 'coach-comp' ? 'comp' : 'snack';
+      toggleCheckMut.mutate({ slotKey, kind: checkKind, itemId, nowChecked });
     };
 
   const template = templateQuery.data;
@@ -220,22 +249,24 @@ export function NutritionHeute() {
     [mealLogQuery.data],
   );
 
-  const coachPlannedMacros = useMemo(() => {
+  // Macros: NUR abgehakte Coach-Items zählen (geplante = noch nicht konsumiert).
+  // Selbst getrackte Logs zählen immer.
+  const coachConsumedMacros = useMemo(() => {
     if (!template) return { kcal: 0, protein: 0, carbs: 0, fat: 0 };
     const all = template.meals.flatMap((meal) => [
       ...meal.components
-        .filter((c) => !skips.comp.has(c.id))
+        .filter((c) => !skips.comp.has(c.id) && checks.comp.has(c.id))
         .map((c) => calcComponentMacros(c.food, Number(c.amount_g))),
       ...meal.snacks
-        .filter((s) => !skips.snack.has(s.id))
+        .filter((s) => !skips.snack.has(s.id) && checks.snack.has(s.id))
         .map((s) => calcComponentMacros(s.food, Number(s.amount_g))),
     ]);
     return sumMacros(all);
-  }, [template, skips.comp, skips.snack]);
+  }, [template, skips.comp, skips.snack, checks.comp, checks.snack]);
 
   const eatenMacros = useMemo(
-    () => sumMacros([loggedMacros, coachPlannedMacros]),
-    [loggedMacros, coachPlannedMacros],
+    () => sumMacros([loggedMacros, coachConsumedMacros]),
+    [loggedMacros, coachConsumedMacros],
   );
 
   // Pro Slot: getrackte Logs
@@ -323,10 +354,12 @@ export function NutritionHeute() {
                 meal={slot.coachMeal}
                 loggedItems={logsBySlot.get(slotKey) ?? []}
                 coachSkips={skips}
+                coachChecks={checks}
                 onOpen={goToDetail}
                 onAdd={goToDetail}
                 onItemPress={handleItemPress}
                 onItemDelete={handleItemDelete(slot, idx)}
+                onItemCheckToggle={handleItemCheckToggle(slot, idx)}
               />
             );
           })}
@@ -363,23 +396,31 @@ export function NutritionHeute() {
           onDelete={handleDeleteLog}
         />
       );
-    })() : activeSheet?.kind === 'coach' ? (
-      <FoodDetailSheet
-        visible={true}
-        mode="view"
-        name={activeSheet.name}
-        timeLabel="Coach-Vorgabe — zählt automatisch"
-        macrosPer100g={{
-          kcal: Number(activeSheet.food.kcal_per_100g),
-          protein: Number(activeSheet.food.protein_per_100g),
-          carbs: Number(activeSheet.food.carbs_per_100g),
-          fat: Number(activeSheet.food.fat_per_100g),
-        }}
-        initialAmountG={activeSheet.amountG}
-        onClose={() => setActiveSheet(null)}
-        onDelete={handleSkipCoachFromSheet}
-      />
-    ) : (
+    })() : activeSheet?.kind === 'coach' ? (() => {
+      const isChecked =
+        activeSheet.itemKind === 'comp'
+          ? checks.comp.has(activeSheet.itemId)
+          : checks.snack.has(activeSheet.itemId);
+      return (
+        <FoodDetailSheet
+          visible={true}
+          mode="view"
+          name={activeSheet.name}
+          timeLabel={isChecked ? 'Konsumiert ✓' : 'Coach-Vorgabe — noch nicht abgehakt'}
+          macrosPer100g={{
+            kcal: Number(activeSheet.food.kcal_per_100g),
+            protein: Number(activeSheet.food.protein_per_100g),
+            carbs: Number(activeSheet.food.carbs_per_100g),
+            fat: Number(activeSheet.food.fat_per_100g),
+          }}
+          initialAmountG={activeSheet.amountG}
+          onClose={() => setActiveSheet(null)}
+          isChecked={isChecked}
+          onCheckToggle={handleToggleCoachCheckFromSheet}
+          onDelete={handleSkipCoachFromSheet}
+        />
+      );
+    })() : (
       <FoodDetailSheet
         visible={false}
         mode="view"

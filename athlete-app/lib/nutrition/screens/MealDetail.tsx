@@ -39,12 +39,14 @@ import { calcComponentMacros, pct, sumMacros } from '@/lib/nutrition/macroCalc';
 import {
   extractLogMeta,
   useAddMealLog,
+  useCoachChecksForDate,
   useCoachSkipsForDate,
   useDeleteMealLog,
   useFrequentLogs,
   useMealLogForSlot,
   useRecentLogs,
   useSkipCoachItem,
+  useToggleCoachCheck,
   useUpdateMealLog,
   type MealLog,
   type QuickPickItem,
@@ -140,6 +142,8 @@ export default function MealDetailScreen() {
   const deleteMealMut = useDeleteMealLog(userId, todayIso);
   const coachSkipsQuery = useCoachSkipsForDate(userId, todayIso);
   const skipCoachMut = useSkipCoachItem(userId, todayIso);
+  const coachChecksQuery = useCoachChecksForDate(userId, todayIso);
+  const toggleCheckMut = useToggleCoachCheck(userId, todayIso);
 
   // Tabs (Mahlzeit / Zuletzt / Häufig — analog FEELY)
   const [activeTab, setActiveTab] = useState<DetailTab>('meal');
@@ -291,8 +295,11 @@ export default function MealDetailScreen() {
     }
   }, [openItem, openKind, logQuery.data, coachMeal]);
 
-  // Skip-Set: vom Athleten weggeklickte Coach-Items
+  // Skip-Set: vom Athleten weggeklickte Coach-Items (verschwinden aus Liste)
   const skips = coachSkipsQuery.data ?? { comp: new Set<string>(), snack: new Set<string>() };
+  // Check-Set: vom Athleten ABGEHAKTE Items (zählen ab dann ins Tages-Total)
+  const checks = coachChecksQuery.data ?? { comp: new Set<string>(), snack: new Set<string>() };
+
   const visibleComponents = useMemo(
     () => coachMeal?.components.filter((c) => !skips.comp.has(c.id)) ?? [],
     [coachMeal, skips.comp],
@@ -302,12 +309,17 @@ export default function MealDetailScreen() {
     [coachMeal, skips.snack],
   );
 
-  // Macros: Coach-Plan (ohne geskippte) + selbst getrackt
-  const coachPlannedMacros = useMemo(() => {
-    const compMacros = visibleComponents.map((c) => calcComponentMacros(c.food, Number(c.amount_g)));
-    const snackMacros = visibleSnacks.map((s) => calcComponentMacros(s.food, Number(s.amount_g)));
+  // Macros: NUR abgehakte Coach-Items + alle selbst getrackten Logs.
+  // Geplante (nicht abgehakte) Coach-Items werden NICHT mitgezählt.
+  const coachConsumedMacros = useMemo(() => {
+    const compMacros = visibleComponents
+      .filter((c) => checks.comp.has(c.id))
+      .map((c) => calcComponentMacros(c.food, Number(c.amount_g)));
+    const snackMacros = visibleSnacks
+      .filter((s) => checks.snack.has(s.id))
+      .map((s) => calcComponentMacros(s.food, Number(s.amount_g)));
     return sumMacros([...compMacros, ...snackMacros]);
-  }, [visibleComponents, visibleSnacks]);
+  }, [visibleComponents, visibleSnacks, checks.comp, checks.snack]);
 
   const loggedMacros = useMemo(
     () =>
@@ -323,8 +335,8 @@ export default function MealDetailScreen() {
   );
 
   const totalMacros = useMemo(
-    () => sumMacros([coachPlannedMacros, loggedMacros]),
-    [coachPlannedMacros, loggedMacros],
+    () => sumMacros([coachConsumedMacros, loggedMacros]),
+    [coachConsumedMacros, loggedMacros],
   );
 
   const dayGoal = templateQuery.data?.target_kcal ?? 2500;
@@ -578,11 +590,12 @@ export default function MealDetailScreen() {
                   ) : null}
                 </View>
                 <View style={styles.itemsCard}>
-                  {/* Coach-Plan-Items (zählen automatisch, read-only) */}
+                  {/* Coach-Plan-Items (Checkbox: abhaken = konsumiert, X = entfernen) */}
                   {visibleComponents.map((c, i) => {
                     const macros = calcComponentMacros(c.food, Number(c.amount_g));
                     const name = c.food?.name ?? c.food_name_override ?? '—';
                     const amt = c.amount_display ?? `${Number(c.amount_g)}g`;
+                    const isChecked = checks.comp.has(c.id);
                     return (
                       <ItemRow
                         key={`comp-${c.id}`}
@@ -593,8 +606,17 @@ export default function MealDetailScreen() {
                         carbs={Math.round(macros.carbs)}
                         fat={Math.round(macros.fat)}
                         isCoach
+                        checked={isChecked}
                         showDivider={i > 0}
                         onPress={() => setActiveSheet({ kind: 'coach', component: c, snack: null })}
+                        onCheckToggle={() =>
+                          toggleCheckMut.mutate({
+                            slotKey,
+                            kind: 'comp',
+                            itemId: c.id,
+                            nowChecked: !isChecked,
+                          })
+                        }
                         onDelete={() => skipCoachMut.mutate({ slotKey, kind: 'comp', itemId: c.id })}
                       />
                     );
@@ -604,6 +626,7 @@ export default function MealDetailScreen() {
                     const name = s.food?.name ?? s.food_name_override ?? '—';
                     const amt = s.amount_display ?? (Number(s.amount_g) > 0 ? `${Number(s.amount_g)}g` : '');
                     const isFirst = visibleComponents.length === 0 && i === 0;
+                    const isChecked = checks.snack.has(s.id);
                     return (
                       <ItemRow
                         key={`snack-${s.id}`}
@@ -615,8 +638,17 @@ export default function MealDetailScreen() {
                         fat={Math.round(macros.fat)}
                         hint={s.hint ?? undefined}
                         isCoach
+                        checked={isChecked}
                         showDivider={!isFirst}
                         onPress={() => setActiveSheet({ kind: 'coach', component: null, snack: s })}
+                        onCheckToggle={() =>
+                          toggleCheckMut.mutate({
+                            slotKey,
+                            kind: 'snack',
+                            itemId: s.id,
+                            nowChecked: !isChecked,
+                          })
+                        }
                         onDelete={() => skipCoachMut.mutate({ slotKey, kind: 'snack', itemId: s.id })}
                       />
                     );
@@ -689,6 +721,10 @@ export default function MealDetailScreen() {
         onEditLog={handleEditLog}
         onDeleteLog={handleDeleteLog}
         onSkipCoach={(kind, itemId) => skipCoachMut.mutate({ slotKey, kind, itemId })}
+        coachChecks={checks}
+        onToggleCheck={(kind, itemId, nowChecked) =>
+          toggleCheckMut.mutate({ slotKey, kind, itemId, nowChecked })
+        }
       />
     </View>
   );
@@ -706,6 +742,8 @@ function SheetMount({
   onEditLog,
   onDeleteLog,
   onSkipCoach,
+  coachChecks,
+  onToggleCheck,
 }: {
   activeSheet: ActiveSheet;
   onClose: () => void;
@@ -716,6 +754,8 @@ function SheetMount({
   onEditLog: (amountG: number, servings: number) => void;
   onDeleteLog: () => void;
   onSkipCoach: (kind: 'comp' | 'snack', itemId: string) => void;
+  coachChecks: { comp: Set<string>; snack: Set<string> };
+  onToggleCheck: (kind: 'comp' | 'snack', itemId: string, nowChecked: boolean) => void;
 }) {
   if (!activeSheet) {
     return <FoodDetailSheet visible={false} mode="view" name="" macrosPer100g={{ kcal: 0, protein: 0, carbs: 0, fat: 0 }} initialAmountG={100} onClose={onClose} />;
@@ -728,12 +768,14 @@ function SheetMount({
       return null;
     }
     const kind: 'comp' | 'snack' = activeSheet.component ? 'comp' : 'snack';
+    const isChecked =
+      kind === 'comp' ? coachChecks.comp.has(item.id) : coachChecks.snack.has(item.id);
     return (
       <FoodDetailSheet
         visible={true}
         mode="view"
         name={food.name}
-        timeLabel="Coach-Vorgabe — zählt automatisch"
+        timeLabel={isChecked ? 'Konsumiert ✓' : 'Coach-Vorgabe — noch nicht abgehakt'}
         macrosPer100g={{
           kcal: Number(food.kcal_per_100g),
           protein: Number(food.protein_per_100g),
@@ -742,6 +784,8 @@ function SheetMount({
         }}
         initialAmountG={Number(item.amount_g)}
         onClose={onClose}
+        isChecked={isChecked}
+        onCheckToggle={() => onToggleCheck(kind, item.id, !isChecked)}
         onDelete={() => onSkipCoach(kind, item.id)}
       />
     );
@@ -834,9 +878,11 @@ function ItemRow({
   fat,
   hint,
   isCoach,
+  checked,
   showDivider,
   onPress,
   onDelete,
+  onCheckToggle,
 }: {
   name: string;
   amount: string;
@@ -846,22 +892,43 @@ function ItemRow({
   fat: number;
   hint?: string;
   isCoach: boolean;
+  /** Coach-Items only: ist das Item bereits abgehakt? */
+  checked?: boolean;
   showDivider: boolean;
   onPress: () => void;
   onDelete?: () => void;
+  /** Coach-Items only: Tap auf Checkbox toggelt den Status */
+  onCheckToggle?: () => void;
 }) {
+  const showCheckbox = isCoach && !!onCheckToggle;
   return (
     <View style={[styles.itemRowOuter, showDivider && styles.itemRowDivider]}>
+      {showCheckbox ? (
+        <Pressable
+          onPress={onCheckToggle}
+          hitSlop={8}
+          style={({ pressed }) => [styles.itemCheckbox, pressed && { opacity: 0.5 }]}
+        >
+          <Ionicons
+            name={checked ? 'checkmark-circle' : 'ellipse-outline'}
+            size={24}
+            color={checked ? color.macroProtein : color.textMuted}
+          />
+        </Pressable>
+      ) : null}
       <Pressable
         onPress={onPress}
         style={({ pressed }) => [styles.itemRowMain, pressed && { opacity: 0.6 }]}
       >
-        <View style={[styles.itemBullet, { backgroundColor: isCoach ? color.macroProtein : color.text }]} />
+        {!showCheckbox ? (
+          <View style={[styles.itemBullet, { backgroundColor: color.text }]} />
+        ) : null}
         <View style={{ flex: 1, gap: 4 }}>
-          <Text style={styles.itemName}>{name}</Text>
+          <Text style={[styles.itemName, isCoach && !checked && styles.itemNamePlanned]}>{name}</Text>
           {amount || kcal > 0 ? (
             <Text style={styles.itemMeta}>
               {[amount, kcal > 0 ? `${kcal} kcal` : null].filter(Boolean).join(' · ')}
+              {isCoach && !checked ? ' · geplant' : ''}
             </Text>
           ) : null}
           {protein + carbs + fat > 0 ? (
@@ -1269,6 +1336,16 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: space[3],
     paddingVertical: space[4],
+  },
+  itemCheckbox: {
+    paddingVertical: space[4],
+    paddingRight: space[2],
+    alignSelf: 'stretch',
+    justifyContent: 'flex-start',
+    paddingTop: space[4],
+  },
+  itemNamePlanned: {
+    color: color.textMuted,
   },
   itemRowDivider: {
     borderTopWidth: StyleSheet.hairlineWidth,

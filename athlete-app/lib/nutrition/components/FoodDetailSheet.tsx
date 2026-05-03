@@ -44,6 +44,10 @@ type Props = {
   onSave?: (amountG: number, servings: number) => void;
   onDelete?: () => void;
   onAdopt?: (amountG: number, servings: number) => void;
+  /** Coach-Items only: ist das Item bereits abgehakt? */
+  isChecked?: boolean;
+  /** Coach-Items only: Toggle-Callback (abhaken / Häkchen entfernen) */
+  onCheckToggle?: () => void;
 };
 
 export function FoodDetailSheet({
@@ -58,6 +62,8 @@ export function FoodDetailSheet({
   onSave,
   onDelete,
   onAdopt,
+  isChecked,
+  onCheckToggle,
 }: Props) {
   const insets = useSafeAreaInsets();
   const [amountG, setAmountG] = useState(initialAmountG);
@@ -78,9 +84,15 @@ export function FoodDetailSheet({
     fat: macrosPer100g.fat * factor,
   };
 
-  const isReadOnly = mode === 'view' && !onAdopt;
+  const isCoachWithCheck = mode === 'view' && !!onCheckToggle;
+  const isReadOnly = mode === 'view' && !onAdopt && !onCheckToggle;
 
   const handlePrimary = () => {
+    if (isCoachWithCheck) {
+      onCheckToggle?.();
+      onClose();
+      return;
+    }
     if (isReadOnly) {
       onClose();
       return;
@@ -91,13 +103,17 @@ export function FoodDetailSheet({
     onClose();
   };
 
-  const primaryLabel = isReadOnly
-    ? `Schließen · ${Math.round(total.kcal)} kcal`
-    : mode === 'edit'
-      ? `Speichern · ${Math.round(total.kcal)} kcal`
-      : mode === 'create'
-        ? `Hinzufügen · ${Math.round(total.kcal)} kcal`
-        : `Übernehmen · ${Math.round(total.kcal)} kcal`;
+  const primaryLabel = isCoachWithCheck
+    ? isChecked
+      ? `Häkchen entfernen · ${Math.round(total.kcal)} kcal`
+      : `Abhaken · ${Math.round(total.kcal)} kcal`
+    : isReadOnly
+      ? `Schließen · ${Math.round(total.kcal)} kcal`
+      : mode === 'edit'
+        ? `Speichern · ${Math.round(total.kcal)} kcal`
+        : mode === 'create'
+          ? `Hinzufügen · ${Math.round(total.kcal)} kcal`
+          : `Übernehmen · ${Math.round(total.kcal)} kcal`;
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>

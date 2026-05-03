@@ -24,10 +24,13 @@ type Props = {
   loggedItems: MealLog[];
   /** Skip-Set: Coach-Items mit IDs in diesen Sets werden ausgeblendet */
   coachSkips?: { comp: Set<string>; snack: Set<string> };
+  /** Check-Set: Coach-Items mit IDs in diesen Sets sind abgehakt (gelten als konsumiert) */
+  coachChecks?: { comp: Set<string>; snack: Set<string> };
   onAdd?: () => void;
   onOpen?: () => void;
   onItemPress?: (itemId: string, kind: 'coach' | 'log') => void;
   onItemDelete?: (itemId: string, kind: 'coach-comp' | 'coach-snack' | 'log') => void;
+  onItemCheckToggle?: (itemId: string, kind: 'coach-comp' | 'coach-snack', nowChecked: boolean) => void;
 };
 
 type Row = {
@@ -42,11 +45,26 @@ type Row = {
   carbs: number;
   fat: number;
   isCoach: boolean;
+  /** Coach-Items only: abgehakt? */
+  checked: boolean;
 };
 
-export function MealSlotCard({ slotLabel, meal, loggedItems, coachSkips, onAdd, onOpen, onItemPress, onItemDelete }: Props) {
+export function MealSlotCard({
+  slotLabel,
+  meal,
+  loggedItems,
+  coachSkips,
+  coachChecks,
+  onAdd,
+  onOpen,
+  onItemPress,
+  onItemDelete,
+  onItemCheckToggle,
+}: Props) {
   const skipComp = coachSkips?.comp ?? new Set<string>();
   const skipSnack = coachSkips?.snack ?? new Set<string>();
+  const checkComp = coachChecks?.comp ?? new Set<string>();
+  const checkSnack = coachChecks?.snack ?? new Set<string>();
 
   // Coach-Macros (visible only)
   const componentRows: Row[] =
@@ -66,6 +84,7 @@ export function MealSlotCard({ slotLabel, meal, loggedItems, coachSkips, onAdd, 
           carbs: macros.carbs,
           fat: macros.fat,
           isCoach: true,
+          checked: checkComp.has(c.id),
         };
       }) ?? [];
   const snackRows: Row[] =
@@ -85,6 +104,7 @@ export function MealSlotCard({ slotLabel, meal, loggedItems, coachSkips, onAdd, 
           carbs: macros.carbs,
           fat: macros.fat,
           isCoach: true,
+          checked: checkSnack.has(s.id),
         };
       }) ?? [];
 
@@ -104,11 +124,14 @@ export function MealSlotCard({ slotLabel, meal, loggedItems, coachSkips, onAdd, 
       carbs: Number(log.total_carbs_g ?? 0),
       fat: Number(log.total_fat_g ?? 0),
       isCoach: false,
+      checked: true, // Selbst getrackte Items zählen immer
     };
   });
 
   const allRows = [...componentRows, ...snackRows, ...logRows];
-  const totals = sumMacros(allRows);
+  // kcal-Total = nur Items die gegessen wurden (Coach abgehakt + alle Logs)
+  const consumedRows = allRows.filter((r) => r.checked);
+  const totals = sumMacros(consumedRows);
   const totalKcal = Math.round(totals.kcal);
   const hasItems = allRows.length > 0;
 
@@ -132,45 +155,73 @@ export function MealSlotCard({ slotLabel, meal, loggedItems, coachSkips, onAdd, 
 
       {hasItems ? (
         <View style={styles.itemsList}>
-          {allRows.map((row, i) => (
-            <View key={row.key} style={[styles.itemBlockOuter, i > 0 && styles.itemBlockDivider]}>
-              <Pressable
-                onPress={() => onItemPress?.(row.itemId, row.kind)}
-                style={({ pressed }) => [styles.itemBlock, pressed && { opacity: 0.6 }]}
-              >
-                <View style={styles.itemHeaderRow}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.itemName} numberOfLines={1}>
-                      {row.name}
-                    </Text>
-                    {row.amount ? <Text style={styles.itemAmount}>{row.amount}</Text> : null}
+          {allRows.map((row, i) => {
+            const isCoachUnchecked = row.isCoach && !row.checked;
+            return (
+              <View key={row.key} style={[styles.itemBlockOuter, i > 0 && styles.itemBlockDivider]}>
+                {row.isCoach && onItemCheckToggle ? (
+                  <Pressable
+                    onPress={() =>
+                      onItemCheckToggle(row.itemId, row.deleteKind as 'coach-comp' | 'coach-snack', !row.checked)
+                    }
+                    hitSlop={8}
+                    style={({ pressed }) => [styles.itemCheckbox, pressed && { opacity: 0.5 }]}
+                  >
+                    <Ionicons
+                      name={row.checked ? 'checkmark-circle' : 'ellipse-outline'}
+                      size={22}
+                      color={row.checked ? color.macroProtein : color.textMuted}
+                    />
+                  </Pressable>
+                ) : null}
+                <Pressable
+                  onPress={() => onItemPress?.(row.itemId, row.kind)}
+                  style={({ pressed }) => [styles.itemBlock, pressed && { opacity: 0.6 }]}
+                >
+                  <View style={styles.itemHeaderRow}>
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={[styles.itemName, isCoachUnchecked && styles.itemNamePlanned]}
+                        numberOfLines={1}
+                      >
+                        {row.name}
+                      </Text>
+                      {row.amount ? (
+                        <Text style={styles.itemAmount}>
+                          {row.amount}
+                          {isCoachUnchecked ? ' · geplant' : ''}
+                        </Text>
+                      ) : null}
+                    </View>
+                    {row.kcal > 0 ? (
+                      <View style={styles.itemKcalWrap}>
+                        <Text style={[styles.itemKcal, isCoachUnchecked && styles.itemKcalPlanned]}>
+                          {Math.round(row.kcal)}
+                        </Text>
+                        <Text style={styles.itemKcalUnit}>kcal</Text>
+                      </View>
+                    ) : null}
                   </View>
-                  {row.kcal > 0 ? (
-                    <View style={styles.itemKcalWrap}>
-                      <Text style={styles.itemKcal}>{Math.round(row.kcal)}</Text>
-                      <Text style={styles.itemKcalUnit}>kcal</Text>
+                  {row.protein + row.carbs + row.fat > 0 ? (
+                    <View style={styles.itemDots}>
+                      <MacroDot color={color.macroProtein} value={`${Math.round(row.protein)}g`} />
+                      <MacroDot color={color.macroCarbs} value={`${Math.round(row.carbs)}g`} />
+                      <MacroDot color={color.macroFat} value={`${Math.round(row.fat)}g`} />
                     </View>
                   ) : null}
-                </View>
-                {row.protein + row.carbs + row.fat > 0 ? (
-                  <View style={styles.itemDots}>
-                    <MacroDot color={color.macroProtein} value={`${Math.round(row.protein)}g`} />
-                    <MacroDot color={color.macroCarbs} value={`${Math.round(row.carbs)}g`} />
-                    <MacroDot color={color.macroFat} value={`${Math.round(row.fat)}g`} />
-                  </View>
-                ) : null}
-              </Pressable>
-              {onItemDelete ? (
-                <Pressable
-                  onPress={() => onItemDelete(row.itemId, row.deleteKind)}
-                  hitSlop={10}
-                  style={({ pressed }) => [styles.itemDeleteBtn, pressed && { opacity: 0.5 }]}
-                >
-                  <Ionicons name="close-circle" size={22} color={color.textMuted} />
                 </Pressable>
-              ) : null}
-            </View>
-          ))}
+                {onItemDelete ? (
+                  <Pressable
+                    onPress={() => onItemDelete(row.itemId, row.deleteKind)}
+                    hitSlop={10}
+                    style={({ pressed }) => [styles.itemDeleteBtn, pressed && { opacity: 0.5 }]}
+                  >
+                    <Ionicons name="close-circle" size={22} color={color.textMuted} />
+                  </Pressable>
+                ) : null}
+              </View>
+            );
+          })}
         </View>
       ) : (
         <Pressable onPress={onAdd} hitSlop={6} style={styles.emptyHintWrap}>
@@ -252,6 +303,18 @@ const styles = StyleSheet.create({
     paddingLeft: space[2],
     alignSelf: 'stretch',
     justifyContent: 'center',
+  },
+  itemCheckbox: {
+    paddingVertical: space[3],
+    paddingRight: space[2],
+    alignSelf: 'flex-start',
+    justifyContent: 'flex-start',
+  },
+  itemNamePlanned: {
+    color: color.textMuted,
+  },
+  itemKcalPlanned: {
+    color: color.textMuted,
   },
   itemHeaderRow: {
     flexDirection: 'row',
