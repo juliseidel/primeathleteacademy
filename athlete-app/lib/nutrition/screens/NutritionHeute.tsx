@@ -26,10 +26,17 @@ import { color, font, radius, space } from '@/lib/design/tokens';
 import { deriveDayType } from '@/lib/nutrition/dayType';
 import { sumMacros } from '@/lib/nutrition/macroCalc';
 import { DailyRoutineCard } from '@/lib/nutrition/components/DailyRoutineCard';
+import { FoodDetailSheet } from '@/lib/nutrition/components/FoodDetailSheet';
 import { MealSlotCard } from '@/lib/nutrition/components/MealSlotCard';
 import { OverviewCard } from '@/lib/nutrition/components/OverviewCard';
 import { WeekCalendar } from '@/lib/nutrition/components/WeekCalendar';
-import { useMealLogForDate } from '@/lib/nutrition/mealLogData';
+import {
+  extractLogMeta,
+  useDeleteMealLog,
+  useMealLogForDate,
+  useUpdateMealLog,
+  type MealLog,
+} from '@/lib/nutrition/mealLogData';
 import {
   useAddWater,
   useDailySupplements,
@@ -40,8 +47,14 @@ import {
   useTodayWaterTotal,
   useTodayWorkoutCount,
   useToggleSupplementCheck,
+  type CoachFood,
   type FullMeal,
 } from '@/lib/nutrition/nutritionData';
+
+type ActiveSheet =
+  | { kind: 'log'; log: MealLog }
+  | { kind: 'coach'; food: CoachFood; amountG: number; name: string }
+  | null;
 
 export function NutritionHeute() {
   const insets = useSafeAreaInsets();
@@ -95,6 +108,59 @@ export function NutritionHeute() {
   const addWaterMut = useAddWater(userId);
   const toggleSuppMut = useToggleSupplementCheck(userId);
   const mealLogQuery = useMealLogForDate(userId, todayIso);
+  const updateMealMut = useUpdateMealLog(userId, todayIso);
+  const deleteMealMut = useDeleteMealLog(userId, todayIso);
+
+  // Sheet-State für inline Item-Detail (kein Navigieren — Sheet öffnet direkt im Heute-Tab)
+  const [activeSheet, setActiveSheet] = useState<ActiveSheet>(null);
+
+  const handleItemPress = (itemId: string, kind: 'coach' | 'log') => {
+    if (kind === 'log') {
+      const log = (mealLogQuery.data ?? []).find((l) => l.id === itemId);
+      if (log) setActiveSheet({ kind: 'log', log });
+      return;
+    }
+    // Coach-Item: in allen Mahlzeiten des Tages-Templates suchen
+    for (const meal of templateQuery.data?.meals ?? []) {
+      const comp = meal.components.find((c) => c.id === itemId);
+      if (comp?.food) {
+        setActiveSheet({
+          kind: 'coach',
+          food: comp.food,
+          amountG: Number(comp.amount_g),
+          name: comp.food.name,
+        });
+        return;
+      }
+      const snack = meal.snacks.find((s) => s.id === itemId);
+      if (snack?.food) {
+        setActiveSheet({
+          kind: 'coach',
+          food: snack.food,
+          amountG: Number(snack.amount_g),
+          name: snack.food.name,
+        });
+        return;
+      }
+    }
+  };
+
+  const handleEditLog = (amountG: number, servings: number) => {
+    if (activeSheet?.kind !== 'log') return;
+    const meta = extractLogMeta(activeSheet.log);
+    if (!meta) return;
+    updateMealMut.mutate({
+      logId: activeSheet.log.id,
+      amountG,
+      servings,
+      macrosPer100g: meta.macrosPer100g,
+    });
+  };
+
+  const handleDeleteLog = () => {
+    if (activeSheet?.kind !== 'log') return;
+    deleteMealMut.mutate(activeSheet.log.id);
+  };
 
   const template = templateQuery.data;
 
@@ -126,6 +192,7 @@ export function NutritionHeute() {
   }, [mealLogQuery.data]);
 
   return (
+    <>
     <ScrollView
       contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space[3], paddingBottom: 160 }]}
       showsVerticalScrollIndicator={false}
@@ -179,14 +246,13 @@ export function NutritionHeute() {
         <View style={styles.mealsList}>
           {standardSlots.map((slot, idx) => {
             const slotKey = slotKeyFor(slot.label, idx);
-            const goToDetail = (extra?: { openItem?: string; openKind?: string }) =>
+            const goToDetail = () =>
               router.push({
                 pathname: '/nutrition/meal/[slotKey]',
                 params: {
                   slotKey,
                   label: slot.label,
                   coachMealId: slot.coachMeal?.id ?? '',
-                  ...(extra ?? {}),
                 },
               });
             return (
@@ -196,9 +262,9 @@ export function NutritionHeute() {
                 slotLabel={slot.label}
                 meal={slot.coachMeal}
                 loggedItems={logsBySlot.get(slotKey) ?? []}
-                onOpen={() => goToDetail()}
-                onAdd={() => goToDetail()}
-                onItemPress={(itemId, kind) => goToDetail({ openItem: itemId, openKind: kind })}
+                onOpen={goToDetail}
+                onAdd={goToDetail}
+                onItemPress={handleItemPress}
               />
             );
           })}
@@ -216,6 +282,51 @@ export function NutritionHeute() {
         </View>
       ) : null}
     </ScrollView>
+
+    {/* Item-Detail-Sheet — öffnet inline, ohne Navigation */}
+    {activeSheet?.kind === 'log' ? (() => {
+      const meta = extractLogMeta(activeSheet.log);
+      if (!meta) return null;
+      return (
+        <FoodDetailSheet
+          visible={true}
+          mode="edit"
+          name={activeSheet.log.display_name}
+          timeLabel={activeSheet.log.log_time?.slice(0, 5) + ' Uhr'}
+          macrosPer100g={meta.macrosPer100g}
+          initialAmountG={meta.amountG}
+          initialServings={meta.servings}
+          onClose={() => setActiveSheet(null)}
+          onSave={handleEditLog}
+          onDelete={handleDeleteLog}
+        />
+      );
+    })() : activeSheet?.kind === 'coach' ? (
+      <FoodDetailSheet
+        visible={true}
+        mode="view"
+        name={activeSheet.name}
+        timeLabel="Coach-Vorgabe — zählt automatisch"
+        macrosPer100g={{
+          kcal: Number(activeSheet.food.kcal_per_100g),
+          protein: Number(activeSheet.food.protein_per_100g),
+          carbs: Number(activeSheet.food.carbs_per_100g),
+          fat: Number(activeSheet.food.fat_per_100g),
+        }}
+        initialAmountG={activeSheet.amountG}
+        onClose={() => setActiveSheet(null)}
+      />
+    ) : (
+      <FoodDetailSheet
+        visible={false}
+        mode="view"
+        name=""
+        macrosPer100g={{ kcal: 0, protein: 0, carbs: 0, fat: 0 }}
+        initialAmountG={100}
+        onClose={() => setActiveSheet(null)}
+      />
+    )}
+    </>
   );
 }
 
