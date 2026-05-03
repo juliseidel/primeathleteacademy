@@ -188,3 +188,92 @@ export function extractLogMeta(log: MealLog): { amountG: number; servings: numbe
     macrosPer100g: c.macros_per_100g,
   };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FEELY-Style "Zuletzt" + "Häufig" Tabs
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type QuickPickItem = {
+  displayName: string;
+  source: MealLog['source'];
+  macrosPer100g: { kcal: number; protein: number; carbs: number; fat: number };
+  defaultAmountG: number;
+  count?: number; // nur bei "frequent"
+};
+
+/** Letzte N einzigartige Logs (Deduplikation by display_name, neuester zuerst) */
+export function useRecentLogs(athleteId: string | undefined, limit = 30) {
+  return useQuery<QuickPickItem[]>({
+    queryKey: ['meal-log', athleteId, 'recent', limit],
+    enabled: !!athleteId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('athlete_meal_log')
+        .select('*')
+        .eq('athlete_id', athleteId!)
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false })
+        .limit(150);
+      if (error) throw error;
+      const seen = new Set<string>();
+      const out: QuickPickItem[] = [];
+      for (const log of data ?? []) {
+        const key = log.display_name.toLowerCase();
+        if (seen.has(key)) continue;
+        const meta = extractLogMeta(log);
+        if (!meta) continue;
+        seen.add(key);
+        out.push({
+          displayName: log.display_name,
+          source: log.source,
+          macrosPer100g: meta.macrosPer100g,
+          defaultAmountG: meta.amountG,
+        });
+        if (out.length >= limit) break;
+      }
+      return out;
+    },
+  });
+}
+
+/** Häufigste N Logs (Gruppierung nach display_name, sortiert nach count) */
+export function useFrequentLogs(athleteId: string | undefined, limit = 30) {
+  return useQuery<QuickPickItem[]>({
+    queryKey: ['meal-log', athleteId, 'frequent', limit],
+    enabled: !!athleteId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('athlete_meal_log')
+        .select('*')
+        .eq('athlete_id', athleteId!)
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      const groups = new Map<string, { item: QuickPickItem; count: number }>();
+      for (const log of data ?? []) {
+        const key = log.display_name.toLowerCase();
+        const existing = groups.get(key);
+        if (existing) {
+          existing.count += 1;
+          continue;
+        }
+        const meta = extractLogMeta(log);
+        if (!meta) continue;
+        groups.set(key, {
+          item: {
+            displayName: log.display_name,
+            source: log.source,
+            macrosPer100g: meta.macrosPer100g,
+            defaultAmountG: meta.amountG,
+          },
+          count: 1,
+        });
+      }
+      return [...groups.values()]
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit)
+        .map((g) => ({ ...g.item, count: g.count }));
+    },
+  });
+}

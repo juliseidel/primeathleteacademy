@@ -163,40 +163,16 @@ export function NutritionHeute() {
       <View style={styles.section}>
         <OverviewCard
           eaten={eatenMacros}
-          burned={0}
           goal={{
             kcal: template?.target_kcal ?? null,
             protein: template?.target_protein_g ?? null,
             carbs: template?.target_carbs_g ?? null,
             fat: template?.target_fat_g ?? null,
           }}
-          onSettingsPress={() =>
-            Alert.alert(
-              'Kalorienziel',
-              'Coach pflegt das Tagestyp-Template (Offday / 1 Einheit / 2 Einheiten / Matchday-1 / Matchday). Manueller Override kommt im Coach-Dashboard.',
-            )
-          }
         />
       </View>
 
-      {/* 4. Banner */}
-      <Pressable
-        onPress={() =>
-          Alert.alert(
-            'Kalorienziel anpassen',
-            'Dein Coach pflegt die Ziele pro Tagestyp. Anpassungen kommen im Coach-Dashboard.',
-          )
-        }
-        style={({ pressed }) => [styles.banner, pressed && { opacity: 0.85 }]}
-      >
-        <View style={{ flex: 1 }}>
-          <Text style={styles.bannerTitle}>Kalorienziel anpassen</Text>
-          <Text style={styles.bannerSub}>Makros passen sich automatisch an</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={18} color={color.gold} />
-      </Pressable>
-
-      {/* 5. Mahlzeiten */}
+      {/* 4. Mahlzeiten */}
       <View style={styles.mealsSection}>
         <Text style={styles.mealsTitle}>Mahlzeiten</Text>
         <View style={styles.mealsList}>
@@ -377,30 +353,7 @@ const styles = StyleSheet.create({
     borderColor: color.goldA20,
   },
   section: {
-    marginBottom: space[4],
-  },
-  banner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space[3],
-    padding: space[4],
-    borderRadius: radius.lg,
-    backgroundColor: color.goldA04,
-    borderWidth: 1,
-    borderColor: color.goldA20,
     marginBottom: space[5],
-  },
-  bannerTitle: {
-    fontFamily: font.family,
-    fontSize: 15,
-    fontWeight: '700',
-    color: color.text,
-  },
-  bannerSub: {
-    fontFamily: font.family,
-    fontSize: 12,
-    color: color.textMuted,
-    marginTop: 2,
   },
   mealsSection: {
     marginBottom: space[5],

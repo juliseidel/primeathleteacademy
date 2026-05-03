@@ -19,9 +19,11 @@ type Props = {
   goal: number;
   size?: number;
   strokeWidth?: number;
+  /** Override fill color when not over goal. Defaults to macro green like FEELY. */
+  accent?: string;
 };
 
-export function SemiCircleProgress({ current, goal, size = 200, strokeWidth = 14 }: Props) {
+export function SemiCircleProgress({ current, goal, size = 200, strokeWidth = 14, accent = color.macroProtein }: Props) {
   const animatedValue = useRef(new Animated.Value(0)).current;
   const percentage = goal > 0 ? Math.min(150, (current / goal) * 100) : 0;
 
@@ -63,6 +65,7 @@ export function SemiCircleProgress({ current, goal, size = 200, strokeWidth = 14
           strokeWidth={strokeWidth}
           animatedValue={animatedValue}
           isOver={isOver}
+          accent={accent}
         />
       </Svg>
 
@@ -83,6 +86,7 @@ function ProgressArc({
   strokeWidth,
   animatedValue,
   isOver,
+  accent,
 }: {
   cx: number;
   cy: number;
@@ -90,6 +94,7 @@ function ProgressArc({
   strokeWidth: number;
   animatedValue: Animated.Value;
   isOver: boolean;
+  accent: string;
 }) {
   const [pathD, setPathD] = useState('');
 
@@ -114,7 +119,7 @@ function ProgressArc({
   return (
     <Path
       d={pathD}
-      stroke={isOver ? color.danger : color.gold}
+      stroke={isOver ? color.danger : accent}
       strokeWidth={strokeWidth}
       fill="none"
       strokeLinecap="round"

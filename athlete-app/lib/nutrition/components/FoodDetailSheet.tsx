@@ -133,9 +133,9 @@ export function FoodDetailSheet({
             </View>
 
             <View style={styles.macroPills}>
-              <MacroPill label="Eiweiß" value={total.protein} accent={color.goldLight} />
-              <MacroPill label="Kohlenh." value={total.carbs} accent={color.gold} />
-              <MacroPill label="Fett" value={total.fat} accent={color.goldDark} />
+              <MacroPill label="Eiweiß" value={total.protein} accent={color.macroProtein} />
+              <MacroPill label="Kohlenh." value={total.carbs} accent={color.macroCarbs} />
+              <MacroPill label="Fett" value={total.fat} accent={color.macroFat} />
             </View>
           </View>
 

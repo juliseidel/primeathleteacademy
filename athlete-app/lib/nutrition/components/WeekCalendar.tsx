@@ -20,7 +20,6 @@ import {
 import { color, font, radius, space } from '@/lib/design/tokens';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const DAY_WIDTH = (SCREEN_WIDTH - 40 - 16) / 7;
 
 const DAYS = ['MO', 'DI', 'MI', 'DO', 'FR', 'SA', 'SO'] as const;
 const MONTHS = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'] as const;
@@ -142,7 +141,7 @@ export function WeekCalendar({
 
       <View style={styles.daysHeader}>
         {DAYS.map((d) => (
-          <View key={d} style={[styles.dayHeaderCell, { width: DAY_WIDTH }]}>
+          <View key={d} style={styles.dayHeaderCell}>
             <Text style={styles.dayHeaderText}>{d}</Text>
           </View>
         ))}
@@ -156,18 +155,20 @@ export function WeekCalendar({
           return (
             <Pressable
               key={idx}
-              style={[styles.dayCell, { width: DAY_WIDTH }, selected && styles.dayCellSelected]}
+              style={styles.dayCell}
               onPress={() => handleDayPress(date)}
             >
-              <Text
-                style={[
-                  styles.dayNumber,
-                  selected && styles.dayNumberSelected,
-                  !selected && today && styles.dayNumberToday,
-                ]}
-              >
-                {date.getDate()}
-              </Text>
+              <View style={[styles.dayPill, selected && styles.dayPillSelected]}>
+                <Text
+                  style={[
+                    styles.dayNumber,
+                    selected && styles.dayNumberSelected,
+                    !selected && today && styles.dayNumberToday,
+                  ]}
+                >
+                  {date.getDate()}
+                </Text>
+              </View>
               {hasData && !selected ? <View style={styles.trackingDot} /> : null}
             </Pressable>
           );
@@ -228,10 +229,10 @@ const styles = StyleSheet.create({
   },
   daysHeader: {
     flexDirection: 'row',
-    paddingHorizontal: space[2],
     marginBottom: space[2],
   },
   dayHeaderCell: {
+    flex: 1,
     alignItems: 'center',
   },
   dayHeaderText: {
@@ -243,20 +244,26 @@ const styles = StyleSheet.create({
   },
   daysRow: {
     flexDirection: 'row',
-    paddingHorizontal: space[2],
   },
   dayCell: {
-    height: 44,
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radius.md,
+    paddingVertical: 2,
   },
-  dayCellSelected: {
+  dayPill: {
+    width: 38,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayPillSelected: {
     backgroundColor: color.gold,
   },
   dayNumber: {
     fontFamily: font.family,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
     color: color.text,
   },
@@ -270,7 +277,7 @@ const styles = StyleSheet.create({
   },
   trackingDot: {
     position: 'absolute',
-    bottom: 6,
+    bottom: 4,
     width: 4,
     height: 4,
     borderRadius: 2,

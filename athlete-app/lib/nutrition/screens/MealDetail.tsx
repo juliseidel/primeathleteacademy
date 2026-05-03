@@ -39,9 +39,12 @@ import {
   extractLogMeta,
   useAddMealLog,
   useDeleteMealLog,
+  useFrequentLogs,
   useMealLogForSlot,
+  useRecentLogs,
   useUpdateMealLog,
   type MealLog,
+  type QuickPickItem,
 } from '@/lib/nutrition/mealLogData';
 import {
   useHasMatchOn,
@@ -68,7 +71,10 @@ type ActiveSheet =
   | { kind: 'coach'; component: TemplateComponent | null; snack: TemplateSnack | null }
   | { kind: 'log'; log: MealLog }
   | { kind: 'search'; hit: SearchHit }
+  | { kind: 'quickPick'; item: QuickPickItem }
   | null;
+
+type DetailTab = 'meal' | 'recent' | 'frequent';
 
 export default function MealDetailScreen() {
   const insets = useSafeAreaInsets();
@@ -108,6 +114,11 @@ export default function MealDetailScreen() {
   const addMealMut = useAddMealLog(userId, todayIso);
   const updateMealMut = useUpdateMealLog(userId, todayIso);
   const deleteMealMut = useDeleteMealLog(userId, todayIso);
+
+  // Tabs (Mahlzeit / Zuletzt / Häufig — analog FEELY)
+  const [activeTab, setActiveTab] = useState<DetailTab>('meal');
+  const recentQuery = useRecentLogs(userId, 30);
+  const frequentQuery = useFrequentLogs(userId, 30);
 
   // Suche
   const [query, setQuery] = useState('');
@@ -235,6 +246,18 @@ export default function MealDetailScreen() {
     setQuery('');
   };
 
+  const handleAddQuickPick = (amountG: number, servings: number) => {
+    if (!activeSheet || activeSheet.kind !== 'quickPick') return;
+    addMealMut.mutate({
+      slotKey,
+      displayName: activeSheet.item.displayName,
+      source: activeSheet.item.source,
+      amountG,
+      servings,
+      macrosPer100g: activeSheet.item.macrosPer100g,
+    });
+  };
+
   const handleEditLog = (amountG: number, servings: number) => {
     if (!activeSheet || activeSheet.kind !== 'log') return;
     const meta = extractLogMeta(activeSheet.log);
@@ -300,6 +323,15 @@ export default function MealDetailScreen() {
           </Pressable>
         </View>
 
+        {/* Tabs (FEELY: Mahlzeit | Zuletzt | Häufig) */}
+        {!showingSearch ? (
+          <View style={styles.tabsRow}>
+            <TabBtn label={label} active={activeTab === 'meal'} onPress={() => setActiveTab('meal')} />
+            <TabBtn label="Zuletzt" active={activeTab === 'recent'} onPress={() => setActiveTab('recent')} />
+            <TabBtn label="Häufig" active={activeTab === 'frequent'} onPress={() => setActiveTab('frequent')} />
+          </View>
+        ) : null}
+
         {/* Such-Ergebnisse oder Standard-Layout */}
         {showingSearch ? (
           <View style={styles.searchResults}>
@@ -328,6 +360,16 @@ export default function MealDetailScreen() {
               ))
             )}
           </View>
+        ) : activeTab !== 'meal' ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>{activeTab === 'recent' ? 'ZULETZT GEGESSEN' : 'HÄUFIG GEGESSEN'}</Text>
+            <QuickPickList
+              items={(activeTab === 'recent' ? recentQuery.data : frequentQuery.data) ?? []}
+              isLoading={activeTab === 'recent' ? recentQuery.isLoading : frequentQuery.isLoading}
+              onPick={(item) => setActiveSheet({ kind: 'quickPick', item })}
+              showCount={activeTab === 'frequent'}
+            />
+          </View>
         ) : (
           <>
             {/* Nährwerte gesamt für diesen Slot */}
@@ -344,9 +386,9 @@ export default function MealDetailScreen() {
                   <Text style={styles.macroGoalRight}>von {dayGoal} Tagesziel</Text>
                 </View>
 
-                <MacroBar label="Eiweiß" current={loggedMacros.protein} goal={proteinGoal} accent={color.goldLight} />
-                <MacroBar label="Kohlenhydrate" current={loggedMacros.carbs} goal={carbsGoal} accent={color.gold} />
-                <MacroBar label="Fett" current={loggedMacros.fat} goal={fatGoal} accent={color.goldDark} />
+                <MacroBar label="Eiweiß" current={loggedMacros.protein} goal={proteinGoal} accent={color.macroProtein} />
+                <MacroBar label="Kohlenhydrate" current={loggedMacros.carbs} goal={carbsGoal} accent={color.macroCarbs} />
+                <MacroBar label="Fett" current={loggedMacros.fat} goal={fatGoal} accent={color.macroFat} />
               </View>
             </View>
 
@@ -465,6 +507,7 @@ export default function MealDetailScreen() {
       <SheetMount activeSheet={activeSheet} onClose={closeSheet}
         onAdoptCoach={handleAdoptCoach}
         onAddSearch={handleAddSearch}
+        onAddQuickPick={handleAddQuickPick}
         onEditLog={handleEditLog}
         onDeleteLog={handleDeleteLog}
       />
@@ -479,6 +522,7 @@ function SheetMount({
   onClose,
   onAdoptCoach,
   onAddSearch,
+  onAddQuickPick,
   onEditLog,
   onDeleteLog,
 }: {
@@ -486,6 +530,7 @@ function SheetMount({
   onClose: () => void;
   onAdoptCoach: (amountG: number, servings: number) => void;
   onAddSearch: (amountG: number, servings: number) => void;
+  onAddQuickPick: (amountG: number, servings: number) => void;
   onEditLog: (amountG: number, servings: number) => void;
   onDeleteLog: () => void;
 }) {
@@ -537,6 +582,21 @@ function SheetMount({
     );
   }
 
+  if (activeSheet.kind === 'quickPick') {
+    return (
+      <FoodDetailSheet
+        visible={true}
+        mode="create"
+        name={activeSheet.item.displayName}
+        timeLabel={activeSheet.item.count ? `${activeSheet.item.count}× gegessen` : 'Schnellauswahl'}
+        macrosPer100g={activeSheet.item.macrosPer100g}
+        initialAmountG={activeSheet.item.defaultAmountG}
+        onClose={onClose}
+        onSave={onAddQuickPick}
+      />
+    );
+  }
+
   // search
   return (
     <FoodDetailSheet
@@ -549,6 +609,71 @@ function SheetMount({
       onClose={onClose}
       onSave={onAddSearch}
     />
+  );
+}
+
+// ─── Tabs (FEELY-Style: Underline) ──────────────────────────────────
+
+function TabBtn({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={styles.tabBtn} hitSlop={6}>
+      <Text style={[styles.tabLabel, active && styles.tabLabelActive]} numberOfLines={1}>
+        {label}
+      </Text>
+      {active ? <View style={styles.tabUnderline} /> : null}
+    </Pressable>
+  );
+}
+
+// ─── QuickPickList (Zuletzt / Häufig) ───────────────────────────────
+
+function QuickPickList({
+  items,
+  isLoading,
+  onPick,
+  showCount,
+}: {
+  items: QuickPickItem[];
+  isLoading: boolean;
+  onPick: (item: QuickPickItem) => void;
+  showCount: boolean;
+}) {
+  if (isLoading) {
+    return <ActivityIndicator color={color.gold} style={{ marginTop: 16 }} />;
+  }
+  if (items.length === 0) {
+    return (
+      <Text style={styles.emptyText}>
+        Noch keine Einträge. Tracke ein paar Mahlzeiten — dann findest du sie hier.
+      </Text>
+    );
+  }
+  return (
+    <View style={{ gap: 8 }}>
+      {items.map((item, idx) => (
+        <Pressable
+          key={`${item.displayName}-${idx}`}
+          onPress={() => onPick(item)}
+          style={({ pressed }) => [styles.row, pressed && { opacity: 0.85 }]}
+        >
+          <View style={{ flex: 1 }}>
+            <Text style={styles.rowName}>{item.displayName}</Text>
+            <Text style={styles.rowNote}>
+              {Math.round(item.macrosPer100g.protein)}P · {Math.round(item.macrosPer100g.carbs)}C · {Math.round(item.macrosPer100g.fat)}F · pro 100g
+            </Text>
+          </View>
+          <View style={styles.rowRight}>
+            <Text style={styles.rowKcal}>{Math.round(item.macrosPer100g.kcal)}</Text>
+            <Text style={styles.rowPer}>kcal/100g</Text>
+            {showCount && item.count ? (
+              <View style={styles.countPill}>
+                <Text style={styles.countPillLabel}>{item.count}×</Text>
+              </View>
+            ) : null}
+          </View>
+        </Pressable>
+      ))}
+    </View>
   );
 }
 
@@ -679,6 +804,54 @@ const styles = StyleSheet.create({
   },
   searchResults: {
     gap: space[2],
+  },
+  tabsRow: {
+    flexDirection: 'row',
+    gap: space[5],
+    paddingTop: space[2],
+    paddingBottom: space[1],
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255,255,255,0.08)',
+  },
+  tabBtn: {
+    paddingVertical: space[2],
+    alignItems: 'flex-start',
+  },
+  tabLabel: {
+    fontFamily: font.family,
+    fontSize: 15,
+    fontWeight: '500',
+    color: color.textMuted,
+    letterSpacing: -0.2,
+  },
+  tabLabelActive: {
+    color: color.text,
+    fontWeight: '700',
+  },
+  tabUnderline: {
+    position: 'absolute',
+    bottom: -1,
+    left: 0,
+    right: 0,
+    height: 2,
+    borderRadius: 2,
+    backgroundColor: color.gold,
+  },
+  countPill: {
+    marginTop: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    backgroundColor: color.goldA10,
+    borderWidth: 1,
+    borderColor: color.goldA30,
+  },
+  countPillLabel: {
+    fontFamily: font.family,
+    fontSize: 9,
+    fontWeight: '700',
+    color: color.gold,
+    letterSpacing: 0.4,
   },
   section: {
     gap: space[3],

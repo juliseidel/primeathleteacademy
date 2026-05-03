@@ -35,9 +35,9 @@ export function MacroProgress({ target, planned, note }: Props) {
           </View>
 
           <View style={styles.macroRow}>
-            <Macro label="Protein" planned={planned.protein} target={target.protein} unit="g" />
-            <Macro label="Carbs" planned={planned.carbs} target={target.carbs} unit="g" />
-            <Macro label="Fette" planned={planned.fat} target={target.fat} unit="g" />
+            <Macro label="Protein" planned={planned.protein} target={target.protein} unit="g" accent={color.macroProtein} />
+            <Macro label="Carbs" planned={planned.carbs} target={target.carbs} unit="g" accent={color.macroCarbs} />
+            <Macro label="Fette" planned={planned.fat} target={target.fat} unit="g" accent={color.macroFat} />
           </View>
         </>
       )}
@@ -52,11 +52,13 @@ function Macro({
   planned,
   target,
   unit,
+  accent,
 }: {
   label: string;
   planned: number;
   target: number | null;
   unit: string;
+  accent: string;
 }) {
   const percent = pct(planned, target);
   return (
@@ -68,7 +70,7 @@ function Macro({
         {target ? <Text style={styles.macroTarget}> / {target}</Text> : null}
       </Text>
       <View style={styles.bar}>
-        <View style={[styles.barFill, { width: `${percent}%` }]} />
+        <View style={[styles.barFill, { width: `${percent}%`, backgroundColor: accent }]} />
       </View>
     </View>
   );
@@ -175,7 +177,6 @@ const styles = StyleSheet.create({
   },
   barFill: {
     height: '100%',
-    backgroundColor: color.gold,
     borderRadius: 2,
   },
   note: {
