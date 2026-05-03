@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   todayBtn: {
     paddingHorizontal: space[3],
     paddingVertical: 6,
-    backgroundColor: color.gold,
+    backgroundColor: color.text,
     borderRadius: radius.md,
     marginLeft: space[2],
   },
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   dayPillSelected: {
-    backgroundColor: color.gold,
+    backgroundColor: color.text,
   },
   dayNumber: {
     fontFamily: font.family,
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   dayNumberToday: {
-    color: color.gold,
+    color: color.macroProtein,
     fontWeight: '700',
   },
   trackingDot: {
@@ -281,6 +281,6 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: color.gold,
+    backgroundColor: color.macroProtein,
   },
 });

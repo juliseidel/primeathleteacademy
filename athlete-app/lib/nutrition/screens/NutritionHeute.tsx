@@ -273,7 +273,7 @@ function WaterQuickAction({ totalMl, onPress }: { totalMl: number; onPress: () =
   const liters = (totalMl / 1000).toFixed(1).replace('.', ',');
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.waterPill, pressed && { opacity: 0.7 }]}>
-      <Ionicons name="water" size={14} color={color.gold} />
+      <Ionicons name="water" size={14} color={color.text} />
       <Text style={styles.waterText}>{totalMl > 0 ? `${liters} L` : '0'}</Text>
     </Pressable>
   );
@@ -331,9 +331,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: space[3],
     paddingVertical: 6,
     borderRadius: radius.pill,
-    backgroundColor: color.goldA10,
+    backgroundColor: color.whiteA08,
     borderWidth: 1,
-    borderColor: color.goldA30,
+    borderColor: color.whiteA15,
   },
   waterText: {
     fontFamily: font.family,
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.04)',
     borderWidth: 1,
-    borderColor: color.goldA20,
+    borderColor: 'rgba(255,255,255,0.10)',
   },
   section: {
     marginBottom: space[5],

@@ -103,7 +103,7 @@ export function MealSlotCard({ index, slotLabel, meal, loggedKcal = 0, onAdd, on
 
             {meal.notes ? (
               <View style={styles.coachNote}>
-                <Ionicons name="chatbox-ellipses" size={11} color={color.gold} />
+                <Ionicons name="chatbox-ellipses" size={11} color={color.text} />
                 <Text style={styles.coachNoteText}>{meal.notes}</Text>
               </View>
             ) : null}
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: color.goldA20,
+    borderColor: 'rgba(255,255,255,0.10)',
     backgroundColor: 'rgba(20,20,20,0.55)',
   },
   cardInner: {
@@ -160,9 +160,9 @@ const styles = StyleSheet.create({
     height: 28,
     paddingHorizontal: 10,
     borderRadius: 8,
-    backgroundColor: color.goldA10,
+    backgroundColor: color.whiteA08,
     borderWidth: 1,
-    borderColor: color.goldA30,
+    borderColor: color.whiteA15,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 12,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 1.2,
   },
   slotLabel: {
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 11,
     fontWeight: '600',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 0.6,
     marginTop: 2,
     textTransform: 'uppercase',
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: color.gold,
+    backgroundColor: color.text,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     gap: space[2],
     paddingTop: space[2],
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: color.goldA20,
+    borderTopColor: 'rgba(255,255,255,0.10)',
   },
   itemRow: {
     flexDirection: 'row',
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: color.gold,
+    backgroundColor: color.text,
   },
   itemName: {
     flex: 1,
@@ -241,9 +241,9 @@ const styles = StyleSheet.create({
     paddingVertical: space[2],
     paddingHorizontal: space[3],
     borderRadius: radius.sm,
-    backgroundColor: color.goldA04,
+    backgroundColor: 'rgba(255,255,255,0.03)',
     borderWidth: 1,
-    borderColor: color.goldA20,
+    borderColor: 'rgba(255,255,255,0.10)',
     marginTop: space[1],
   },
   coachNoteText: {
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 14,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 0.2,
   },
 });

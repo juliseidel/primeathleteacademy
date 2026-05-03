@@ -63,7 +63,7 @@ export function OverviewCard({ eaten, goal, onSettingsPress }: Props) {
         </View>
 
         <View style={styles.gaugeWrap}>
-          <SemiCircleProgress current={eaten.kcal} goal={goalKcal} size={200} strokeWidth={14} />
+          <SemiCircleProgress current={eaten.kcal} goal={goalKcal} size={180} strokeWidth={12} />
         </View>
 
         <View style={styles.sideStat}>
@@ -159,18 +159,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     paddingTop: space[2],
+    gap: space[2],
   },
   sideStat: {
     flex: 1,
     alignItems: 'center',
-    paddingBottom: space[1],
+    paddingBottom: space[2],
   },
   sideValue: {
     fontFamily: font.family,
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: '700',
     color: color.text,
-    letterSpacing: -0.4,
+    letterSpacing: -0.2,
   },
   sideLabel: {
     fontFamily: font.family,

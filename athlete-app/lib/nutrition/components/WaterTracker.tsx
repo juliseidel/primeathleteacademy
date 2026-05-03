@@ -21,7 +21,7 @@ export function WaterTracker({ totalMl, onAdd, onRemoveLast, busy }: Props) {
     <View style={styles.card}>
       <View style={styles.headerRow}>
         <View style={styles.iconBox}>
-          <Ionicons name="water" size={16} color={color.gold} />
+          <Ionicons name="water" size={16} color={color.text} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.eyebrow}>WASSER</Text>
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     backgroundColor: color.blackA55,
     borderWidth: 1,
-    borderColor: color.goldA20,
+    borderColor: 'rgba(255,255,255,0.10)',
     gap: space[3],
   },
   headerRow: {
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: radius.sm,
-    backgroundColor: color.goldA10,
+    backgroundColor: color.whiteA08,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 10,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 2.6,
   },
   amountRow: {
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   },
   barFill: {
     height: '100%',
-    backgroundColor: color.gold,
+    backgroundColor: color.text,
     borderRadius: 2,
   },
   btnRow: {
@@ -151,16 +151,16 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: space[3],
     borderRadius: radius.pill,
-    backgroundColor: color.goldA10,
+    backgroundColor: color.whiteA08,
     borderWidth: 1,
-    borderColor: color.goldA30,
+    borderColor: color.whiteA15,
     alignItems: 'center',
   },
   quickLabel: {
     fontFamily: font.family,
     fontSize: 13,
     fontWeight: '600',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 0.4,
   },
 });

@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 11,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 3.0,
   },
   headline: {
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: color.surface,
     borderWidth: 1,
-    borderColor: color.goldA20,
+    borderColor: 'rgba(255,255,255,0.10)',
   },
   searchInput: {
     flex: 1,
@@ -191,9 +191,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: space[3],
     paddingVertical: space[1],
     borderRadius: radius.pill,
-    backgroundColor: color.goldA10,
+    backgroundColor: color.whiteA08,
     borderWidth: 1,
-    borderColor: color.goldA30,
+    borderColor: color.whiteA15,
   },
   tagMuted: {
     backgroundColor: 'rgba(255,255,255,0.04)',
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 10,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 1.4,
   },
   tagLabelMuted: {
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 9,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 1.6,
     marginTop: 2,
   },

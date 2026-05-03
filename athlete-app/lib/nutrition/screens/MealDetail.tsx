@@ -319,7 +319,7 @@ export default function MealDetailScreen() {
             }
             style={({ pressed }) => [styles.barcodeBtn, pressed && { opacity: 0.7 }]}
           >
-            <Ionicons name="barcode-outline" size={20} color={color.gold} />
+            <Ionicons name="barcode-outline" size={20} color={color.text} />
           </Pressable>
         </View>
 
@@ -348,7 +348,7 @@ export default function MealDetailScreen() {
                   <View style={{ flex: 1 }}>
                     <Text style={styles.rowName}>{hit.name}</Text>
                     {hit.note ? <Text style={styles.rowNote}>{hit.note}</Text> : null}
-                    <Text style={[styles.rowSource, hit.source === 'coach' && { color: color.gold }]}>
+                    <Text style={[styles.rowSource, hit.source === 'coach' && { color: color.macroProtein }]}>
                       {hit.source === 'coach' ? 'COACH-DATENBANK' : 'BLS'}
                     </Text>
                   </View>
@@ -392,7 +392,7 @@ export default function MealDetailScreen() {
               </View>
             </View>
 
-            {/* Coach-Vorgabe */}
+            {/* Coach-Vorgabe — alle Items in EINER Card mit Bullet-Liste (FEELY-Style) */}
             {coachMeal && (coachMeal.components.length > 0 || coachMeal.snacks.length > 0) ? (
               <View style={styles.section}>
                 <View style={styles.sectionHeaderRow}>
@@ -401,8 +401,8 @@ export default function MealDetailScreen() {
                     <Text style={styles.sectionLabelSecondary}>· {coachMeal.timing_hint}</Text>
                   ) : null}
                 </View>
-                <View style={styles.coachList}>
-                  {coachMeal.components.map((c) => {
+                <View style={styles.coachCard}>
+                  {coachMeal.components.map((c, i) => {
                     const macros = calcComponentMacros(c.food, Number(c.amount_g));
                     const name = c.food?.name ?? c.food_name_override ?? '—';
                     const amt = c.amount_display ?? `${Number(c.amount_g)}g`;
@@ -410,44 +410,53 @@ export default function MealDetailScreen() {
                       <Pressable
                         key={c.id}
                         onPress={() => setActiveSheet({ kind: 'coach', component: c, snack: null })}
-                        style={({ pressed }) => [styles.row, pressed && { opacity: 0.85 }]}
+                        style={({ pressed }) => [styles.coachItem, i > 0 && styles.coachItemDivider, pressed && { opacity: 0.7 }]}
                       >
+                        <View style={styles.coachBullet} />
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.rowName}>{name}</Text>
-                          <Text style={styles.rowNote}>
-                            {amt} · {Math.round(macros.kcal)} kcal · {Math.round(macros.protein)}P · {Math.round(macros.carbs)}C · {Math.round(macros.fat)}F
+                          <Text style={styles.coachItemName}>{name}</Text>
+                          <Text style={styles.coachItemMeta}>
+                            {amt} · {Math.round(macros.kcal)} kcal
                           </Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={16} color={color.textDim} />
+                        <Text style={styles.coachItemMacros}>
+                          {Math.round(macros.protein)}P · {Math.round(macros.carbs)}C · {Math.round(macros.fat)}F
+                        </Text>
                       </Pressable>
                     );
                   })}
-                  {coachMeal.snacks.map((s) => {
+                  {coachMeal.snacks.map((s, i) => {
                     const macros = calcComponentMacros(s.food, Number(s.amount_g));
                     const name = s.food?.name ?? s.food_name_override ?? '—';
                     const amt = s.amount_display ?? (Number(s.amount_g) > 0 ? `${Number(s.amount_g)}g` : '');
+                    const isFirst = coachMeal.components.length === 0 && i === 0;
                     return (
                       <Pressable
                         key={s.id}
                         onPress={() => setActiveSheet({ kind: 'coach', component: null, snack: s })}
-                        style={({ pressed }) => [styles.row, pressed && { opacity: 0.85 }]}
+                        style={({ pressed }) => [styles.coachItem, !isFirst && styles.coachItemDivider, pressed && { opacity: 0.7 }]}
                       >
+                        <View style={styles.coachBullet} />
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.rowName}>{name}</Text>
+                          <Text style={styles.coachItemName}>{name}</Text>
                           {amt || macros.kcal > 0 ? (
-                            <Text style={styles.rowNote}>
+                            <Text style={styles.coachItemMeta}>
                               {[amt, macros.kcal > 0 ? `${Math.round(macros.kcal)} kcal` : null].filter(Boolean).join(' · ')}
                             </Text>
                           ) : null}
                           {s.hint ? <Text style={styles.rowHint}>{s.hint}</Text> : null}
                         </View>
-                        <Ionicons name="chevron-forward" size={16} color={color.textDim} />
+                        {macros.kcal > 0 ? (
+                          <Text style={styles.coachItemMacros}>
+                            {Math.round(macros.protein)}P · {Math.round(macros.carbs)}C · {Math.round(macros.fat)}F
+                          </Text>
+                        ) : null}
                       </Pressable>
                     );
                   })}
                   {coachMeal.notes ? (
-                    <View style={styles.coachNote}>
-                      <Ionicons name="chatbox-ellipses" size={11} color={color.gold} />
+                    <View style={styles.coachNoteInner}>
+                      <Ionicons name="chatbox-ellipses" size={11} color={color.textMuted} />
                       <Text style={styles.coachNoteText}>{coachMeal.notes}</Text>
                     </View>
                   ) : null}
@@ -459,7 +468,7 @@ export default function MealDetailScreen() {
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>LEBENSMITTEL</Text>
               {logQuery.isLoading ? (
-                <ActivityIndicator color={color.gold} />
+                <ActivityIndicator color={color.text} />
               ) : (logQuery.data ?? []).length === 0 ? (
                 <Text style={styles.emptyText}>
                   Noch nichts getrackt. Suche oben oder übernimm die Coach-Vorgabe.
@@ -620,7 +629,7 @@ function TabBtn({ label, active, onPress }: { label: string; active: boolean; on
       <Text style={[styles.tabLabel, active && styles.tabLabelActive]} numberOfLines={1}>
         {label}
       </Text>
-      {active ? <View style={styles.tabUnderline} /> : null}
+      <View style={[styles.tabUnderline, !active && { backgroundColor: 'transparent' }]} />
     </Pressable>
   );
 }
@@ -639,7 +648,7 @@ function QuickPickList({
   showCount: boolean;
 }) {
   if (isLoading) {
-    return <ActivityIndicator color={color.gold} style={{ marginTop: 16 }} />;
+    return <ActivityIndicator color={color.text} style={{ marginTop: 16 }} />;
   }
   if (items.length === 0) {
     return (
@@ -749,9 +758,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: space[3],
     paddingVertical: 6,
     borderRadius: radius.pill,
-    backgroundColor: color.goldA10,
+    backgroundColor: color.whiteA08,
     borderWidth: 1,
-    borderColor: color.goldA30,
+    borderColor: color.whiteA15,
   },
   kcalNow: {
     fontFamily: font.family,
@@ -783,7 +792,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     backgroundColor: color.surface,
     borderWidth: 1,
-    borderColor: color.goldA20,
+    borderColor: 'rgba(255,255,255,0.10)',
   },
   searchInput: {
     flex: 1,
@@ -798,24 +807,24 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: color.goldA10,
+    backgroundColor: color.whiteA08,
     borderWidth: 1,
-    borderColor: color.goldA30,
+    borderColor: color.whiteA15,
   },
   searchResults: {
     gap: space[2],
   },
   tabsRow: {
     flexDirection: 'row',
-    gap: space[5],
-    paddingTop: space[2],
-    paddingBottom: space[1],
+    paddingTop: space[3],
+    paddingBottom: space[2],
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: 'rgba(255,255,255,0.08)',
   },
   tabBtn: {
-    paddingVertical: space[2],
-    alignItems: 'flex-start',
+    flex: 1,
+    paddingVertical: space[3],
+    alignItems: 'center',
   },
   tabLabel: {
     fontFamily: font.family,
@@ -829,28 +838,26 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   tabUnderline: {
-    position: 'absolute',
-    bottom: -1,
-    left: 0,
-    right: 0,
+    width: 28,
     height: 2,
     borderRadius: 2,
-    backgroundColor: color.gold,
+    backgroundColor: color.text,
+    marginTop: 6,
   },
   countPill: {
     marginTop: 4,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
-    backgroundColor: color.goldA10,
+    backgroundColor: color.whiteA08,
     borderWidth: 1,
-    borderColor: color.goldA30,
+    borderColor: color.whiteA15,
   },
   countPillLabel: {
     fontFamily: font.family,
     fontSize: 9,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 0.4,
   },
   section: {
@@ -865,7 +872,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 11,
     fontWeight: '700',
-    color: color.gold,
+    color: color.textMuted,
     letterSpacing: 2.2,
   },
   sectionLabelSecondary: {
@@ -880,7 +887,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     backgroundColor: color.blackA55,
     borderWidth: 1,
-    borderColor: color.goldA30,
+    borderColor: color.whiteA15,
     gap: space[3],
   },
   macroHeaderRow: {
@@ -936,19 +943,58 @@ const styles = StyleSheet.create({
     minWidth: 38,
     textAlign: 'right',
   },
-  coachList: {
-    gap: space[2],
+  coachCard: {
+    paddingVertical: space[2],
+    paddingHorizontal: space[5],
+    borderRadius: radius.lg,
+    backgroundColor: color.blackA40,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
   },
-  coachNote: {
+  coachItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[3],
+    paddingVertical: space[3],
+  },
+  coachItemDivider: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+  },
+  coachBullet: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: color.macroProtein,
+  },
+  coachItemName: {
+    fontFamily: font.family,
+    fontSize: 15,
+    fontWeight: '600',
+    color: color.text,
+    letterSpacing: -0.1,
+  },
+  coachItemMeta: {
+    fontFamily: font.family,
+    fontSize: 12,
+    color: color.textMuted,
+    marginTop: 2,
+    letterSpacing: 0.1,
+  },
+  coachItemMacros: {
+    fontFamily: font.family,
+    fontSize: 11,
+    fontWeight: '600',
+    color: color.textMuted,
+    letterSpacing: 0.3,
+  },
+  coachNoteInner: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: space[2],
-    paddingVertical: space[2],
-    paddingHorizontal: space[3],
-    borderRadius: radius.sm,
-    backgroundColor: color.goldA04,
-    borderWidth: 1,
-    borderColor: color.goldA20,
+    paddingVertical: space[3],
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(255,255,255,0.06)',
     marginTop: space[1],
   },
   coachNoteText: {
@@ -987,7 +1033,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 10,
     fontStyle: 'italic',
-    color: color.gold,
+    color: color.macroProtein,
     marginTop: 2,
     letterSpacing: 0.4,
   },
@@ -1032,7 +1078,7 @@ const styles = StyleSheet.create({
     paddingTop: space[3],
     backgroundColor: color.bg,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: color.goldA20,
+    borderTopColor: 'rgba(255,255,255,0.10)',
   },
   photoBtn: {
     flexDirection: 'row',
@@ -1041,7 +1087,7 @@ const styles = StyleSheet.create({
     gap: space[2],
     paddingVertical: space[4],
     borderRadius: radius.pill,
-    backgroundColor: color.gold,
+    backgroundColor: color.text,
   },
   photoLabel: {
     fontFamily: font.family,
@@ -1061,7 +1107,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 9,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 0.4,
   },
 });

@@ -29,7 +29,7 @@ export function NutritionMatchday() {
       </Text>
 
       {templateQuery.isLoading ? (
-        <ActivityIndicator color={color.gold} style={{ marginTop: space[10] }} />
+        <ActivityIndicator color={color.text} style={{ marginTop: space[10] }} />
       ) : !template ? (
         <Text style={styles.empty}>Noch kein Matchday-Template hinterlegt.</Text>
       ) : (
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 11,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 3.0,
   },
   headline: {
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     fontFamily: displaySerif as string,
     fontStyle: 'italic',
     fontSize: 14,
-    color: color.gold,
+    color: color.text,
     paddingBottom: space[2],
   },
   list: {

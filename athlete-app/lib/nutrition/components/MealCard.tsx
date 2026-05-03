@@ -53,7 +53,7 @@ export function MealCard({ meal, slotIndex }: { meal: FullMeal; slotIndex: numbe
 
       {meal.notes ? (
         <View style={styles.noteBox}>
-          <Ionicons name="information-circle-outline" size={13} color={color.gold} />
+          <Ionicons name="information-circle-outline" size={13} color={color.text} />
           <Text style={styles.noteText}>{meal.notes}</Text>
         </View>
       ) : null}
@@ -106,7 +106,7 @@ function ComponentRow({ component, macros }: { component: TemplateComponent; mac
   return (
     <View style={styles.row}>
       <View style={styles.iconBox}>
-        <Ionicons name={CATEGORY_ICON[component.category] ?? 'ellipsis-horizontal'} size={13} color={color.gold} />
+        <Ionicons name={CATEGORY_ICON[component.category] ?? 'ellipsis-horizontal'} size={13} color={color.text} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={styles.rowLabel}>{CATEGORY_LABEL[component.category]}</Text>
@@ -127,7 +127,7 @@ function SnackRow({ snack, macros }: { snack: TemplateSnack; macros: MacroBundle
   return (
     <View style={styles.row}>
       <View style={styles.iconBox}>
-        <Ionicons name="cafe-outline" size={13} color={color.gold} />
+        <Ionicons name="cafe-outline" size={13} color={color.text} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={styles.rowLabel}>Snack {snack.snack_order}</Text>
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 13,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 1.2,
     minWidth: 22,
   },
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 11,
     fontWeight: '600',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 0.4,
     marginTop: 2,
     textTransform: 'uppercase',
@@ -222,9 +222,9 @@ const styles = StyleSheet.create({
     paddingVertical: space[2],
     paddingHorizontal: space[3],
     borderRadius: radius.sm,
-    backgroundColor: color.goldA04,
+    backgroundColor: 'rgba(255,255,255,0.03)',
     borderWidth: 1,
-    borderColor: color.goldA20,
+    borderColor: 'rgba(255,255,255,0.10)',
   },
   noteText: {
     flex: 1,
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: radius.sm,
-    backgroundColor: color.goldA10,
+    backgroundColor: color.whiteA08,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 2,
@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 9,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 1.6,
   },
   rowName: {
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
     gap: space[5],
     paddingTop: space[3],
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: color.goldA20,
+    borderTopColor: 'rgba(255,255,255,0.10)',
   },
   macroFootItem: {
     flexDirection: 'row',
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 10,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 1.2,
   },
   macroFootValue: {

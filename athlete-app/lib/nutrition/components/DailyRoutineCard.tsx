@@ -44,7 +44,7 @@ export function DailyRoutineCard({ supplements, checkedIds, onToggle }: Props) {
     <View style={styles.card}>
       <Pressable onPress={() => setExpanded((e) => !e)} style={styles.header}>
         <View style={styles.iconBox}>
-          <Ionicons name="sparkles" size={14} color={color.gold} />
+          <Ionicons name="sparkles" size={14} color={color.text} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.title}>The Difference</Text>
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     backgroundColor: color.blackA55,
     borderWidth: 1,
-    borderColor: color.goldA20,
+    borderColor: 'rgba(255,255,255,0.10)',
     overflow: 'hidden',
   },
   header: {
@@ -123,9 +123,9 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: radius.sm,
-    backgroundColor: color.goldA10,
+    backgroundColor: color.whiteA08,
     borderWidth: 1,
-    borderColor: color.goldA20,
+    borderColor: 'rgba(255,255,255,0.10)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontFamily: font.family,
     fontSize: 11,
-    color: color.gold,
+    color: color.text,
     letterSpacing: 0.4,
     marginTop: 2,
     fontWeight: '600',
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 9,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 1.8,
     paddingTop: space[2],
   },
@@ -171,14 +171,14 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 6,
     borderWidth: 1.5,
-    borderColor: color.goldA50,
+    borderColor: 'rgba(255,255,255,0.30)',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 1,
   },
   checkboxChecked: {
-    backgroundColor: color.gold,
-    borderColor: color.gold,
+    backgroundColor: color.text,
+    borderColor: color.text,
   },
   itemName: {
     fontFamily: font.family,

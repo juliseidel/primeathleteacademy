@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 11,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 3.0,
   },
   headline: {
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     backgroundColor: color.blackA55,
     borderWidth: 1,
-    borderColor: color.goldA20,
+    borderColor: 'rgba(255,255,255,0.10)',
     gap: space[2],
   },
   cardHeader: {
@@ -140,13 +140,13 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 16,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
   },
   cardKcalFree: {
     fontFamily: displaySerif as string,
     fontSize: 16,
     fontStyle: 'italic',
-    color: color.gold,
+    color: color.text,
   },
   cardMacros: {
     fontFamily: font.family,

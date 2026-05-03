@@ -118,7 +118,7 @@ export function FoodDetailSheet({
           {/* Nährwerte */}
           <View style={styles.macroCard}>
             <View style={styles.macroHeader}>
-              <Ionicons name="flame" size={14} color={color.gold} />
+              <Ionicons name="flame" size={14} color={color.text} />
               <Text style={styles.macroHeaderTitle}>Nährwerte</Text>
             </View>
 
@@ -142,7 +142,7 @@ export function FoodDetailSheet({
           {/* Portion */}
           <View style={styles.portionCard}>
             <View style={styles.portionHeader}>
-              <Ionicons name="resize-outline" size={14} color={color.gold} />
+              <Ionicons name="resize-outline" size={14} color={color.text} />
               <Text style={styles.portionTitle}>Portion bearbeiten</Text>
             </View>
 
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     borderTopWidth: 1,
-    borderColor: color.goldA30,
+    borderColor: color.whiteA15,
     maxHeight: '90%',
   },
   handleRow: {
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: space[4],
     paddingVertical: space[3],
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: color.goldA20,
+    borderBottomColor: 'rgba(255,255,255,0.10)',
   },
   closeBtn: {
     width: 36,
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     backgroundColor: color.surfaceLight,
     borderWidth: 1,
-    borderColor: color.goldA20,
+    borderColor: 'rgba(255,255,255,0.10)',
   },
   nameText: {
     fontFamily: font.family,
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     backgroundColor: color.surfaceLight,
     borderWidth: 1,
-    borderColor: color.goldA20,
+    borderColor: 'rgba(255,255,255,0.10)',
     gap: space[4],
   },
   macroHeader: {
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: 'rgba(20,20,20,0.45)',
     borderWidth: 1,
-    borderColor: color.goldA20,
+    borderColor: 'rgba(255,255,255,0.10)',
     borderTopWidth: 2,
   },
   pillValue: {
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     backgroundColor: color.surfaceLight,
     borderWidth: 1,
-    borderColor: color.goldA20,
+    borderColor: 'rgba(255,255,255,0.10)',
     gap: space[3],
   },
   portionHeader: {
@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family,
     fontSize: 9,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
     letterSpacing: 1.6,
     textAlign: 'center',
     marginTop: space[2],
@@ -467,14 +467,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: 'rgba(20,20,20,0.45)',
     borderWidth: 1,
-    borderColor: color.goldA20,
+    borderColor: 'rgba(255,255,255,0.10)',
     alignItems: 'center',
   },
   stepBtnLabel: {
     fontFamily: font.family,
     fontSize: 13,
     fontWeight: '700',
-    color: color.gold,
+    color: color.text,
   },
   stepValueWrap: {
     flex: 1,
@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: color.bg,
     borderWidth: 1,
-    borderColor: color.goldA30,
+    borderColor: color.whiteA15,
   },
   stepValue: {
     fontFamily: font.family,
@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
     gap: space[2],
   },
   primaryBtn: {
-    backgroundColor: color.gold,
+    backgroundColor: color.text,
     paddingVertical: space[4],
     borderRadius: radius.pill,
     alignItems: 'center',
