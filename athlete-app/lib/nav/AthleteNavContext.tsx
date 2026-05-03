@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 
 export type NavMode = 'main' | 'training-sub' | 'nutrition-sub';
 export type TrainingSubTab = 'heute' | 'woche' | 'historie' | 'fortschritt';
-export type NutritionSubTab = 'heute' | 'plan' | 'matchday' | 'historie';
+export type NutritionSubTab = 'heute' | 'plan' | 'lebensmittel' | 'matchday';
 
 type AthleteNavContextValue = {
   mode: NavMode;

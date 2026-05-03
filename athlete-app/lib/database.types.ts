@@ -14,6 +14,144 @@ export type Database = {
   }
   public: {
     Tables: {
+      athlete_meal_log: {
+        Row: {
+          ai_analysis: Json | null
+          athlete_id: string
+          components: Json | null
+          created_at: string
+          display_name: string
+          id: string
+          is_deleted: boolean
+          log_date: string
+          log_time: string | null
+          notes: string | null
+          photo_url: string | null
+          source: Database["public"]["Enums"]["nutrition_meal_log_source"]
+          swapped_from_original: boolean
+          template_meal_id: string | null
+          total_carbs_g: number | null
+          total_fat_g: number | null
+          total_kcal: number | null
+          total_protein_g: number | null
+          updated_at: string
+          voice_note_url: string | null
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          athlete_id: string
+          components?: Json | null
+          created_at?: string
+          display_name: string
+          id?: string
+          is_deleted?: boolean
+          log_date: string
+          log_time?: string | null
+          notes?: string | null
+          photo_url?: string | null
+          source: Database["public"]["Enums"]["nutrition_meal_log_source"]
+          swapped_from_original?: boolean
+          template_meal_id?: string | null
+          total_carbs_g?: number | null
+          total_fat_g?: number | null
+          total_kcal?: number | null
+          total_protein_g?: number | null
+          updated_at?: string
+          voice_note_url?: string | null
+        }
+        Update: {
+          ai_analysis?: Json | null
+          athlete_id?: string
+          components?: Json | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_deleted?: boolean
+          log_date?: string
+          log_time?: string | null
+          notes?: string | null
+          photo_url?: string | null
+          source?: Database["public"]["Enums"]["nutrition_meal_log_source"]
+          swapped_from_original?: boolean
+          template_meal_id?: string | null
+          total_carbs_g?: number | null
+          total_fat_g?: number | null
+          total_kcal?: number | null
+          total_protein_g?: number | null
+          updated_at?: string
+          voice_note_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "athlete_meal_log_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athlete_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athlete_meal_log_template_meal_id_fkey"
+            columns: ["template_meal_id"]
+            isOneToOne: false
+            referencedRelation: "nutrition_template_meals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      athlete_nutrition_day: {
+        Row: {
+          athlete_id: string
+          created_at: string
+          id: string
+          override_by: string | null
+          override_reason: string | null
+          override_template_type:
+            | Database["public"]["Enums"]["nutrition_day_type"]
+            | null
+          plan_date: string
+          updated_at: string
+        }
+        Insert: {
+          athlete_id: string
+          created_at?: string
+          id?: string
+          override_by?: string | null
+          override_reason?: string | null
+          override_template_type?:
+            | Database["public"]["Enums"]["nutrition_day_type"]
+            | null
+          plan_date: string
+          updated_at?: string
+        }
+        Update: {
+          athlete_id?: string
+          created_at?: string
+          id?: string
+          override_by?: string | null
+          override_reason?: string | null
+          override_template_type?:
+            | Database["public"]["Enums"]["nutrition_day_type"]
+            | null
+          plan_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "athlete_nutrition_day_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athlete_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athlete_nutrition_day_override_by_fkey"
+            columns: ["override_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       athlete_profiles: {
         Row: {
           avatar_data_uri: string | null
@@ -73,6 +211,83 @@ export type Database = {
           },
         ]
       }
+      athlete_supplement_check: {
+        Row: {
+          athlete_id: string
+          check_date: string
+          checked_at: string
+          id: string
+          supplement_id: string
+        }
+        Insert: {
+          athlete_id: string
+          check_date: string
+          checked_at?: string
+          id?: string
+          supplement_id: string
+        }
+        Update: {
+          athlete_id?: string
+          check_date?: string
+          checked_at?: string
+          id?: string
+          supplement_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "athlete_supplement_check_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athlete_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athlete_supplement_check_supplement_id_fkey"
+            columns: ["supplement_id"]
+            isOneToOne: false
+            referencedRelation: "nutrition_daily_supplements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      athlete_water_log: {
+        Row: {
+          amount_ml: number
+          athlete_id: string
+          created_at: string
+          drink_type: Database["public"]["Enums"]["drink_type"]
+          id: string
+          log_date: string
+          log_time: string
+        }
+        Insert: {
+          amount_ml: number
+          athlete_id: string
+          created_at?: string
+          drink_type?: Database["public"]["Enums"]["drink_type"]
+          id?: string
+          log_date: string
+          log_time?: string
+        }
+        Update: {
+          amount_ml?: number
+          athlete_id?: string
+          created_at?: string
+          drink_type?: Database["public"]["Enums"]["drink_type"]
+          id?: string
+          log_date?: string
+          log_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "athlete_water_log_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athlete_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_athlete_assignments: {
         Row: {
           athlete_id: string
@@ -100,6 +315,62 @@ export type Database = {
           {
             foreignKeyName: "coach_athlete_assignments_coach_id_fkey"
             columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_food_database: {
+        Row: {
+          carbs_per_100g: number
+          category: Database["public"]["Enums"]["nutrition_food_category"]
+          created_at: string
+          created_by_coach_id: string | null
+          fat_per_100g: number
+          id: string
+          is_archived: boolean
+          is_global: boolean
+          kcal_per_100g: number
+          name: string
+          note: string | null
+          protein_per_100g: number
+          updated_at: string
+        }
+        Insert: {
+          carbs_per_100g?: number
+          category: Database["public"]["Enums"]["nutrition_food_category"]
+          created_at?: string
+          created_by_coach_id?: string | null
+          fat_per_100g?: number
+          id?: string
+          is_archived?: boolean
+          is_global?: boolean
+          kcal_per_100g: number
+          name: string
+          note?: string | null
+          protein_per_100g?: number
+          updated_at?: string
+        }
+        Update: {
+          carbs_per_100g?: number
+          category?: Database["public"]["Enums"]["nutrition_food_category"]
+          created_at?: string
+          created_by_coach_id?: string | null
+          fat_per_100g?: number
+          id?: string
+          is_archived?: boolean
+          is_global?: boolean
+          kcal_per_100g?: number
+          name?: string
+          note?: string | null
+          protein_per_100g?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_food_database_created_by_coach_id_fkey"
+            columns: ["created_by_coach_id"]
             isOneToOne: false
             referencedRelation: "coach_profiles"
             referencedColumns: ["id"]
@@ -240,6 +511,277 @@ export type Database = {
             columns: ["athlete_id"]
             isOneToOne: false
             referencedRelation: "athlete_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nutrition_daily_supplements: {
+        Row: {
+          amount: string | null
+          athlete_id: string | null
+          benefit: string | null
+          created_at: string
+          display_order: number
+          id: string
+          is_archived: boolean
+          name: string
+          priority: Database["public"]["Enums"]["nutrition_supplement_priority"]
+          updated_at: string
+          when_to_take: string | null
+        }
+        Insert: {
+          amount?: string | null
+          athlete_id?: string | null
+          benefit?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_archived?: boolean
+          name: string
+          priority: Database["public"]["Enums"]["nutrition_supplement_priority"]
+          updated_at?: string
+          when_to_take?: string | null
+        }
+        Update: {
+          amount?: string | null
+          athlete_id?: string | null
+          benefit?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_archived?: boolean
+          name?: string
+          priority?: Database["public"]["Enums"]["nutrition_supplement_priority"]
+          updated_at?: string
+          when_to_take?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nutrition_daily_supplements_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athlete_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nutrition_day_templates: {
+        Row: {
+          athlete_id: string
+          created_at: string
+          created_by_coach_id: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          target_carbs_g: number | null
+          target_fat_g: number | null
+          target_kcal: number | null
+          target_protein_g: number | null
+          template_type: Database["public"]["Enums"]["nutrition_day_type"]
+          updated_at: string
+        }
+        Insert: {
+          athlete_id: string
+          created_at?: string
+          created_by_coach_id?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          target_carbs_g?: number | null
+          target_fat_g?: number | null
+          target_kcal?: number | null
+          target_protein_g?: number | null
+          template_type: Database["public"]["Enums"]["nutrition_day_type"]
+          updated_at?: string
+        }
+        Update: {
+          athlete_id?: string
+          created_at?: string
+          created_by_coach_id?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          target_carbs_g?: number | null
+          target_fat_g?: number | null
+          target_kcal?: number | null
+          target_protein_g?: number | null
+          template_type?: Database["public"]["Enums"]["nutrition_day_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nutrition_day_templates_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athlete_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutrition_day_templates_created_by_coach_id_fkey"
+            columns: ["created_by_coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nutrition_template_meal_components: {
+        Row: {
+          amount_display: string | null
+          amount_g: number
+          category: Database["public"]["Enums"]["nutrition_food_category"]
+          category_order: number
+          created_at: string
+          food_id: string | null
+          food_name_override: string | null
+          id: string
+          meal_id: string
+          notes: string | null
+          swap_options: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_display?: string | null
+          amount_g: number
+          category: Database["public"]["Enums"]["nutrition_food_category"]
+          category_order?: number
+          created_at?: string
+          food_id?: string | null
+          food_name_override?: string | null
+          id?: string
+          meal_id: string
+          notes?: string | null
+          swap_options?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_display?: string | null
+          amount_g?: number
+          category?: Database["public"]["Enums"]["nutrition_food_category"]
+          category_order?: number
+          created_at?: string
+          food_id?: string | null
+          food_name_override?: string | null
+          id?: string
+          meal_id?: string
+          notes?: string | null
+          swap_options?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nutrition_template_meal_components_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "coach_food_database"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutrition_template_meal_components_meal_id_fkey"
+            columns: ["meal_id"]
+            isOneToOne: false
+            referencedRelation: "nutrition_template_meals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nutrition_template_meals: {
+        Row: {
+          created_at: string
+          id: string
+          is_snack_container: boolean
+          notes: string | null
+          slot_label: string
+          slot_order: number
+          swap_hint: string | null
+          template_id: string
+          timing_hint: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_snack_container?: boolean
+          notes?: string | null
+          slot_label: string
+          slot_order: number
+          swap_hint?: string | null
+          template_id: string
+          timing_hint?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_snack_container?: boolean
+          notes?: string | null
+          slot_label?: string
+          slot_order?: number
+          swap_hint?: string | null
+          template_id?: string
+          timing_hint?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nutrition_template_meals_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "nutrition_day_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nutrition_template_snacks: {
+        Row: {
+          amount_display: string | null
+          amount_g: number
+          created_at: string
+          food_id: string | null
+          food_name_override: string | null
+          hint: string | null
+          id: string
+          meal_id: string
+          snack_order: number
+          updated_at: string
+        }
+        Insert: {
+          amount_display?: string | null
+          amount_g: number
+          created_at?: string
+          food_id?: string | null
+          food_name_override?: string | null
+          hint?: string | null
+          id?: string
+          meal_id: string
+          snack_order: number
+          updated_at?: string
+        }
+        Update: {
+          amount_display?: string | null
+          amount_g?: number
+          created_at?: string
+          food_id?: string | null
+          food_name_override?: string | null
+          hint?: string | null
+          id?: string
+          meal_id?: string
+          snack_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nutrition_template_snacks_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "coach_food_database"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutrition_template_snacks_meal_id_fkey"
+            columns: ["meal_id"]
+            isOneToOne: false
+            referencedRelation: "nutrition_template_meals"
             referencedColumns: ["id"]
           },
         ]
@@ -543,6 +1085,7 @@ export type Database = {
       is_coach: { Args: { uid: string }; Returns: boolean }
     }
     Enums: {
+      drink_type: "water" | "tea" | "coffee" | "juice" | "isotonic" | "other"
       exercise_side: "both" | "left" | "right"
       load_type:
         | "barbell"
@@ -566,6 +1109,32 @@ export type Database = {
         | "rounds"
         | "cardio"
         | "mixed"
+      nutrition_day_type:
+        | "offday"
+        | "one_session"
+        | "two_sessions"
+        | "matchday_minus1"
+        | "matchday"
+      nutrition_food_category:
+        | "protein"
+        | "carb"
+        | "fat"
+        | "vegetable"
+        | "fruit"
+        | "sauce"
+        | "snack"
+        | "other"
+      nutrition_meal_log_source:
+        | "coach_plan"
+        | "photo"
+        | "barcode"
+        | "search"
+        | "manual"
+      nutrition_supplement_priority:
+        | "daily"
+        | "very_recommended"
+        | "pre_training"
+        | "post_training"
       sport_profile: "football" | "strength" | "endurance" | "other"
       user_role: "athlete" | "coach"
       workout_day_role: "paa_training" | "teamtraining_vm" | "teamtraining_nm"
@@ -718,6 +1287,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      drink_type: ["water", "tea", "coffee", "juice", "isotonic", "other"],
       exercise_side: ["both", "left", "right"],
       load_type: [
         "barbell",
@@ -742,6 +1312,36 @@ export const Constants = {
         "rounds",
         "cardio",
         "mixed",
+      ],
+      nutrition_day_type: [
+        "offday",
+        "one_session",
+        "two_sessions",
+        "matchday_minus1",
+        "matchday",
+      ],
+      nutrition_food_category: [
+        "protein",
+        "carb",
+        "fat",
+        "vegetable",
+        "fruit",
+        "sauce",
+        "snack",
+        "other",
+      ],
+      nutrition_meal_log_source: [
+        "coach_plan",
+        "photo",
+        "barcode",
+        "search",
+        "manual",
+      ],
+      nutrition_supplement_priority: [
+        "daily",
+        "very_recommended",
+        "pre_training",
+        "post_training",
       ],
       sport_profile: ["football", "strength", "endurance", "other"],
       user_role: ["athlete", "coach"],

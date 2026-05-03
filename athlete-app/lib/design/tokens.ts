@@ -36,6 +36,22 @@ export const color = {
   warning:      '#E6A23C',
   danger:       '#E55A4C',
 
+  // Makro-Farben (FEELY 1:1 — Eiweiß grün / Kohlenhydrate amber / Fett violett)
+  macroProtein:     '#10B981',
+  macroProteinDark: '#059669',
+  macroProteinA15:  'rgba(16, 185, 129, 0.15)',
+  macroProteinA08:  'rgba(16, 185, 129, 0.08)',
+
+  macroCarbs:       '#F59E0B',
+  macroCarbsDark:   '#D97706',
+  macroCarbsA15:    'rgba(245, 158, 11, 0.15)',
+  macroCarbsA08:    'rgba(245, 158, 11, 0.08)',
+
+  macroFat:         '#8B5CF6',
+  macroFatDark:     '#7C3AED',
+  macroFatA15:      'rgba(139, 92, 246, 0.15)',
+  macroFatA08:      'rgba(139, 92, 246, 0.08)',
+
   // Static rgba helpers (häufig genutzte Stops)
   goldA04:      'rgba(197, 165, 90, 0.04)',
   goldA10:      'rgba(197, 165, 90, 0.10)',

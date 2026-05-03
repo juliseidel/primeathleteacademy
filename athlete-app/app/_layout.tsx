@@ -150,6 +150,15 @@ function RootNav() {
           }}
         />
         <Stack.Screen
+          name="nutrition/meal/[slotKey]"
+          options={{
+            presentation: 'card',
+            headerShown: false,
+            animation: 'slide_from_right',
+            contentStyle: { backgroundColor: color.bg },
+          }}
+        />
+        <Stack.Screen
           name="modal"
           options={{
             presentation: 'modal',

@@ -48,23 +48,23 @@ const TRAINING_SUB_LABEL: Record<TrainingSubTab, string> = {
   fortschritt: 'Fortschritt',
 };
 
-const TRAINING_SUB_ORDER: TrainingSubTab[] = ['heute', 'woche', 'historie', 'fortschritt'];
+const TRAINING_SUB_ORDER: TrainingSubTab[] = ['heute', 'woche', 'fortschritt', 'historie'];
 
 const NUTRITION_SUB_ICON: Record<NutritionSubTab, IconPair> = {
-  heute:    { active: 'flash',    inactive: 'flash-outline' },
-  plan:     { active: 'list',     inactive: 'list-outline' },
-  matchday: { active: 'trophy',   inactive: 'trophy-outline' },
-  historie: { active: 'time',     inactive: 'time-outline' },
+  heute:        { active: 'flash',    inactive: 'flash-outline' },
+  plan:         { active: 'list',     inactive: 'list-outline' },
+  lebensmittel: { active: 'basket',   inactive: 'basket-outline' },
+  matchday:     { active: 'trophy',   inactive: 'trophy-outline' },
 };
 
 const NUTRITION_SUB_LABEL: Record<NutritionSubTab, string> = {
   heute: 'Heute',
   plan: 'Plan',
+  lebensmittel: 'Lebensmittel',
   matchday: 'Matchday',
-  historie: 'Historie',
 };
 
-const NUTRITION_SUB_ORDER: NutritionSubTab[] = ['heute', 'plan', 'matchday', 'historie'];
+const NUTRITION_SUB_ORDER: NutritionSubTab[] = ['heute', 'plan', 'lebensmittel', 'matchday'];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Bar geometry
