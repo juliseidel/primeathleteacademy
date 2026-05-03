@@ -78,15 +78,22 @@ export function FoodDetailSheet({
     fat: macrosPer100g.fat * factor,
   };
 
+  const isReadOnly = mode === 'view' && !onAdopt;
+
   const handlePrimary = () => {
+    if (isReadOnly) {
+      onClose();
+      return;
+    }
     if (mode === 'edit') onSave?.(amountG, servings);
     else if (mode === 'create') onSave?.(amountG, servings);
     else if (mode === 'view') onAdopt?.(amountG, servings);
     onClose();
   };
 
-  const primaryLabel =
-    mode === 'edit'
+  const primaryLabel = isReadOnly
+    ? `Schließen · ${Math.round(total.kcal)} kcal`
+    : mode === 'edit'
       ? `Speichern · ${Math.round(total.kcal)} kcal`
       : mode === 'create'
         ? `Hinzufügen · ${Math.round(total.kcal)} kcal`

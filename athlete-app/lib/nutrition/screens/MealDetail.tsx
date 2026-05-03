@@ -186,7 +186,14 @@ export default function MealDetailScreen() {
   // Sheet-State
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>(null);
 
-  // Aggregierte Slot-Macros (logged Items)
+  // Macros: Coach-Plan + selbst getrackt (wird zur Slot-Summe addiert)
+  const coachPlannedMacros = useMemo(() => {
+    if (!coachMeal) return { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+    const compMacros = coachMeal.components.map((c) => calcComponentMacros(c.food, Number(c.amount_g)));
+    const snackMacros = coachMeal.snacks.map((s) => calcComponentMacros(s.food, Number(s.amount_g)));
+    return sumMacros([...compMacros, ...snackMacros]);
+  }, [coachMeal]);
+
   const loggedMacros = useMemo(
     () =>
       sumMacros(
@@ -198,6 +205,11 @@ export default function MealDetailScreen() {
         })),
       ),
     [logQuery.data],
+  );
+
+  const totalMacros = useMemo(
+    () => sumMacros([coachPlannedMacros, loggedMacros]),
+    [coachPlannedMacros, loggedMacros],
   );
 
   const dayGoal = templateQuery.data?.target_kcal ?? 2500;
@@ -284,7 +296,7 @@ export default function MealDetailScreen() {
         </Pressable>
         <Text style={styles.headerTitle}>{label.toUpperCase()}</Text>
         <View style={styles.kcalPill}>
-          <Text style={styles.kcalNow}>{Math.round(loggedMacros.kcal)}</Text>
+          <Text style={styles.kcalNow}>{Math.round(totalMacros.kcal)}</Text>
           <Text style={styles.kcalGoal}> / {dayGoal} kcal</Text>
         </View>
       </View>
@@ -372,128 +384,120 @@ export default function MealDetailScreen() {
           </View>
         ) : (
           <>
-            {/* Nährwerte gesamt für diesen Slot */}
+            {/* Nährwerte gesamt für diesen Slot — Coach-Plan + selbst getrackt */}
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>NÄHRWERTE GESAMT</Text>
               <View style={styles.macroCard}>
                 <View style={styles.macroHeaderRow}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.macroBig}>
-                      {Math.round(loggedMacros.kcal)}
+                      {Math.round(totalMacros.kcal)}
                       <Text style={styles.macroUnit}> kcal</Text>
                     </Text>
                   </View>
                   <Text style={styles.macroGoalRight}>von {dayGoal} Tagesziel</Text>
                 </View>
 
-                <MacroBar label="Eiweiß" current={loggedMacros.protein} goal={proteinGoal} accent={color.macroProtein} />
-                <MacroBar label="Kohlenhydrate" current={loggedMacros.carbs} goal={carbsGoal} accent={color.macroCarbs} />
-                <MacroBar label="Fett" current={loggedMacros.fat} goal={fatGoal} accent={color.macroFat} />
+                <MacroBar label="Eiweiß" current={totalMacros.protein} goal={proteinGoal} accent={color.macroProtein} />
+                <MacroBar label="Kohlenhydrate" current={totalMacros.carbs} goal={carbsGoal} accent={color.macroCarbs} />
+                <MacroBar label="Fett" current={totalMacros.fat} goal={fatGoal} accent={color.macroFat} />
               </View>
             </View>
 
-            {/* Coach-Vorgabe — alle Items in EINER Card mit Bullet-Liste (FEELY-Style) */}
-            {coachMeal && (coachMeal.components.length > 0 || coachMeal.snacks.length > 0) ? (
+            {/* LEBENSMITTEL — Coach-Plan + selbst getrackte gemeinsam in einer Liste (FEELY 1:1) */}
+            {(coachMeal && (coachMeal.components.length > 0 || coachMeal.snacks.length > 0)) ||
+            (logQuery.data ?? []).length > 0 ? (
               <View style={styles.section}>
                 <View style={styles.sectionHeaderRow}>
-                  <Text style={styles.sectionLabel}>COACH-VORGABE</Text>
-                  {coachMeal.timing_hint ? (
+                  <Text style={styles.sectionLabel}>LEBENSMITTEL</Text>
+                  {coachMeal?.timing_hint ? (
                     <Text style={styles.sectionLabelSecondary}>· {coachMeal.timing_hint}</Text>
                   ) : null}
                 </View>
-                <View style={styles.coachCard}>
-                  {coachMeal.components.map((c, i) => {
+                <View style={styles.itemsCard}>
+                  {/* Coach-Plan-Items (zählen automatisch, read-only) */}
+                  {coachMeal?.components.map((c, i) => {
                     const macros = calcComponentMacros(c.food, Number(c.amount_g));
                     const name = c.food?.name ?? c.food_name_override ?? '—';
                     const amt = c.amount_display ?? `${Number(c.amount_g)}g`;
                     return (
-                      <Pressable
-                        key={c.id}
+                      <ItemRow
+                        key={`comp-${c.id}`}
+                        name={name}
+                        amount={amt}
+                        kcal={Math.round(macros.kcal)}
+                        protein={Math.round(macros.protein)}
+                        carbs={Math.round(macros.carbs)}
+                        fat={Math.round(macros.fat)}
+                        isCoach
+                        showDivider={i > 0}
                         onPress={() => setActiveSheet({ kind: 'coach', component: c, snack: null })}
-                        style={({ pressed }) => [styles.coachItem, i > 0 && styles.coachItemDivider, pressed && { opacity: 0.7 }]}
-                      >
-                        <View style={styles.coachBullet} />
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.coachItemName}>{name}</Text>
-                          <Text style={styles.coachItemMeta}>
-                            {amt} · {Math.round(macros.kcal)} kcal
-                          </Text>
-                        </View>
-                        <Text style={styles.coachItemMacros}>
-                          {Math.round(macros.protein)}P · {Math.round(macros.carbs)}C · {Math.round(macros.fat)}F
-                        </Text>
-                      </Pressable>
+                      />
                     );
                   })}
-                  {coachMeal.snacks.map((s, i) => {
+                  {coachMeal?.snacks.map((s, i) => {
                     const macros = calcComponentMacros(s.food, Number(s.amount_g));
                     const name = s.food?.name ?? s.food_name_override ?? '—';
                     const amt = s.amount_display ?? (Number(s.amount_g) > 0 ? `${Number(s.amount_g)}g` : '');
-                    const isFirst = coachMeal.components.length === 0 && i === 0;
+                    const isFirst = (coachMeal?.components.length ?? 0) === 0 && i === 0;
                     return (
-                      <Pressable
-                        key={s.id}
+                      <ItemRow
+                        key={`snack-${s.id}`}
+                        name={name}
+                        amount={amt}
+                        kcal={Math.round(macros.kcal)}
+                        protein={Math.round(macros.protein)}
+                        carbs={Math.round(macros.carbs)}
+                        fat={Math.round(macros.fat)}
+                        hint={s.hint ?? undefined}
+                        isCoach
+                        showDivider={!isFirst}
                         onPress={() => setActiveSheet({ kind: 'coach', component: null, snack: s })}
-                        style={({ pressed }) => [styles.coachItem, !isFirst && styles.coachItemDivider, pressed && { opacity: 0.7 }]}
-                      >
-                        <View style={styles.coachBullet} />
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.coachItemName}>{name}</Text>
-                          {amt || macros.kcal > 0 ? (
-                            <Text style={styles.coachItemMeta}>
-                              {[amt, macros.kcal > 0 ? `${Math.round(macros.kcal)} kcal` : null].filter(Boolean).join(' · ')}
-                            </Text>
-                          ) : null}
-                          {s.hint ? <Text style={styles.rowHint}>{s.hint}</Text> : null}
-                        </View>
-                        {macros.kcal > 0 ? (
-                          <Text style={styles.coachItemMacros}>
-                            {Math.round(macros.protein)}P · {Math.round(macros.carbs)}C · {Math.round(macros.fat)}F
-                          </Text>
-                        ) : null}
-                      </Pressable>
+                      />
                     );
                   })}
-                  {coachMeal.notes ? (
+                  {/* Athleten-getrackte Items (editierbar) */}
+                  {(logQuery.data ?? []).map((log, i) => {
+                    const isFirstOverall =
+                      (coachMeal?.components.length ?? 0) === 0 &&
+                      (coachMeal?.snacks.length ?? 0) === 0 &&
+                      i === 0;
+                    const meta = extractLogMeta(log);
+                    const amt = meta ? `${meta.amountG}g${meta.servings > 1 ? ` × ${meta.servings}` : ''}` : '';
+                    return (
+                      <ItemRow
+                        key={`log-${log.id}`}
+                        name={log.display_name}
+                        amount={amt}
+                        kcal={Math.round(Number(log.total_kcal ?? 0))}
+                        protein={Math.round(Number(log.total_protein_g ?? 0))}
+                        carbs={Math.round(Number(log.total_carbs_g ?? 0))}
+                        fat={Math.round(Number(log.total_fat_g ?? 0))}
+                        isCoach={false}
+                        showDivider={!isFirstOverall}
+                        onPress={() => setActiveSheet({ kind: 'log', log })}
+                      />
+                    );
+                  })}
+                  {coachMeal?.notes ? (
                     <View style={styles.coachNoteInner}>
                       <Ionicons name="chatbox-ellipses" size={11} color={color.textMuted} />
                       <Text style={styles.coachNoteText}>{coachMeal.notes}</Text>
                     </View>
                   ) : null}
                 </View>
+                {logQuery.isLoading ? (
+                  <ActivityIndicator color={color.text} style={{ marginTop: 8 }} />
+                ) : null}
               </View>
-            ) : null}
-
-            {/* Athleten-Log */}
-            <View style={styles.section}>
-              <Text style={styles.sectionLabel}>LEBENSMITTEL</Text>
-              {logQuery.isLoading ? (
-                <ActivityIndicator color={color.text} />
-              ) : (logQuery.data ?? []).length === 0 ? (
+            ) : (
+              <View style={styles.section}>
+                <Text style={styles.sectionLabel}>LEBENSMITTEL</Text>
                 <Text style={styles.emptyText}>
-                  Noch nichts getrackt. Suche oben oder übernimm die Coach-Vorgabe.
+                  Noch nichts geplant. Suche oben oder tippe ein neues Lebensmittel ein.
                 </Text>
-              ) : (
-                (logQuery.data ?? []).map((log) => (
-                  <Pressable
-                    key={log.id}
-                    onPress={() => setActiveSheet({ kind: 'log', log })}
-                    style={({ pressed }) => [styles.row, pressed && { opacity: 0.85 }]}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.rowName}>{log.display_name}</Text>
-                      <Text style={styles.rowNote}>
-                        {Math.round(Number(log.total_protein_g ?? 0))}P · {Math.round(Number(log.total_carbs_g ?? 0))}C · {Math.round(Number(log.total_fat_g ?? 0))}F
-                      </Text>
-                    </View>
-                    <View style={styles.rowRight}>
-                      <Text style={styles.rowKcal}>{Math.round(Number(log.total_kcal ?? 0))}</Text>
-                      <Text style={styles.rowPer}>kcal</Text>
-                    </View>
-                  </Pressable>
-                ))
-              )}
-            </View>
+              </View>
+            )}
           </>
         )}
       </ScrollView>
@@ -558,7 +562,7 @@ function SheetMount({
         visible={true}
         mode="view"
         name={food.name}
-        timeLabel="Coach-Vorgabe"
+        timeLabel="Coach-Vorgabe — zählt automatisch"
         macrosPer100g={{
           kcal: Number(food.kcal_per_100g),
           protein: Number(food.protein_per_100g),
@@ -567,7 +571,6 @@ function SheetMount({
         }}
         initialAmountG={Number(item.amount_g)}
         onClose={onClose}
-        onAdopt={onAdoptCoach}
       />
     );
   }
@@ -618,6 +621,66 @@ function SheetMount({
       onClose={onClose}
       onSave={onAddSearch}
     />
+  );
+}
+
+// ─── Lebensmittel-Item-Row (Coach + Logs, FEELY-Style) ─────────────
+
+function ItemRow({
+  name,
+  amount,
+  kcal,
+  protein,
+  carbs,
+  fat,
+  hint,
+  isCoach,
+  showDivider,
+  onPress,
+}: {
+  name: string;
+  amount: string;
+  kcal: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  hint?: string;
+  isCoach: boolean;
+  showDivider: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.itemRow, showDivider && styles.itemRowDivider, pressed && { opacity: 0.7 }]}
+    >
+      <View style={[styles.itemBullet, { backgroundColor: isCoach ? color.macroProtein : color.text }]} />
+      <View style={{ flex: 1, gap: 4 }}>
+        <Text style={styles.itemName}>{name}</Text>
+        {amount || kcal > 0 ? (
+          <Text style={styles.itemMeta}>
+            {[amount, kcal > 0 ? `${kcal} kcal` : null].filter(Boolean).join(' · ')}
+          </Text>
+        ) : null}
+        {protein + carbs + fat > 0 ? (
+          <View style={styles.itemDots}>
+            <MacroDot color={color.macroProtein} value={`${protein}g`} />
+            <MacroDot color={color.macroCarbs} value={`${carbs}g`} />
+            <MacroDot color={color.macroFat} value={`${fat}g`} />
+          </View>
+        ) : null}
+        {hint ? <Text style={styles.rowHint}>{hint}</Text> : null}
+      </View>
+    </Pressable>
+  );
+}
+
+function MacroDot({ color: c, value }: { color: string; value: string }) {
+  return (
+    <View style={styles.macroDotWrap}>
+      <View style={[styles.macroDot, { backgroundColor: c }]} />
+      <Text style={styles.macroDotValue}>{value}</Text>
+    </View>
   );
 }
 
@@ -943,50 +1006,64 @@ const styles = StyleSheet.create({
     minWidth: 38,
     textAlign: 'right',
   },
-  coachCard: {
-    paddingVertical: space[2],
+  itemsCard: {
     paddingHorizontal: space[5],
     borderRadius: radius.lg,
     backgroundColor: color.blackA40,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.06)',
   },
-  coachItem: {
+  itemRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: space[3],
-    paddingVertical: space[3],
+    paddingVertical: space[4],
   },
-  coachItemDivider: {
+  itemRowDivider: {
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(255,255,255,0.06)',
   },
-  coachBullet: {
+  itemBullet: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: color.macroProtein,
+    marginTop: 8,
   },
-  coachItemName: {
+  itemName: {
     fontFamily: font.family,
     fontSize: 15,
     fontWeight: '600',
     color: color.text,
     letterSpacing: -0.1,
   },
-  coachItemMeta: {
+  itemMeta: {
     fontFamily: font.family,
     fontSize: 12,
     color: color.textMuted,
-    marginTop: 2,
     letterSpacing: 0.1,
   },
-  coachItemMacros: {
+  itemDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[3],
+    marginTop: 2,
+  },
+  macroDotWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  macroDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  macroDotValue: {
     fontFamily: font.family,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
-    color: color.textMuted,
-    letterSpacing: 0.3,
+    color: color.text,
+    letterSpacing: 0.1,
   },
   coachNoteInner: {
     flexDirection: 'row',

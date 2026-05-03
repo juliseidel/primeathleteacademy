@@ -112,14 +112,15 @@ export function NutritionHeute() {
     );
   }, [mealLogQuery.data]);
 
-  // Pro Slot: kcal getrackt
-  const kcalBySlot = useMemo(() => {
-    const map = new Map<string, number>();
+  // Pro Slot: getrackte Logs
+  const logsBySlot = useMemo(() => {
+    const map = new Map<string, NonNullable<typeof mealLogQuery.data>>();
     for (const log of mealLogQuery.data ?? []) {
       const noteMatch = (log.notes ?? '').match(/__slot__:([\w-]+)/);
       const key = noteMatch?.[1];
       if (!key) continue;
-      map.set(key, (map.get(key) ?? 0) + Number(log.total_kcal ?? 0));
+      const existing = map.get(key) ?? [];
+      map.set(key, [...existing, log]);
     }
     return map;
   }, [mealLogQuery.data]);
@@ -193,7 +194,7 @@ export function NutritionHeute() {
                 index={idx + 1}
                 slotLabel={slot.label}
                 meal={slot.coachMeal}
-                loggedKcal={kcalBySlot.get(slotKey) ?? 0}
+                loggedItems={logsBySlot.get(slotKey) ?? []}
                 onOpen={goToDetail}
                 onAdd={goToDetail}
               />

@@ -1,304 +1,274 @@
 /**
- * MealSlotCard — Mahlzeit-Karte FEELY-Style mit vorausgefüllten Coach-Items.
+ * MealSlotCard — Mahlzeit-Karte FEELY-Style.
  *
  * Layout:
- *   Header: Index-Pill (gold) + Slot-Name + Timing-Hint + Plus-Button rechts
- *   Body:   Items vom Coach-Plan (Bullet + Name + Menge/kcal rechts)
- *   Footer: kcal-Summe + "+ Hinzufügen"
+ *   Header: Slot-Name links + "X kcal" + Plus-Button rechts
+ *   Body:   Items (Coach-Plan + Athleten-Logs) mit colored Macro-Dots
+ *   Footer: Hinzufügen-Hinweis ODER "Noch nichts geplant"
  *
- * Premium: gold-tinted Background-Hint, gold Hairline für Items.
+ * Total = Coach-Plan + Athleten-Logs (Coach zählt automatisch).
  */
 
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { color, font, radius, space } from '@/lib/design/tokens';
 import { calcComponentMacros, sumMacros } from '@/lib/nutrition/macroCalc';
+import { extractLogMeta, type MealLog } from '@/lib/nutrition/mealLogData';
 import type { FullMeal } from '@/lib/nutrition/nutritionData';
 
 type Props = {
   index: number;
   slotLabel: string;
   meal: FullMeal | null;
-  loggedKcal?: number;
+  loggedItems: MealLog[];
   onAdd?: () => void;
   onOpen?: () => void;
 };
 
-export function MealSlotCard({ index, slotLabel, meal, loggedKcal = 0, onAdd, onOpen }: Props) {
-  const componentMacros =
-    meal?.components.map((c) => calcComponentMacros(c.food, Number(c.amount_g))) ?? [];
-  const snackMacros =
-    meal?.snacks.map((s) => calcComponentMacros(s.food, Number(s.amount_g))) ?? [];
-  const total = sumMacros([...componentMacros, ...snackMacros]);
-  const hasItems = (meal?.components.length ?? 0) + (meal?.snacks.length ?? 0) > 0;
+type Row = {
+  key: string;
+  name: string;
+  amount: string;
+  kcal: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  isCoach: boolean;
+};
+
+export function MealSlotCard({ slotLabel, meal, loggedItems, onAdd, onOpen }: Props) {
+  // Coach-Macros
+  const componentRows: Row[] =
+    meal?.components.map((c) => {
+      const macros = calcComponentMacros(c.food, Number(c.amount_g));
+      return {
+        key: `comp-${c.id}`,
+        name: c.food?.name ?? c.food_name_override ?? '—',
+        amount: c.amount_display ?? `${Number(c.amount_g)}g`,
+        kcal: macros.kcal,
+        protein: macros.protein,
+        carbs: macros.carbs,
+        fat: macros.fat,
+        isCoach: true,
+      };
+    }) ?? [];
+  const snackRows: Row[] =
+    meal?.snacks.map((s) => {
+      const macros = calcComponentMacros(s.food, Number(s.amount_g));
+      return {
+        key: `snack-${s.id}`,
+        name: s.food?.name ?? s.food_name_override ?? '—',
+        amount: s.amount_display ?? (Number(s.amount_g) > 0 ? `${Number(s.amount_g)}g` : ''),
+        kcal: macros.kcal,
+        protein: macros.protein,
+        carbs: macros.carbs,
+        fat: macros.fat,
+        isCoach: true,
+      };
+    }) ?? [];
+
+  // Athleten-Logs (zeigen ALLE Items, auch wenn 0 macros)
+  const logRows: Row[] = loggedItems.map((log) => {
+    const meta = extractLogMeta(log);
+    const amt = meta ? `${meta.amountG}g${meta.servings > 1 ? ` × ${meta.servings}` : ''}` : '';
+    return {
+      key: `log-${log.id}`,
+      name: log.display_name,
+      amount: amt,
+      kcal: Number(log.total_kcal ?? 0),
+      protein: Number(log.total_protein_g ?? 0),
+      carbs: Number(log.total_carbs_g ?? 0),
+      fat: Number(log.total_fat_g ?? 0),
+      isCoach: false,
+    };
+  });
+
+  const allRows = [...componentRows, ...snackRows, ...logRows];
+  const totals = sumMacros(allRows);
+  const totalKcal = Math.round(totals.kcal);
+  const hasItems = allRows.length > 0;
 
   return (
-    <Pressable onPress={onOpen} style={({ pressed }) => [styles.cardOuter, pressed && { opacity: 0.92 }]}>
-      <LinearGradient
-        colors={['rgba(197,165,90,0.05)', 'rgba(197,165,90,0)']}
-        locations={[0, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFill}
-        pointerEvents="none"
-      />
-      <View style={styles.cardInner}>
-        <View style={styles.header}>
-          <View style={styles.indexPill}>
-            <Text style={styles.indexText}>{String(index).padStart(2, '0')}</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.slotLabel}>{slotLabel}</Text>
-            {meal?.timing_hint || (meal?.slot_label && meal.slot_label !== slotLabel) ? (
-              <Text style={styles.timing}>
-                {[meal?.slot_label !== slotLabel ? meal?.slot_label : null, meal?.timing_hint]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </Text>
-            ) : null}
-          </View>
+    <Pressable onPress={onOpen} style={({ pressed }) => [styles.card, pressed && { opacity: 0.92 }]}>
+      <View style={styles.header}>
+        <Text style={styles.slotLabel}>{slotLabel}</Text>
+        <View style={styles.headerRight}>
+          {totalKcal > 0 ? (
+            <Text style={styles.totalKcal}>{totalKcal} kcal</Text>
+          ) : null}
           <Pressable
             onPress={onAdd}
             style={({ pressed }) => [styles.plusBtn, pressed && { opacity: 0.7 }]}
             hitSlop={6}
           >
-            <Ionicons name="add" size={22} color={color.bg} />
-          </Pressable>
-        </View>
-
-        {hasItems && meal ? (
-          <View style={styles.itemsBlock}>
-            {meal.components.map((c, i) => {
-              const name = c.food?.name ?? c.food_name_override ?? '—';
-              const amt = c.amount_display ?? `${Number(c.amount_g)}g`;
-              const kcal = Math.round(componentMacros[i].kcal);
-              return (
-                <View key={c.id} style={styles.itemRow}>
-                  <View style={styles.bullet} />
-                  <Text style={styles.itemName} numberOfLines={1}>
-                    {name}
-                  </Text>
-                  <Text style={styles.itemAmount}>{amt}</Text>
-                  {kcal > 0 ? <Text style={styles.itemKcal}>· {kcal} kcal</Text> : null}
-                </View>
-              );
-            })}
-            {meal.snacks.map((s, i) => {
-              const name = s.food?.name ?? s.food_name_override ?? '—';
-              const amt = s.amount_display ?? (Number(s.amount_g) > 0 ? `${Number(s.amount_g)}g` : '');
-              const kcal = Math.round(snackMacros[i].kcal);
-              return (
-                <View key={s.id} style={styles.itemRow}>
-                  <View style={styles.bullet} />
-                  <Text style={styles.itemName} numberOfLines={1}>
-                    {name}
-                  </Text>
-                  {amt ? <Text style={styles.itemAmount}>{amt}</Text> : null}
-                  {kcal > 0 ? <Text style={styles.itemKcal}>· {kcal} kcal</Text> : null}
-                </View>
-              );
-            })}
-
-            {meal.notes ? (
-              <View style={styles.coachNote}>
-                <Ionicons name="chatbox-ellipses" size={11} color={color.text} />
-                <Text style={styles.coachNoteText}>{meal.notes}</Text>
-              </View>
-            ) : null}
-          </View>
-        ) : null}
-
-        <View style={styles.footer}>
-          <View style={styles.footerLeft}>
-            {loggedKcal > 0 ? (
-              <Text style={styles.totalKcal}>
-                {Math.round(loggedKcal)} <Text style={styles.totalKcalUnit}>kcal getrackt</Text>
-              </Text>
-            ) : total.kcal > 0 ? (
-              <>
-                <Text style={styles.totalKcal}>
-                  {Math.round(total.kcal)} <Text style={styles.totalKcalUnit}>kcal Vorgabe</Text>
-                </Text>
-                <Text style={styles.totalMacros}>
-                  {Math.round(total.protein)}P · {Math.round(total.carbs)}C · {Math.round(total.fat)}F
-                </Text>
-              </>
-            ) : (
-              <Text style={styles.emptyHint}>Noch nichts vom Coach geplant</Text>
-            )}
-          </View>
-          <Pressable onPress={onAdd} hitSlop={6} style={({ pressed }) => [pressed && { opacity: 0.6 }]}>
-            <Text style={styles.addLabel}>+ Hinzufügen</Text>
+            <Ionicons name="add" size={20} color={color.bg} />
           </Pressable>
         </View>
       </View>
+
+      {hasItems ? (
+        <View style={styles.itemsList}>
+          {allRows.map((row, i) => (
+            <View key={row.key} style={[styles.itemBlock, i > 0 && styles.itemBlockDivider]}>
+              <View style={styles.itemHeaderRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.itemName} numberOfLines={1}>
+                    {row.name}
+                  </Text>
+                  {row.amount ? <Text style={styles.itemAmount}>{row.amount}</Text> : null}
+                </View>
+                {row.kcal > 0 ? (
+                  <View style={styles.itemKcalWrap}>
+                    <Text style={styles.itemKcal}>{Math.round(row.kcal)}</Text>
+                    <Text style={styles.itemKcalUnit}>kcal</Text>
+                  </View>
+                ) : null}
+              </View>
+              {row.protein + row.carbs + row.fat > 0 ? (
+                <View style={styles.itemDots}>
+                  <MacroDot color={color.macroProtein} value={`${Math.round(row.protein)}g`} />
+                  <MacroDot color={color.macroCarbs} value={`${Math.round(row.carbs)}g`} />
+                  <MacroDot color={color.macroFat} value={`${Math.round(row.fat)}g`} />
+                </View>
+              ) : null}
+            </View>
+          ))}
+        </View>
+      ) : (
+        <Pressable onPress={onAdd} hitSlop={6} style={styles.emptyHintWrap}>
+          <Text style={styles.emptyHint}>+ Hinzufügen</Text>
+        </Pressable>
+      )}
     </Pressable>
   );
 }
 
+function MacroDot({ color: c, value }: { color: string; value: string }) {
+  return (
+    <View style={styles.macroDotWrap}>
+      <View style={[styles.macroDot, { backgroundColor: c }]} />
+      <Text style={styles.macroDotValue}>{value}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  cardOuter: {
-    borderRadius: radius.lg,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.10)',
-    backgroundColor: 'rgba(20,20,20,0.55)',
-  },
-  cardInner: {
+  card: {
     padding: space[5],
+    borderRadius: radius.lg,
+    backgroundColor: color.blackA40,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
     gap: space[4],
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: space[3],
+    justifyContent: 'space-between',
   },
-  indexPill: {
-    minWidth: 36,
-    height: 28,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    backgroundColor: color.whiteA08,
-    borderWidth: 1,
-    borderColor: color.whiteA15,
+  headerRight: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  indexText: {
-    fontFamily: font.family,
-    fontSize: 12,
-    fontWeight: '700',
-    color: color.text,
-    letterSpacing: 1.2,
+    gap: space[3],
   },
   slotLabel: {
     fontFamily: font.family,
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
     color: color.text,
     letterSpacing: -0.4,
   },
-  timing: {
+  totalKcal: {
     fontFamily: font.family,
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: '600',
-    color: color.text,
-    letterSpacing: 0.6,
-    marginTop: 2,
-    textTransform: 'uppercase',
+    color: color.textMuted,
+    letterSpacing: 0.1,
   },
   plusBtn: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     borderRadius: 12,
     backgroundColor: color.text,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  itemsBlock: {
-    gap: space[2],
-    paddingTop: space[2],
+  itemsList: {
+    gap: 0,
+  },
+  itemBlock: {
+    paddingVertical: space[3],
+    gap: 6,
+  },
+  itemBlockDivider: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255,255,255,0.10)',
+    borderTopColor: 'rgba(255,255,255,0.08)',
   },
-  itemRow: {
+  itemHeaderRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: space[2],
-  },
-  bullet: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: color.text,
+    alignItems: 'flex-start',
   },
   itemName: {
-    flex: 1,
     fontFamily: font.family,
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 15,
+    fontWeight: '600',
     color: color.text,
-    letterSpacing: 0.1,
+    letterSpacing: -0.1,
   },
   itemAmount: {
     fontFamily: font.family,
     fontSize: 12,
-    fontWeight: '600',
-    color: color.text,
+    color: color.textMuted,
+    marginTop: 2,
+  },
+  itemKcalWrap: {
+    alignItems: 'flex-end',
+    paddingLeft: space[3],
   },
   itemKcal: {
     fontFamily: font.family,
-    fontSize: 11,
-    fontWeight: '500',
-    color: color.textMuted,
-  },
-  coachNote: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: space[2],
-    paddingVertical: space[2],
-    paddingHorizontal: space[3],
-    borderRadius: radius.sm,
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.10)',
-    marginTop: space[1],
-  },
-  coachNoteText: {
-    flex: 1,
-    fontFamily: font.family,
-    fontSize: 11,
-    fontStyle: 'italic',
-    color: color.textMuted,
-    lineHeight: 15,
-    letterSpacing: 0.1,
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: space[2],
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255,255,255,0.06)',
-  },
-  footerLeft: {
-    flex: 1,
-  },
-  totalKcal: {
-    fontFamily: font.family,
-    fontSize: 15,
+    fontSize: 17,
     fontWeight: '700',
     color: color.text,
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
   },
-  totalKcalUnit: {
+  itemKcalUnit: {
     fontFamily: font.family,
-    fontSize: 11,
-    fontWeight: '500',
+    fontSize: 10,
     color: color.textMuted,
-    letterSpacing: 0.4,
+    marginTop: -2,
   },
-  totalMacros: {
+  itemDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[3],
+  },
+  macroDotWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  macroDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  macroDotValue: {
     fontFamily: font.family,
-    fontSize: 11,
-    fontWeight: '500',
-    color: color.textMuted,
-    marginTop: 2,
-    letterSpacing: 0.4,
+    fontSize: 12,
+    fontWeight: '600',
+    color: color.text,
+    letterSpacing: 0.1,
+  },
+  emptyHintWrap: {
+    paddingVertical: space[2],
   },
   emptyHint: {
     fontFamily: font.family,
-    fontSize: 12,
-    fontStyle: 'italic',
-    color: color.textDim,
-  },
-  addLabel: {
-    fontFamily: font.family,
     fontSize: 14,
-    fontWeight: '700',
-    color: color.text,
-    letterSpacing: 0.2,
+    fontWeight: '600',
+    color: color.macroProtein,
+    letterSpacing: 0.1,
   },
 });
