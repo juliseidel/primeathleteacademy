@@ -53,9 +53,12 @@ export type OffSearchResult = {
 export async function getProductByBarcode(
   barcode: string,
 ): Promise<{ success: true; product: OffProduct } | { success: false; error: string }> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
   try {
-    const res = await fetch(`${API_BASE}/product/${barcode}.json`, {
+    const res = await fetch(`${API_BASE}/product/${barcode}.json?lc=de&cc=de`, {
       headers: { 'User-Agent': USER_AGENT },
+      signal: controller.signal,
     });
     if (!res.ok) return { success: false, error: `API ${res.status}` };
 
@@ -91,7 +94,12 @@ export async function getProductByBarcode(
       },
     };
   } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      return { success: false, error: 'Zeitüberschreitung — bitte nochmal versuchen' };
+    }
     return { success: false, error: err instanceof Error ? err.message : 'Netzwerkfehler' };
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
@@ -102,6 +110,8 @@ export async function searchProducts(
 ): Promise<{ success: true; products: OffSearchResult[]; total: number } | { success: false; error: string }> {
   if (!query || query.length < 2) return { success: false, error: 'Suchbegriff zu kurz' };
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
   try {
     const params = new URLSearchParams({
       search_terms: query,
@@ -110,11 +120,17 @@ export async function searchProducts(
       json: '1',
       page: String(page),
       page_size: String(pageSize),
-      fields: 'code,product_name,product_name_de,brands,nutriments,nutriscore_grade,nova_group',
+      lc: 'de',
+      cc: 'de',
+      // Sortierung: Produkte mit besserem Datenstand priorisieren
+      sort_by: 'unique_scans_n',
+      fields:
+        'code,product_name,product_name_de,brands,nutriments,nutriscore_grade,nova_group,quantity',
     });
 
     const res = await fetch(`${SEARCH_BASE}?${params}`, {
       headers: { 'User-Agent': USER_AGENT },
+      signal: controller.signal,
     });
     if (!res.ok) return { success: false, error: `API ${res.status}` };
 
@@ -125,7 +141,7 @@ export async function searchProducts(
         return {
           id: String(p.code ?? ''),
           barcode: String(p.code ?? ''),
-          name: (p.product_name_de as string) || (p.product_name as string) || 'Unbekanntes Produkt',
+          name: (p.product_name_de as string) || (p.product_name as string) || '',
           brand: (p.brands as string) || '',
           energy_kcal: n['energy-kcal_100g'] ?? 0,
           protein: n.proteins_100g ?? 0,
@@ -138,11 +154,17 @@ export async function searchProducts(
           _source: 'openfoodfacts' as const,
         };
       })
-      .filter((p: OffSearchResult) => p.name && p.name !== 'Unbekanntes Produkt');
+      // Items ohne Name oder ohne Energie sind nutzlos für Tracking
+      .filter((p: OffSearchResult) => p.name.trim().length > 0 && p.energy_kcal > 0);
 
     return { success: true, products, total: data.count || products.length };
   } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      return { success: false, error: 'Zeitüberschreitung' };
+    }
     return { success: false, error: err instanceof Error ? err.message : 'Netzwerkfehler' };
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
