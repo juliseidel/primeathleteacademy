@@ -32,6 +32,7 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { todayLocalIso } from '@/lib/data/dates';
 import { color, font, radius, space } from '@/lib/design/tokens';
 import { searchBls } from '@/lib/nutrition/blsService';
+import { getProductByBarcode, searchProducts as searchOff, type OffProduct } from '@/lib/nutrition/OpenFoodFactsService';
 import { FoodDetailSheet } from '@/lib/nutrition/components/FoodDetailSheet';
 import { deriveDayType } from '@/lib/nutrition/dayType';
 import { calcComponentMacros, pct, sumMacros } from '@/lib/nutrition/macroCalc';
@@ -62,18 +63,29 @@ import { supabase } from '@/lib/supabase';
 import type { CoachFood } from '@/lib/nutrition/nutritionData';
 
 type SearchHit = {
-  source: 'coach' | 'bls';
+  source: 'coach' | 'bls' | 'off';
   id: string;
   name: string;
   note?: string | null;
   macrosPer100g: { kcal: number; protein: number; carbs: number; fat: number };
 };
 
+/** Mini-Hook: Wert wird erst nach `delay` ms aktualisiert (verhindert API-Spam beim Tippen) */
+function useDebounced<T>(value: T, delay: number): T {
+  const [v, setV] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setV(value), delay);
+    return () => clearTimeout(id);
+  }, [value, delay]);
+  return v;
+}
+
 type ActiveSheet =
   | { kind: 'coach'; component: TemplateComponent | null; snack: TemplateSnack | null }
   | { kind: 'log'; log: MealLog }
   | { kind: 'search'; hit: SearchHit }
   | { kind: 'quickPick'; item: QuickPickItem }
+  | { kind: 'scan'; product: OffProduct }
   | null;
 
 type DetailTab = 'meal' | 'recent' | 'frequent';
@@ -87,12 +99,14 @@ export default function MealDetailScreen() {
     coachMealId?: string;
     openItem?: string;
     openKind?: string;
+    openBarcode?: string;
   }>();
   const slotKey = params.slotKey ?? 'snack-x';
   const label = params.label ?? 'Mahlzeit';
   const coachMealId = params.coachMealId;
   const openItem = params.openItem;
   const openKind = params.openKind;
+  const openBarcode = params.openBarcode;
 
   const { session } = useAuth();
   const userId = session?.user.id;
@@ -139,6 +153,7 @@ export default function MealDetailScreen() {
   const [query, setQuery] = useState('');
   const trimmedQuery = query.trim();
   const showingSearch = trimmedQuery.length >= 2;
+  const debouncedQuery = useDebounced(trimmedQuery, 350);
 
   const coachSearchQuery = useQuery({
     queryKey: ['nutrition', 'coach-foods-search', trimmedQuery],
@@ -157,10 +172,28 @@ export default function MealDetailScreen() {
 
   const blsResults = useMemo(() => (showingSearch ? searchBls(trimmedQuery, 10) : []), [trimmedQuery, showingSearch]);
 
+  // Open Food Facts API (debounced 350ms, 5min Cache)
+  const offQuery = useQuery({
+    queryKey: ['off-search', debouncedQuery],
+    enabled: showingSearch && debouncedQuery.length >= 3,
+    queryFn: () => searchOff(debouncedQuery, 1, 15),
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+
+  // Vom Scanner gesetzte Cache-Eintrag (oder Live-Fetch falls noch nicht da)
+  const scannedQuery = useQuery({
+    queryKey: ['scanned-product', openBarcode],
+    enabled: !!openBarcode,
+    queryFn: () => getProductByBarcode(openBarcode!),
+    staleTime: Infinity,
+  });
+
   const searchHits: SearchHit[] = useMemo(() => {
     if (!showingSearch) return [];
     const seen = new Set<string>();
     const hits: SearchHit[] = [];
+    // 1. Coach-DB (höchste Priorität)
     for (const c of coachSearchQuery.data ?? []) {
       const key = c.name.toLowerCase();
       if (seen.has(key)) continue;
@@ -178,6 +211,7 @@ export default function MealDetailScreen() {
         },
       });
     }
+    // 2. BLS lokal (deutsche Basics)
     for (const b of blsResults) {
       const key = b.name.toLowerCase();
       if (seen.has(key)) continue;
@@ -195,11 +229,42 @@ export default function MealDetailScreen() {
         },
       });
     }
+    // 3. Open Food Facts (Marken-Produkte, ~360k weltweit)
+    if (offQuery.data?.success) {
+      for (const o of offQuery.data.products) {
+        const displayName = o.brand ? `${o.name} (${o.brand})` : o.name;
+        const key = displayName.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        hits.push({
+          source: 'off',
+          id: `off-${o.barcode}`,
+          name: displayName,
+          note: o.nutri_score ? `Nutri-Score ${o.nutri_score}` : null,
+          macrosPer100g: {
+            kcal: o.energy_kcal,
+            protein: o.protein,
+            carbs: o.carbs,
+            fat: o.fat,
+          },
+        });
+      }
+    }
     return hits;
-  }, [showingSearch, coachSearchQuery.data, blsResults]);
+  }, [showingSearch, coachSearchQuery.data, blsResults, offQuery.data]);
 
   // Sheet-State
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>(null);
+
+  // Auto-open Sheet wenn ein gescanntes Produkt vorliegt
+  useEffect(() => {
+    if (autoOpenedRef.current) return;
+    if (!openBarcode) return;
+    if (scannedQuery.data?.success) {
+      setActiveSheet({ kind: 'scan', product: scannedQuery.data.product });
+      autoOpenedRef.current = true;
+    }
+  }, [openBarcode, scannedQuery.data]);
 
   // Auto-open Sheet wenn ein Item via Heute-Tab Klick übergeben wurde
   useEffect(() => {
@@ -320,6 +385,24 @@ export default function MealDetailScreen() {
     });
   };
 
+  const handleAddScan = (amountG: number, servings: number) => {
+    if (!activeSheet || activeSheet.kind !== 'scan') return;
+    const p = activeSheet.product;
+    addMealMut.mutate({
+      slotKey,
+      displayName: p.brand ? `${p.name} (${p.brand})` : p.name,
+      source: 'barcode',
+      amountG,
+      servings,
+      macrosPer100g: {
+        kcal: p.nutrients.energy_kcal ?? 0,
+        protein: p.nutrients.protein ?? 0,
+        carbs: p.nutrients.carbs ?? 0,
+        fat: p.nutrients.fat ?? 0,
+      },
+    });
+  };
+
   const handleEditLog = (amountG: number, servings: number) => {
     if (!activeSheet || activeSheet.kind !== 'log') return;
     const meta = extractLogMeta(activeSheet.log);
@@ -377,7 +460,14 @@ export default function MealDetailScreen() {
           </View>
           <Pressable
             onPress={() =>
-              Alert.alert('Barcode-Scanner', 'Open Food Facts ist eingebunden — UI kommt in Welle 2.')
+              router.push({
+                pathname: '/nutrition/scan',
+                params: {
+                  slotKey,
+                  label,
+                  coachMealId: coachMealId ?? '',
+                },
+              })
             }
             style={({ pressed }) => [styles.barcodeBtn, pressed && { opacity: 0.7 }]}
           >
@@ -397,10 +487,26 @@ export default function MealDetailScreen() {
         {/* Such-Ergebnisse oder Standard-Layout */}
         {showingSearch ? (
           <View style={styles.searchResults}>
-            <Text style={styles.sectionLabel}>SUCHERGEBNISSE</Text>
-            {searchHits.length === 0 ? (
+            <View style={styles.searchHeaderRow}>
+              <Text style={styles.sectionLabel}>SUCHERGEBNISSE</Text>
+              {offQuery.isFetching && debouncedQuery.length >= 3 ? (
+                <View style={styles.searchLoadingRow}>
+                  <ActivityIndicator size="small" color={color.macroCarbs} />
+                  <Text style={styles.searchLoadingText}>Open Food Facts…</Text>
+                </View>
+              ) : null}
+            </View>
+            {offQuery.data && !offQuery.data.success && debouncedQuery.length >= 3 ? (
+              <View style={styles.offErrorBox}>
+                <Ionicons name="warning-outline" size={14} color={color.warning} />
+                <Text style={styles.offErrorText}>
+                  Open Food Facts: {offQuery.data.error}
+                </Text>
+              </View>
+            ) : null}
+            {searchHits.length === 0 && !offQuery.isFetching ? (
               <Text style={styles.emptyText}>Keine Treffer für „{query}".</Text>
-            ) : (
+            ) : searchHits.length === 0 ? null : (
               searchHits.map((hit) => (
                 <Pressable
                   key={hit.id}
@@ -410,8 +516,14 @@ export default function MealDetailScreen() {
                   <View style={{ flex: 1 }}>
                     <Text style={styles.rowName}>{hit.name}</Text>
                     {hit.note ? <Text style={styles.rowNote}>{hit.note}</Text> : null}
-                    <Text style={[styles.rowSource, hit.source === 'coach' && { color: color.macroProtein }]}>
-                      {hit.source === 'coach' ? 'COACH-DATENBANK' : 'BLS'}
+                    <Text
+                      style={[
+                        styles.rowSource,
+                        hit.source === 'coach' && { color: color.macroProtein },
+                        hit.source === 'off' && { color: color.macroCarbs },
+                      ]}
+                    >
+                      {hit.source === 'coach' ? 'COACH-DATENBANK' : hit.source === 'bls' ? 'BLS' : 'OPEN FOOD FACTS'}
                     </Text>
                   </View>
                   <View style={styles.rowRight}>
@@ -573,6 +685,7 @@ export default function MealDetailScreen() {
         onAdoptCoach={handleAdoptCoach}
         onAddSearch={handleAddSearch}
         onAddQuickPick={handleAddQuickPick}
+        onAddScan={handleAddScan}
         onEditLog={handleEditLog}
         onDeleteLog={handleDeleteLog}
         onSkipCoach={(kind, itemId) => skipCoachMut.mutate({ slotKey, kind, itemId })}
@@ -589,6 +702,7 @@ function SheetMount({
   onAdoptCoach,
   onAddSearch,
   onAddQuickPick,
+  onAddScan,
   onEditLog,
   onDeleteLog,
   onSkipCoach,
@@ -598,6 +712,7 @@ function SheetMount({
   onAdoptCoach: (amountG: number, servings: number) => void;
   onAddSearch: (amountG: number, servings: number) => void;
   onAddQuickPick: (amountG: number, servings: number) => void;
+  onAddScan: (amountG: number, servings: number) => void;
   onEditLog: (amountG: number, servings: number) => void;
   onDeleteLog: () => void;
   onSkipCoach: (kind: 'comp' | 'snack', itemId: string) => void;
@@ -666,13 +781,40 @@ function SheetMount({
     );
   }
 
+  if (activeSheet.kind === 'scan') {
+    const p = activeSheet.product;
+    return (
+      <FoodDetailSheet
+        visible={true}
+        mode="create"
+        name={p.brand ? `${p.name} (${p.brand})` : p.name}
+        timeLabel={`Barcode ${p.barcode}${p.quantity ? ' · ' + p.quantity : ''}`}
+        macrosPer100g={{
+          kcal: p.nutrients.energy_kcal ?? 0,
+          protein: p.nutrients.protein ?? 0,
+          carbs: p.nutrients.carbs ?? 0,
+          fat: p.nutrients.fat ?? 0,
+        }}
+        initialAmountG={100}
+        onClose={onClose}
+        onSave={onAddScan}
+      />
+    );
+  }
+
   // search
   return (
     <FoodDetailSheet
       visible={true}
       mode="create"
       name={activeSheet.hit.name}
-      timeLabel={activeSheet.hit.source === 'coach' ? 'Coach-Datenbank' : 'BLS-Datenbank'}
+      timeLabel={
+        activeSheet.hit.source === 'coach'
+          ? 'Coach-Datenbank'
+          : activeSheet.hit.source === 'bls'
+            ? 'BLS-Datenbank'
+            : 'Open Food Facts'
+      }
       macrosPer100g={activeSheet.hit.macrosPer100g}
       initialAmountG={100}
       onClose={onClose}
@@ -946,6 +1088,40 @@ const styles = StyleSheet.create({
   },
   searchResults: {
     gap: space[2],
+  },
+  searchHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  searchLoadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  searchLoadingText: {
+    fontFamily: font.family,
+    fontSize: 11,
+    color: color.textMuted,
+    letterSpacing: 0.4,
+  },
+  offErrorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[2],
+    paddingVertical: space[2],
+    paddingHorizontal: space[3],
+    borderRadius: radius.md,
+    backgroundColor: 'rgba(230, 162, 60, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(230, 162, 60, 0.20)',
+  },
+  offErrorText: {
+    flex: 1,
+    fontFamily: font.family,
+    fontSize: 12,
+    color: color.warning,
+    letterSpacing: 0.2,
   },
   tabsRow: {
     flexDirection: 'row',
