@@ -1,13 +1,49 @@
 /**
  * Open Food Facts Service — Barcode-Lookup + Text-Suche
  *
- * Adaptiert aus FEELY (services/OpenFoodFactsService.js).
- * Public API, kein Key nötig. Returns nutrients per 100g.
+ * Wir nutzen primär den neuen Search-A-Licious-Endpoint
+ * (https://search.openfoodfacts.org), weil das alte CGI-Search
+ * (cgi/search.pl) regelmäßig mit 503 antwortet. Search-A-Licious
+ * ist Elastic-Search-basiert, schneller und stabiler.
+ *
+ * Für Barcode-Lookups versuchen wir zuerst den klassischen v2-Endpoint
+ * (mehr Felder: Bilder, Zutaten, Allergene), fallen bei Fehler auf
+ * Search-A-Licious mit `q=code:<barcode>` zurück.
+ *
+ * Public API, kein Key nötig. Werte sind pro 100g.
  */
 
-const API_BASE = 'https://world.openfoodfacts.org/api/v2';
-const SEARCH_BASE = 'https://world.openfoodfacts.org/cgi/search.pl';
+const PRODUCT_API = 'https://world.openfoodfacts.org/api/v2';
+const SEARCH_API = 'https://search.openfoodfacts.org/search';
 const USER_AGENT = 'Prime Athlete Academy - Mobile - https://primeathleteacademy.de';
+
+type SalHit = {
+  code?: string;
+  product_name?: string;
+  product_name_de?: string;
+  brands?: string[];
+  quantity?: string;
+  image_front_url?: string;
+  image_front_small_url?: string;
+  ingredients_text_de?: string;
+  ingredients_text?: string;
+  allergens_tags?: string[];
+  nutriments?: Record<string, number | undefined>;
+  nutriscore_grade?: string;
+  nova_groups?: string | number;
+};
+
+function brandsToString(brands: string[] | string | undefined): string {
+  if (!brands) return '';
+  if (typeof brands === 'string') return brands;
+  return brands.join(', ');
+}
+
+function novaToNumber(nova: string | number | undefined): number | null {
+  if (nova == null) return null;
+  const n = typeof nova === 'string' ? Number(nova) : nova;
+  return Number.isFinite(n) ? n : null;
+}
 
 export type OffNutrients = {
   energy_kcal: number | null;
@@ -50,13 +86,50 @@ export type OffSearchResult = {
   _source: 'openfoodfacts';
 };
 
+function hitToOffProduct(barcode: string, h: SalHit): OffProduct {
+  const n = h.nutriments ?? {};
+  return {
+    barcode,
+    name: h.product_name_de || h.product_name || 'Unbekanntes Produkt',
+    brand: brandsToString(h.brands),
+    quantity: h.quantity || '',
+    image: h.image_front_url || null,
+    imageSmall: h.image_front_small_url || null,
+    nutrients: {
+      energy_kcal: n['energy-kcal_100g'] ?? null,
+      protein: n.proteins_100g ?? null,
+      carbs: n.carbohydrates_100g ?? null,
+      fat: n.fat_100g ?? null,
+      saturated_fat: n['saturated-fat_100g'] ?? null,
+      sugar: n.sugars_100g ?? null,
+      fiber: n.fiber_100g ?? null,
+      salt: n.salt_100g ?? null,
+    },
+    nutriscore_grade: h.nutriscore_grade?.toUpperCase() || null,
+    nova_group: novaToNumber(h.nova_groups),
+    ingredients_text: h.ingredients_text_de || h.ingredients_text || '',
+    allergens_tags: h.allergens_tags || [],
+  };
+}
+
 export async function getProductByBarcode(
   barcode: string,
 ): Promise<{ success: true; product: OffProduct } | { success: false; error: string }> {
+  // Erst der klassische v2-Endpoint (hat mehr Detail-Felder)
+  const v2Result = await tryProductV2(barcode);
+  if (v2Result.success) return v2Result;
+
+  // Fallback auf Search-A-Licious (stabiler, weniger Felder)
+  return tryProductViaSearch(barcode);
+}
+
+async function tryProductV2(
+  barcode: string,
+): Promise<{ success: true; product: OffProduct } | { success: false; error: string }> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
   try {
-    const res = await fetch(`${API_BASE}/product/${barcode}.json?lc=de&cc=de`, {
+    const res = await fetch(`${PRODUCT_API}/product/${barcode}.json?lc=de&cc=de`, {
       headers: { 'User-Agent': USER_AGENT },
       signal: controller.signal,
     });
@@ -64,7 +137,7 @@ export async function getProductByBarcode(
 
     const data = await res.json();
     if (data.status !== 1 || !data.product) {
-      return { success: false, error: 'Produkt nicht in Datenbank gefunden' };
+      return { success: false, error: 'not-found' };
     }
 
     const p = data.product;
@@ -95,6 +168,35 @@ export async function getProductByBarcode(
     };
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {
+      return { success: false, error: 'timeout' };
+    }
+    return { success: false, error: err instanceof Error ? err.message : 'network' };
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function tryProductViaSearch(
+  barcode: string,
+): Promise<{ success: true; product: OffProduct } | { success: false; error: string }> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
+  try {
+    const url = `${SEARCH_API}?q=code%3A${encodeURIComponent(barcode)}&page_size=1&langs=de`;
+    const res = await fetch(url, {
+      headers: { 'User-Agent': USER_AGENT },
+      signal: controller.signal,
+    });
+    if (!res.ok) return { success: false, error: `Search-API ${res.status}` };
+
+    const data = await res.json();
+    const hit: SalHit | undefined = data.hits?.[0];
+    if (!hit) {
+      return { success: false, error: 'Produkt nicht in Datenbank gefunden' };
+    }
+    return { success: true, product: hitToOffProduct(barcode, hit) };
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
       return { success: false, error: 'Zeitüberschreitung — bitte nochmal versuchen' };
     }
     return { success: false, error: err instanceof Error ? err.message : 'Netzwerkfehler' };
@@ -114,43 +216,36 @@ export async function searchProducts(
   const timeoutId = setTimeout(() => controller.abort(), 6000);
   try {
     const params = new URLSearchParams({
-      search_terms: query,
-      search_simple: '1',
-      action: 'process',
-      json: '1',
+      q: query,
       page: String(page),
       page_size: String(pageSize),
-      lc: 'de',
-      cc: 'de',
-      // Sortierung: Produkte mit besserem Datenstand priorisieren
-      sort_by: 'unique_scans_n',
-      fields:
-        'code,product_name,product_name_de,brands,nutriments,nutriscore_grade,nova_group,quantity',
+      langs: 'de',
     });
 
-    const res = await fetch(`${SEARCH_BASE}?${params}`, {
+    const res = await fetch(`${SEARCH_API}?${params}`, {
       headers: { 'User-Agent': USER_AGENT },
       signal: controller.signal,
     });
-    if (!res.ok) return { success: false, error: `API ${res.status}` };
+    if (!res.ok) return { success: false, error: `Search-API ${res.status}` };
 
     const data = await res.json();
-    const products: OffSearchResult[] = (data.products || [])
-      .map((p: Record<string, unknown>) => {
-        const n = (p.nutriments ?? {}) as Record<string, number | undefined>;
+    const hits: SalHit[] = data.hits || [];
+    const products: OffSearchResult[] = hits
+      .map((h) => {
+        const n = h.nutriments ?? {};
         return {
-          id: String(p.code ?? ''),
-          barcode: String(p.code ?? ''),
-          name: (p.product_name_de as string) || (p.product_name as string) || '',
-          brand: (p.brands as string) || '',
+          id: String(h.code ?? ''),
+          barcode: String(h.code ?? ''),
+          name: h.product_name_de || h.product_name || '',
+          brand: brandsToString(h.brands),
           energy_kcal: n['energy-kcal_100g'] ?? 0,
           protein: n.proteins_100g ?? 0,
           carbs: n.carbohydrates_100g ?? 0,
           fat: n.fat_100g ?? 0,
           sugar: n.sugars_100g ?? 0,
           salt: n.salt_100g ?? 0,
-          nutri_score: ((p.nutriscore_grade as string) || '').toUpperCase() || null,
-          nova_group: (p.nova_group as number) ?? null,
+          nutri_score: (h.nutriscore_grade || '').toUpperCase() || null,
+          nova_group: novaToNumber(h.nova_groups),
           _source: 'openfoodfacts' as const,
         };
       })

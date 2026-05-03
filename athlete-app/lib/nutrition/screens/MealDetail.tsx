@@ -496,6 +496,14 @@ export default function MealDetailScreen() {
                 </View>
               ) : null}
             </View>
+            {offQuery.data && !offQuery.data.success && debouncedQuery.length >= 3 ? (
+              <View style={styles.offErrorBox}>
+                <Ionicons name="warning-outline" size={14} color={color.warning} />
+                <Text style={styles.offErrorText}>
+                  Open Food Facts: {offQuery.data.error}
+                </Text>
+              </View>
+            ) : null}
             {searchHits.length === 0 && !offQuery.isFetching ? (
               <Text style={styles.emptyText}>Keine Treffer für „{query}".</Text>
             ) : searchHits.length === 0 ? null : (
@@ -1096,6 +1104,24 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: color.textMuted,
     letterSpacing: 0.4,
+  },
+  offErrorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[2],
+    paddingVertical: space[2],
+    paddingHorizontal: space[3],
+    borderRadius: radius.md,
+    backgroundColor: 'rgba(230, 162, 60, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(230, 162, 60, 0.20)',
+  },
+  offErrorText: {
+    flex: 1,
+    fontFamily: font.family,
+    fontSize: 12,
+    color: color.warning,
+    letterSpacing: 0.2,
   },
   tabsRow: {
     flexDirection: 'row',
