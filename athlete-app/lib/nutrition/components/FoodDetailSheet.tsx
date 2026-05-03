@@ -187,7 +187,7 @@ export function FoodDetailSheet({
           >
             <Text style={styles.primaryLabel}>{primaryLabel}</Text>
           </Pressable>
-          {mode === 'edit' && onDelete ? (
+          {onDelete ? (
             <Pressable
               onPress={() => {
                 onDelete();
@@ -195,7 +195,9 @@ export function FoodDetailSheet({
               }}
               style={({ pressed }) => [styles.deleteBtn, pressed && { opacity: 0.7 }]}
             >
-              <Text style={styles.deleteLabel}>Eintrag löschen</Text>
+              <Text style={styles.deleteLabel}>
+                {mode === 'view' ? 'Coach-Item entfernen' : 'Eintrag löschen'}
+              </Text>
             </Pressable>
           ) : null}
         </View>

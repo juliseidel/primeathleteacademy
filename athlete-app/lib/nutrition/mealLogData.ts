@@ -21,9 +21,21 @@ export type MealLog = Tables<'athlete_meal_log'>;
 export type SlotKey = string; // 'breakfast' | 'lunch' | 'dinner' | 'snack-1' | 'snack-2' | …
 
 const SLOT_NOTE_PREFIX = '__slot__:';
+const SKIP_NOTE_PREFIX = '__skip__:';
 
 function slotNoteFor(slotKey: SlotKey): string {
   return `${SLOT_NOTE_PREFIX}${slotKey}`;
+}
+
+function skipNoteFor(kind: 'comp' | 'snack', itemId: string, slotKey: SlotKey): string {
+  return `${SKIP_NOTE_PREFIX}${kind}:${itemId} ${slotNoteFor(slotKey)}`;
+}
+
+function parseSkipFromNotes(notes: string | null): { kind: 'comp' | 'snack'; itemId: string } | null {
+  if (!notes) return null;
+  const m = notes.match(/__skip__:(comp|snack):([\w-]+)/);
+  if (!m) return null;
+  return { kind: m[1] as 'comp' | 'snack', itemId: m[2] };
 }
 
 export function useMealLogForSlot(athleteId: string | undefined, dateIso: string, slotKey: SlotKey) {
@@ -38,6 +50,7 @@ export function useMealLogForSlot(athleteId: string | undefined, dateIso: string
         .eq('log_date', dateIso)
         .eq('is_deleted', false)
         .ilike('notes', `%${slotNoteFor(slotKey)}%`)
+        .not('notes', 'ilike', `%${SKIP_NOTE_PREFIX}%`)
         .order('log_time', { ascending: true });
       if (error) throw error;
       return data ?? [];
@@ -55,9 +68,89 @@ export function useMealLogForDate(athleteId: string | undefined, dateIso: string
         .select('*')
         .eq('athlete_id', athleteId!)
         .eq('log_date', dateIso)
-        .eq('is_deleted', false);
+        .eq('is_deleted', false)
+        .not('notes', 'ilike', `%${SKIP_NOTE_PREFIX}%`);
       if (error) throw error;
       return data ?? [];
+    },
+  });
+}
+
+/**
+ * Set der vom Athlet "weggeskippten" Coach-Items für ein Datum.
+ * Wird in NutritionHeute + MealDetail genutzt um geskippte Items
+ * aus der Anzeige + Macro-Summe zu filtern.
+ */
+export function useCoachSkipsForDate(athleteId: string | undefined, dateIso: string) {
+  return useQuery<{ comp: Set<string>; snack: Set<string> }>({
+    queryKey: ['meal-log', athleteId, dateIso, 'skips'],
+    enabled: !!athleteId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('athlete_meal_log')
+        .select('notes')
+        .eq('athlete_id', athleteId!)
+        .eq('log_date', dateIso)
+        .eq('is_deleted', false)
+        .ilike('notes', `%${SKIP_NOTE_PREFIX}%`);
+      if (error) throw error;
+      const comp = new Set<string>();
+      const snack = new Set<string>();
+      for (const row of data ?? []) {
+        const parsed = parseSkipFromNotes(row.notes);
+        if (!parsed) continue;
+        if (parsed.kind === 'comp') comp.add(parsed.itemId);
+        else snack.add(parsed.itemId);
+      }
+      return { comp, snack };
+    },
+  });
+}
+
+export function useSkipCoachItem(athleteId: string | undefined, dateIso: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (args: { slotKey: SlotKey; kind: 'comp' | 'snack'; itemId: string }) => {
+      if (!athleteId) throw new Error('Athlete-ID fehlt');
+      const notes = skipNoteFor(args.kind, args.itemId, args.slotKey);
+      const { error } = await supabase.from('athlete_meal_log').insert({
+        athlete_id: athleteId,
+        log_date: dateIso,
+        log_time: new Date().toTimeString().slice(0, 8),
+        source: 'manual',
+        display_name: '— Coach-Item übersprungen —',
+        components: [],
+        total_kcal: 0,
+        total_protein_g: 0,
+        total_carbs_g: 0,
+        total_fat_g: 0,
+        notes,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['meal-log', athleteId, dateIso] });
+    },
+  });
+}
+
+/** Skip rückgängig machen (Coach-Item wieder anzeigen). */
+export function useUnskipCoachItem(athleteId: string | undefined, dateIso: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (args: { kind: 'comp' | 'snack'; itemId: string }) => {
+      if (!athleteId) throw new Error('Athlete-ID fehlt');
+      const skipFragment = `${SKIP_NOTE_PREFIX}${args.kind}:${args.itemId}`;
+      const { error } = await supabase
+        .from('athlete_meal_log')
+        .update({ is_deleted: true })
+        .eq('athlete_id', athleteId)
+        .eq('log_date', dateIso)
+        .ilike('notes', `%${skipFragment}%`);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['meal-log', athleteId, dateIso] });
     },
   });
 }

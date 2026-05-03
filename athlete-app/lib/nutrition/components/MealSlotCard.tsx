@@ -22,15 +22,19 @@ type Props = {
   slotLabel: string;
   meal: FullMeal | null;
   loggedItems: MealLog[];
+  /** Skip-Set: Coach-Items mit IDs in diesen Sets werden ausgeblendet */
+  coachSkips?: { comp: Set<string>; snack: Set<string> };
   onAdd?: () => void;
   onOpen?: () => void;
   onItemPress?: (itemId: string, kind: 'coach' | 'log') => void;
+  onItemDelete?: (itemId: string, kind: 'coach-comp' | 'coach-snack' | 'log') => void;
 };
 
 type Row = {
   key: string;
   itemId: string;
   kind: 'coach' | 'log';
+  deleteKind: 'coach-comp' | 'coach-snack' | 'log';
   name: string;
   amount: string;
   kcal: number;
@@ -40,40 +44,49 @@ type Row = {
   isCoach: boolean;
 };
 
-export function MealSlotCard({ slotLabel, meal, loggedItems, onAdd, onOpen, onItemPress }: Props) {
-  // Coach-Macros
+export function MealSlotCard({ slotLabel, meal, loggedItems, coachSkips, onAdd, onOpen, onItemPress, onItemDelete }: Props) {
+  const skipComp = coachSkips?.comp ?? new Set<string>();
+  const skipSnack = coachSkips?.snack ?? new Set<string>();
+
+  // Coach-Macros (visible only)
   const componentRows: Row[] =
-    meal?.components.map((c) => {
-      const macros = calcComponentMacros(c.food, Number(c.amount_g));
-      return {
-        key: `comp-${c.id}`,
-        itemId: c.id,
-        kind: 'coach',
-        name: c.food?.name ?? c.food_name_override ?? '—',
-        amount: c.amount_display ?? `${Number(c.amount_g)}g`,
-        kcal: macros.kcal,
-        protein: macros.protein,
-        carbs: macros.carbs,
-        fat: macros.fat,
-        isCoach: true,
-      };
-    }) ?? [];
+    meal?.components
+      .filter((c) => !skipComp.has(c.id))
+      .map((c) => {
+        const macros = calcComponentMacros(c.food, Number(c.amount_g));
+        return {
+          key: `comp-${c.id}`,
+          itemId: c.id,
+          kind: 'coach' as const,
+          deleteKind: 'coach-comp' as const,
+          name: c.food?.name ?? c.food_name_override ?? '—',
+          amount: c.amount_display ?? `${Number(c.amount_g)}g`,
+          kcal: macros.kcal,
+          protein: macros.protein,
+          carbs: macros.carbs,
+          fat: macros.fat,
+          isCoach: true,
+        };
+      }) ?? [];
   const snackRows: Row[] =
-    meal?.snacks.map((s) => {
-      const macros = calcComponentMacros(s.food, Number(s.amount_g));
-      return {
-        key: `snack-${s.id}`,
-        itemId: s.id,
-        kind: 'coach',
-        name: s.food?.name ?? s.food_name_override ?? '—',
-        amount: s.amount_display ?? (Number(s.amount_g) > 0 ? `${Number(s.amount_g)}g` : ''),
-        kcal: macros.kcal,
-        protein: macros.protein,
-        carbs: macros.carbs,
-        fat: macros.fat,
-        isCoach: true,
-      };
-    }) ?? [];
+    meal?.snacks
+      .filter((s) => !skipSnack.has(s.id))
+      .map((s) => {
+        const macros = calcComponentMacros(s.food, Number(s.amount_g));
+        return {
+          key: `snack-${s.id}`,
+          itemId: s.id,
+          kind: 'coach' as const,
+          deleteKind: 'coach-snack' as const,
+          name: s.food?.name ?? s.food_name_override ?? '—',
+          amount: s.amount_display ?? (Number(s.amount_g) > 0 ? `${Number(s.amount_g)}g` : ''),
+          kcal: macros.kcal,
+          protein: macros.protein,
+          carbs: macros.carbs,
+          fat: macros.fat,
+          isCoach: true,
+        };
+      }) ?? [];
 
   // Athleten-Logs (zeigen ALLE Items, auch wenn 0 macros)
   const logRows: Row[] = loggedItems.map((log) => {
@@ -82,7 +95,8 @@ export function MealSlotCard({ slotLabel, meal, loggedItems, onAdd, onOpen, onIt
     return {
       key: `log-${log.id}`,
       itemId: log.id,
-      kind: 'log',
+      kind: 'log' as const,
+      deleteKind: 'log' as const,
       name: log.display_name,
       amount: amt,
       kcal: Number(log.total_kcal ?? 0),
@@ -119,33 +133,43 @@ export function MealSlotCard({ slotLabel, meal, loggedItems, onAdd, onOpen, onIt
       {hasItems ? (
         <View style={styles.itemsList}>
           {allRows.map((row, i) => (
-            <Pressable
-              key={row.key}
-              onPress={() => onItemPress?.(row.itemId, row.kind)}
-              style={({ pressed }) => [styles.itemBlock, i > 0 && styles.itemBlockDivider, pressed && { opacity: 0.6 }]}
-            >
-              <View style={styles.itemHeaderRow}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.itemName} numberOfLines={1}>
-                    {row.name}
-                  </Text>
-                  {row.amount ? <Text style={styles.itemAmount}>{row.amount}</Text> : null}
+            <View key={row.key} style={[styles.itemBlockOuter, i > 0 && styles.itemBlockDivider]}>
+              <Pressable
+                onPress={() => onItemPress?.(row.itemId, row.kind)}
+                style={({ pressed }) => [styles.itemBlock, pressed && { opacity: 0.6 }]}
+              >
+                <View style={styles.itemHeaderRow}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.itemName} numberOfLines={1}>
+                      {row.name}
+                    </Text>
+                    {row.amount ? <Text style={styles.itemAmount}>{row.amount}</Text> : null}
+                  </View>
+                  {row.kcal > 0 ? (
+                    <View style={styles.itemKcalWrap}>
+                      <Text style={styles.itemKcal}>{Math.round(row.kcal)}</Text>
+                      <Text style={styles.itemKcalUnit}>kcal</Text>
+                    </View>
+                  ) : null}
                 </View>
-                {row.kcal > 0 ? (
-                  <View style={styles.itemKcalWrap}>
-                    <Text style={styles.itemKcal}>{Math.round(row.kcal)}</Text>
-                    <Text style={styles.itemKcalUnit}>kcal</Text>
+                {row.protein + row.carbs + row.fat > 0 ? (
+                  <View style={styles.itemDots}>
+                    <MacroDot color={color.macroProtein} value={`${Math.round(row.protein)}g`} />
+                    <MacroDot color={color.macroCarbs} value={`${Math.round(row.carbs)}g`} />
+                    <MacroDot color={color.macroFat} value={`${Math.round(row.fat)}g`} />
                   </View>
                 ) : null}
-              </View>
-              {row.protein + row.carbs + row.fat > 0 ? (
-                <View style={styles.itemDots}>
-                  <MacroDot color={color.macroProtein} value={`${Math.round(row.protein)}g`} />
-                  <MacroDot color={color.macroCarbs} value={`${Math.round(row.carbs)}g`} />
-                  <MacroDot color={color.macroFat} value={`${Math.round(row.fat)}g`} />
-                </View>
+              </Pressable>
+              {onItemDelete ? (
+                <Pressable
+                  onPress={() => onItemDelete(row.itemId, row.deleteKind)}
+                  hitSlop={10}
+                  style={({ pressed }) => [styles.itemDeleteBtn, pressed && { opacity: 0.5 }]}
+                >
+                  <Ionicons name="close-circle" size={22} color={color.textMuted} />
+                </Pressable>
               ) : null}
-            </Pressable>
+            </View>
           ))}
         </View>
       ) : (
@@ -210,13 +234,24 @@ const styles = StyleSheet.create({
   itemsList: {
     gap: 0,
   },
+  itemBlockOuter: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
   itemBlock: {
+    flex: 1,
     paddingVertical: space[3],
     gap: 6,
   },
   itemBlockDivider: {
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(255,255,255,0.08)',
+  },
+  itemDeleteBtn: {
+    paddingVertical: space[3],
+    paddingLeft: space[2],
+    alignSelf: 'stretch',
+    justifyContent: 'center',
   },
   itemHeaderRow: {
     flexDirection: 'row',

@@ -38,10 +38,12 @@ import { calcComponentMacros, pct, sumMacros } from '@/lib/nutrition/macroCalc';
 import {
   extractLogMeta,
   useAddMealLog,
+  useCoachSkipsForDate,
   useDeleteMealLog,
   useFrequentLogs,
   useMealLogForSlot,
   useRecentLogs,
+  useSkipCoachItem,
   useUpdateMealLog,
   type MealLog,
   type QuickPickItem,
@@ -122,6 +124,8 @@ export default function MealDetailScreen() {
   const addMealMut = useAddMealLog(userId, todayIso);
   const updateMealMut = useUpdateMealLog(userId, todayIso);
   const deleteMealMut = useDeleteMealLog(userId, todayIso);
+  const coachSkipsQuery = useCoachSkipsForDate(userId, todayIso);
+  const skipCoachMut = useSkipCoachItem(userId, todayIso);
 
   // Tabs (Mahlzeit / Zuletzt / Häufig — analog FEELY)
   const [activeTab, setActiveTab] = useState<DetailTab>('meal');
@@ -222,13 +226,23 @@ export default function MealDetailScreen() {
     }
   }, [openItem, openKind, logQuery.data, coachMeal]);
 
-  // Macros: Coach-Plan + selbst getrackt (wird zur Slot-Summe addiert)
+  // Skip-Set: vom Athleten weggeklickte Coach-Items
+  const skips = coachSkipsQuery.data ?? { comp: new Set<string>(), snack: new Set<string>() };
+  const visibleComponents = useMemo(
+    () => coachMeal?.components.filter((c) => !skips.comp.has(c.id)) ?? [],
+    [coachMeal, skips.comp],
+  );
+  const visibleSnacks = useMemo(
+    () => coachMeal?.snacks.filter((s) => !skips.snack.has(s.id)) ?? [],
+    [coachMeal, skips.snack],
+  );
+
+  // Macros: Coach-Plan (ohne geskippte) + selbst getrackt
   const coachPlannedMacros = useMemo(() => {
-    if (!coachMeal) return { kcal: 0, protein: 0, carbs: 0, fat: 0 };
-    const compMacros = coachMeal.components.map((c) => calcComponentMacros(c.food, Number(c.amount_g)));
-    const snackMacros = coachMeal.snacks.map((s) => calcComponentMacros(s.food, Number(s.amount_g)));
+    const compMacros = visibleComponents.map((c) => calcComponentMacros(c.food, Number(c.amount_g)));
+    const snackMacros = visibleSnacks.map((s) => calcComponentMacros(s.food, Number(s.amount_g)));
     return sumMacros([...compMacros, ...snackMacros]);
-  }, [coachMeal]);
+  }, [visibleComponents, visibleSnacks]);
 
   const loggedMacros = useMemo(
     () =>
@@ -440,8 +454,9 @@ export default function MealDetailScreen() {
               </View>
             </View>
 
-            {/* LEBENSMITTEL — Coach-Plan + selbst getrackte gemeinsam in einer Liste (FEELY 1:1) */}
-            {(coachMeal && (coachMeal.components.length > 0 || coachMeal.snacks.length > 0)) ||
+            {/* LEBENSMITTEL — Coach-Plan (ohne geskippte) + selbst getrackt in einer Liste */}
+            {visibleComponents.length > 0 ||
+            visibleSnacks.length > 0 ||
             (logQuery.data ?? []).length > 0 ? (
               <View style={styles.section}>
                 <View style={styles.sectionHeaderRow}>
@@ -452,7 +467,7 @@ export default function MealDetailScreen() {
                 </View>
                 <View style={styles.itemsCard}>
                   {/* Coach-Plan-Items (zählen automatisch, read-only) */}
-                  {coachMeal?.components.map((c, i) => {
+                  {visibleComponents.map((c, i) => {
                     const macros = calcComponentMacros(c.food, Number(c.amount_g));
                     const name = c.food?.name ?? c.food_name_override ?? '—';
                     const amt = c.amount_display ?? `${Number(c.amount_g)}g`;
@@ -468,14 +483,15 @@ export default function MealDetailScreen() {
                         isCoach
                         showDivider={i > 0}
                         onPress={() => setActiveSheet({ kind: 'coach', component: c, snack: null })}
+                        onDelete={() => skipCoachMut.mutate({ slotKey, kind: 'comp', itemId: c.id })}
                       />
                     );
                   })}
-                  {coachMeal?.snacks.map((s, i) => {
+                  {visibleSnacks.map((s, i) => {
                     const macros = calcComponentMacros(s.food, Number(s.amount_g));
                     const name = s.food?.name ?? s.food_name_override ?? '—';
                     const amt = s.amount_display ?? (Number(s.amount_g) > 0 ? `${Number(s.amount_g)}g` : '');
-                    const isFirst = (coachMeal?.components.length ?? 0) === 0 && i === 0;
+                    const isFirst = visibleComponents.length === 0 && i === 0;
                     return (
                       <ItemRow
                         key={`snack-${s.id}`}
@@ -489,15 +505,14 @@ export default function MealDetailScreen() {
                         isCoach
                         showDivider={!isFirst}
                         onPress={() => setActiveSheet({ kind: 'coach', component: null, snack: s })}
+                        onDelete={() => skipCoachMut.mutate({ slotKey, kind: 'snack', itemId: s.id })}
                       />
                     );
                   })}
                   {/* Athleten-getrackte Items (editierbar) */}
                   {(logQuery.data ?? []).map((log, i) => {
                     const isFirstOverall =
-                      (coachMeal?.components.length ?? 0) === 0 &&
-                      (coachMeal?.snacks.length ?? 0) === 0 &&
-                      i === 0;
+                      visibleComponents.length === 0 && visibleSnacks.length === 0 && i === 0;
                     const meta = extractLogMeta(log);
                     const amt = meta ? `${meta.amountG}g${meta.servings > 1 ? ` × ${meta.servings}` : ''}` : '';
                     return (
@@ -512,6 +527,7 @@ export default function MealDetailScreen() {
                         isCoach={false}
                         showDivider={!isFirstOverall}
                         onPress={() => setActiveSheet({ kind: 'log', log })}
+                        onDelete={() => deleteMealMut.mutate(log.id)}
                       />
                     );
                   })}
@@ -559,6 +575,7 @@ export default function MealDetailScreen() {
         onAddQuickPick={handleAddQuickPick}
         onEditLog={handleEditLog}
         onDeleteLog={handleDeleteLog}
+        onSkipCoach={(kind, itemId) => skipCoachMut.mutate({ slotKey, kind, itemId })}
       />
     </View>
   );
@@ -574,6 +591,7 @@ function SheetMount({
   onAddQuickPick,
   onEditLog,
   onDeleteLog,
+  onSkipCoach,
 }: {
   activeSheet: ActiveSheet;
   onClose: () => void;
@@ -582,6 +600,7 @@ function SheetMount({
   onAddQuickPick: (amountG: number, servings: number) => void;
   onEditLog: (amountG: number, servings: number) => void;
   onDeleteLog: () => void;
+  onSkipCoach: (kind: 'comp' | 'snack', itemId: string) => void;
 }) {
   if (!activeSheet) {
     return <FoodDetailSheet visible={false} mode="view" name="" macrosPer100g={{ kcal: 0, protein: 0, carbs: 0, fat: 0 }} initialAmountG={100} onClose={onClose} />;
@@ -593,6 +612,7 @@ function SheetMount({
     if (!item || !food) {
       return null;
     }
+    const kind: 'comp' | 'snack' = activeSheet.component ? 'comp' : 'snack';
     return (
       <FoodDetailSheet
         visible={true}
@@ -607,6 +627,7 @@ function SheetMount({
         }}
         initialAmountG={Number(item.amount_g)}
         onClose={onClose}
+        onDelete={() => onSkipCoach(kind, item.id)}
       />
     );
   }
@@ -673,6 +694,7 @@ function ItemRow({
   isCoach,
   showDivider,
   onPress,
+  onDelete,
 }: {
   name: string;
   amount: string;
@@ -684,30 +706,42 @@ function ItemRow({
   isCoach: boolean;
   showDivider: boolean;
   onPress: () => void;
+  onDelete?: () => void;
 }) {
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [styles.itemRow, showDivider && styles.itemRowDivider, pressed && { opacity: 0.7 }]}
-    >
-      <View style={[styles.itemBullet, { backgroundColor: isCoach ? color.macroProtein : color.text }]} />
-      <View style={{ flex: 1, gap: 4 }}>
-        <Text style={styles.itemName}>{name}</Text>
-        {amount || kcal > 0 ? (
-          <Text style={styles.itemMeta}>
-            {[amount, kcal > 0 ? `${kcal} kcal` : null].filter(Boolean).join(' · ')}
-          </Text>
-        ) : null}
-        {protein + carbs + fat > 0 ? (
-          <View style={styles.itemDots}>
-            <MacroDot color={color.macroProtein} value={`${protein}g`} />
-            <MacroDot color={color.macroCarbs} value={`${carbs}g`} />
-            <MacroDot color={color.macroFat} value={`${fat}g`} />
-          </View>
-        ) : null}
-        {hint ? <Text style={styles.rowHint}>{hint}</Text> : null}
-      </View>
-    </Pressable>
+    <View style={[styles.itemRowOuter, showDivider && styles.itemRowDivider]}>
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [styles.itemRowMain, pressed && { opacity: 0.6 }]}
+      >
+        <View style={[styles.itemBullet, { backgroundColor: isCoach ? color.macroProtein : color.text }]} />
+        <View style={{ flex: 1, gap: 4 }}>
+          <Text style={styles.itemName}>{name}</Text>
+          {amount || kcal > 0 ? (
+            <Text style={styles.itemMeta}>
+              {[amount, kcal > 0 ? `${kcal} kcal` : null].filter(Boolean).join(' · ')}
+            </Text>
+          ) : null}
+          {protein + carbs + fat > 0 ? (
+            <View style={styles.itemDots}>
+              <MacroDot color={color.macroProtein} value={`${protein}g`} />
+              <MacroDot color={color.macroCarbs} value={`${carbs}g`} />
+              <MacroDot color={color.macroFat} value={`${fat}g`} />
+            </View>
+          ) : null}
+          {hint ? <Text style={styles.rowHint}>{hint}</Text> : null}
+        </View>
+      </Pressable>
+      {onDelete ? (
+        <Pressable
+          onPress={onDelete}
+          hitSlop={10}
+          style={({ pressed }) => [styles.itemDeleteBtn, pressed && { opacity: 0.5 }]}
+        >
+          <Ionicons name="close-circle" size={22} color={color.textMuted} />
+        </Pressable>
+      ) : null}
+    </View>
   );
 }
 
@@ -1049,7 +1083,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.06)',
   },
-  itemRow: {
+  itemRowOuter: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  itemRowMain: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: space[3],
@@ -1058,6 +1097,12 @@ const styles = StyleSheet.create({
   itemRowDivider: {
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(255,255,255,0.06)',
+  },
+  itemDeleteBtn: {
+    paddingVertical: space[4],
+    paddingLeft: space[2],
+    alignSelf: 'stretch',
+    justifyContent: 'center',
   },
   itemBullet: {
     width: 6,

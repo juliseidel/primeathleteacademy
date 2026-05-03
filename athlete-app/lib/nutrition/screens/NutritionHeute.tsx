@@ -24,7 +24,7 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { todayLocalIso } from '@/lib/data/dates';
 import { color, font, radius, space } from '@/lib/design/tokens';
 import { deriveDayType } from '@/lib/nutrition/dayType';
-import { sumMacros } from '@/lib/nutrition/macroCalc';
+import { calcComponentMacros, sumMacros } from '@/lib/nutrition/macroCalc';
 import { DailyRoutineCard } from '@/lib/nutrition/components/DailyRoutineCard';
 import { FoodDetailSheet } from '@/lib/nutrition/components/FoodDetailSheet';
 import { MealSlotCard } from '@/lib/nutrition/components/MealSlotCard';
@@ -32,8 +32,10 @@ import { OverviewCard } from '@/lib/nutrition/components/OverviewCard';
 import { WeekCalendar } from '@/lib/nutrition/components/WeekCalendar';
 import {
   extractLogMeta,
+  useCoachSkipsForDate,
   useDeleteMealLog,
   useMealLogForDate,
+  useSkipCoachItem,
   useUpdateMealLog,
   type MealLog,
 } from '@/lib/nutrition/mealLogData';
@@ -110,6 +112,10 @@ export function NutritionHeute() {
   const mealLogQuery = useMealLogForDate(userId, todayIso);
   const updateMealMut = useUpdateMealLog(userId, todayIso);
   const deleteMealMut = useDeleteMealLog(userId, todayIso);
+  const coachSkipsQuery = useCoachSkipsForDate(userId, todayIso);
+  const skipCoachMut = useSkipCoachItem(userId, todayIso);
+
+  const skips = coachSkipsQuery.data ?? { comp: new Set<string>(), snack: new Set<string>() };
 
   // Sheet-State für inline Item-Detail (kein Navigieren — Sheet öffnet direkt im Heute-Tab)
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>(null);
@@ -162,21 +168,75 @@ export function NutritionHeute() {
     deleteMealMut.mutate(activeSheet.log.id);
   };
 
+  const handleSkipCoachFromSheet = () => {
+    if (activeSheet?.kind !== 'coach') return;
+    // Im Heute-Tab brauchen wir den slotKey — den ermitteln wir aus dem Item via Suche
+    if (!template) return;
+    for (let idx = 0; idx < standardSlots.length; idx++) {
+      const slot = standardSlots[idx];
+      const slotKey = slotKeyFor(slot.label, idx);
+      const compMatch = slot.coachMeal?.components.some((c) => c.food?.id === activeSheet.food.id);
+      const snackMatch = slot.coachMeal?.snacks.some((s) => s.food?.id === activeSheet.food.id);
+      if (compMatch) {
+        const comp = slot.coachMeal!.components.find((c) => c.food?.id === activeSheet.food.id)!;
+        skipCoachMut.mutate({ slotKey, kind: 'comp', itemId: comp.id });
+        return;
+      }
+      if (snackMatch) {
+        const snack = slot.coachMeal!.snacks.find((s) => s.food?.id === activeSheet.food.id)!;
+        skipCoachMut.mutate({ slotKey, kind: 'snack', itemId: snack.id });
+        return;
+      }
+    }
+  };
+
+  const handleItemDelete = (slot: { label: string; coachMeal: FullMeal | null }, slotIdx: number) =>
+    (itemId: string, kind: 'coach-comp' | 'coach-snack' | 'log') => {
+      const slotKey = slotKeyFor(slot.label, slotIdx);
+      if (kind === 'log') {
+        deleteMealMut.mutate(itemId);
+      } else if (kind === 'coach-comp') {
+        skipCoachMut.mutate({ slotKey, kind: 'comp', itemId });
+      } else if (kind === 'coach-snack') {
+        skipCoachMut.mutate({ slotKey, kind: 'snack', itemId });
+      }
+    };
+
   const template = templateQuery.data;
 
   const standardSlots = useMemo(() => mapToStandardSlots(template?.meals ?? []), [template]);
 
-  // Aggregierte Tages-Macros aus athlete_meal_log
-  const eatenMacros = useMemo(() => {
-    return sumMacros(
-      (mealLogQuery.data ?? []).map((l) => ({
-        kcal: Number(l.total_kcal ?? 0),
-        protein: Number(l.total_protein_g ?? 0),
-        carbs: Number(l.total_carbs_g ?? 0),
-        fat: Number(l.total_fat_g ?? 0),
-      })),
-    );
-  }, [mealLogQuery.data]);
+  // Aggregierte Tages-Macros: Coach-Plan (ohne geskippte) + selbst getrackt
+  const loggedMacros = useMemo(
+    () =>
+      sumMacros(
+        (mealLogQuery.data ?? []).map((l) => ({
+          kcal: Number(l.total_kcal ?? 0),
+          protein: Number(l.total_protein_g ?? 0),
+          carbs: Number(l.total_carbs_g ?? 0),
+          fat: Number(l.total_fat_g ?? 0),
+        })),
+      ),
+    [mealLogQuery.data],
+  );
+
+  const coachPlannedMacros = useMemo(() => {
+    if (!template) return { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+    const all = template.meals.flatMap((meal) => [
+      ...meal.components
+        .filter((c) => !skips.comp.has(c.id))
+        .map((c) => calcComponentMacros(c.food, Number(c.amount_g))),
+      ...meal.snacks
+        .filter((s) => !skips.snack.has(s.id))
+        .map((s) => calcComponentMacros(s.food, Number(s.amount_g))),
+    ]);
+    return sumMacros(all);
+  }, [template, skips.comp, skips.snack]);
+
+  const eatenMacros = useMemo(
+    () => sumMacros([loggedMacros, coachPlannedMacros]),
+    [loggedMacros, coachPlannedMacros],
+  );
 
   // Pro Slot: getrackte Logs
   const logsBySlot = useMemo(() => {
@@ -262,9 +322,11 @@ export function NutritionHeute() {
                 slotLabel={slot.label}
                 meal={slot.coachMeal}
                 loggedItems={logsBySlot.get(slotKey) ?? []}
+                coachSkips={skips}
                 onOpen={goToDetail}
                 onAdd={goToDetail}
                 onItemPress={handleItemPress}
+                onItemDelete={handleItemDelete(slot, idx)}
               />
             );
           })}
@@ -315,6 +377,7 @@ export function NutritionHeute() {
         }}
         initialAmountG={activeSheet.amountG}
         onClose={() => setActiveSheet(null)}
+        onDelete={handleSkipCoachFromSheet}
       />
     ) : (
       <FoodDetailSheet
