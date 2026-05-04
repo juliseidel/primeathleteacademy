@@ -13,15 +13,12 @@
  */
 
 import { Ionicons } from '@expo/vector-icons';
-import { useAudioRecorder, RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync } from 'expo-audio';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Animated,
-  Easing,
   Image,
   Pressable,
   ScrollView,
@@ -31,6 +28,18 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+// expo-audio wird LAZY geladen — wenn das native Modul im aktuellen Dev-Build
+// fehlt (vor dem nächsten EAS-Build), required der try/catch nicht und der
+// Foto-Flow läuft trotzdem. Voice-Note ist dann ausgeblendet mit Hinweis.
+type VoiceRecorderProps = typeof import('@/lib/nutrition/VoiceRecorder')['VoiceRecorder'] extends React.ComponentType<infer P> ? P : never;
+let VoiceRecorder: React.ComponentType<VoiceRecorderProps> | null = null;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  VoiceRecorder = require('@/lib/nutrition/VoiceRecorder').VoiceRecorder;
+} catch {
+  VoiceRecorder = null;
+}
 
 import { useAuth } from '@/lib/auth/AuthContext';
 import { todayLocalIso } from '@/lib/data/dates';
@@ -64,6 +73,7 @@ export default function PhotoMealScreen() {
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [voiceUri, setVoiceUri] = useState<string | null>(null);
   const [voiceSeconds, setVoiceSeconds] = useState(0);
+  const [isRecording, setIsRecording] = useState(false);
   const [analysis, setAnalysis] = useState<MealAnalysis | null>(null);
   const [editComponents, setEditComponents] = useState<MealComponent[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -72,61 +82,9 @@ export default function PhotoMealScreen() {
 
   const addBulkMut = useAddMealLogBulk(userId, todayIso);
 
-  // ─── Voice-Recording ────────────────────────────────────────────
-  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
-  const [isRecording, setIsRecording] = useState(false);
-  const recordingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const micPulse = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    if (isRecording) {
-      const loop = Animated.loop(
-        Animated.sequence([
-          Animated.timing(micPulse, { toValue: 1.25, duration: 700, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-          Animated.timing(micPulse, { toValue: 1, duration: 700, easing: Easing.in(Easing.quad), useNativeDriver: true }),
-        ]),
-      );
-      loop.start();
-      return () => loop.stop();
-    }
-    micPulse.setValue(1);
-    return undefined;
-  }, [isRecording, micPulse]);
-
-  const startRecording = async () => {
-    try {
-      const perm = await requestRecordingPermissionsAsync();
-      if (!perm.granted) {
-        Alert.alert('Mikrofon-Zugriff benötigt', 'Bitte in den iOS-Einstellungen erlauben.');
-        return;
-      }
-      await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
-      await recorder.prepareToRecordAsync();
-      recorder.record();
-      setIsRecording(true);
-      setVoiceSeconds(0);
-      setVoiceUri(null);
-      recordingTimerRef.current = setInterval(() => setVoiceSeconds((s) => s + 1), 1000);
-    } catch (err) {
-      Alert.alert('Aufnahme-Fehler', err instanceof Error ? err.message : 'Unbekannter Fehler');
-    }
-  };
-
-  const stopRecording = async () => {
-    try {
-      await recorder.stop();
-      setIsRecording(false);
-      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
-      const uri = recorder.uri;
-      if (uri) setVoiceUri(uri);
-    } catch (err) {
-      Alert.alert('Stop-Fehler', err instanceof Error ? err.message : 'Unbekannter Fehler');
-    }
-  };
-
-  const discardVoice = () => {
-    setVoiceUri(null);
-    setVoiceSeconds(0);
+  const handleVoiceChange = (uri: string | null, seconds: number) => {
+    setVoiceUri(uri);
+    setVoiceSeconds(seconds);
   };
 
   // ─── Photo-Picker ───────────────────────────────────────────────
@@ -276,37 +234,21 @@ export default function PhotoMealScreen() {
             <Text style={styles.changePhotoLabel}>Anderes Foto</Text>
           </Pressable>
 
-          <View style={styles.voiceCard}>
-            <Text style={styles.voiceTitle}>Sprachnotiz (optional)</Text>
-            <Text style={styles.voiceSub}>
-              Sag z.B. „150g Reis, 200g Hähnchen, einen Esslöffel Öl" — die KI nutzt das zur Korrektur.
-            </Text>
-            {!voiceUri && !isRecording ? (
-              <Pressable onPress={startRecording} style={({ pressed }) => [styles.micBtn, pressed && { opacity: 0.7 }]}>
-                <Ionicons name="mic-outline" size={26} color={color.text} />
-                <Text style={styles.micBtnLabel}>Aufnahme starten</Text>
-              </Pressable>
-            ) : null}
-            {isRecording ? (
-              <View style={styles.recordingRow}>
-                <Animated.View style={[styles.recordingDot, { transform: [{ scale: micPulse }] }]} />
-                <Text style={styles.recordingTimer}>{formatDuration(voiceSeconds)}</Text>
-                <Pressable onPress={stopRecording} style={({ pressed }) => [styles.stopBtn, pressed && { opacity: 0.7 }]}>
-                  <Ionicons name="stop" size={18} color={color.bg} />
-                  <Text style={styles.stopBtnLabel}>Stopp</Text>
-                </Pressable>
-              </View>
-            ) : null}
-            {voiceUri && !isRecording ? (
-              <View style={styles.voiceDoneRow}>
-                <Ionicons name="checkmark-circle" size={18} color={color.macroProtein} />
-                <Text style={styles.voiceDoneLabel}>Aufnahme: {formatDuration(voiceSeconds)}</Text>
-                <Pressable onPress={discardVoice} hitSlop={6}>
-                  <Text style={styles.discardLabel}>Verwerfen</Text>
-                </Pressable>
-              </View>
-            ) : null}
-          </View>
+          {VoiceRecorder ? (
+            <VoiceRecorder
+              voiceUri={voiceUri}
+              voiceSeconds={voiceSeconds}
+              onVoiceChange={handleVoiceChange}
+              onRecordingChange={setIsRecording}
+            />
+          ) : (
+            <View style={styles.voiceUnavailable}>
+              <Ionicons name="mic-off-outline" size={20} color={color.textMuted} />
+              <Text style={styles.voiceUnavailableText}>
+                Voice-Note wird beim nächsten App-Update aktiviert. Foto-Tracking funktioniert jetzt schon.
+              </Text>
+            </View>
+          )}
         </ScrollView>
 
         <View style={[styles.footerBar, { paddingBottom: insets.bottom + space[2] }]}>
@@ -470,12 +412,6 @@ export default function PhotoMealScreen() {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────
-
-function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-  const s = (seconds % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
-}
 
 // ─── Component-Editor ─────────────────────────────────────────────
 
@@ -663,94 +599,22 @@ const styles = StyleSheet.create({
   },
 
   // Voice-Card
-  voiceCard: {
-    padding: space[5],
-    borderRadius: radius.lg,
-    backgroundColor: color.blackA40,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
+  voiceUnavailable: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     gap: space[3],
+    padding: space[4],
+    borderRadius: radius.lg,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
-  voiceTitle: {
-    fontFamily: font.family,
-    fontSize: 16,
-    fontWeight: '700',
-    color: color.text,
-  },
-  voiceSub: {
+  voiceUnavailableText: {
+    flex: 1,
     fontFamily: font.family,
     fontSize: 12,
     color: color.textMuted,
     lineHeight: 18,
-  },
-  micBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space[2],
-    paddingVertical: space[3],
-    paddingHorizontal: space[4],
-    borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.10)',
-    alignSelf: 'flex-start',
-  },
-  micBtnLabel: {
-    fontFamily: font.family,
-    fontSize: 14,
-    fontWeight: '600',
-    color: color.text,
-  },
-  recordingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space[3],
-  },
-  recordingDot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: color.danger,
-  },
-  recordingTimer: {
-    flex: 1,
-    fontFamily: font.family,
-    fontSize: 16,
-    fontWeight: '700',
-    color: color.text,
-    fontVariant: ['tabular-nums'],
-  },
-  stopBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: space[3],
-    paddingVertical: space[2],
-    borderRadius: radius.pill,
-    backgroundColor: color.text,
-  },
-  stopBtnLabel: {
-    fontFamily: font.family,
-    fontSize: 13,
-    fontWeight: '700',
-    color: color.bg,
-  },
-  voiceDoneRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space[2],
-  },
-  voiceDoneLabel: {
-    flex: 1,
-    fontFamily: font.family,
-    fontSize: 13,
-    color: color.text,
-  },
-  discardLabel: {
-    fontFamily: font.family,
-    fontSize: 12,
-    color: color.danger,
-    textDecorationLine: 'underline',
   },
 
   // Footer-Bar mit primary-Button
