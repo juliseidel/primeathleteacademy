@@ -698,10 +698,15 @@ export default function MealDetailScreen() {
         )}
       </ScrollView>
 
-      {/* Foto-Button (Sticky) */}
+      {/* Foto-Button (Sticky) — öffnet Foto-Modal mit slot-Context */}
       <View style={[styles.photoBar, { paddingBottom: insets.bottom + space[2] }]}>
         <Pressable
-          onPress={() => Alert.alert('Foto-Tracking', 'Gemini-Vision-Pipeline kommt in Welle 2.')}
+          onPress={() =>
+            router.push({
+              pathname: '/nutrition/photo',
+              params: { slotKey, label },
+            })
+          }
           style={({ pressed }) => [styles.photoBtn, pressed && { opacity: 0.85 }]}
         >
           <Ionicons name="camera" size={18} color={color.bg} />

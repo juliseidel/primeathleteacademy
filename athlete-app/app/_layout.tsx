@@ -168,6 +168,15 @@ function RootNav() {
           }}
         />
         <Stack.Screen
+          name="nutrition/photo"
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+            animation: 'slide_from_bottom',
+            contentStyle: { backgroundColor: color.bg },
+          }}
+        />
+        <Stack.Screen
           name="modal"
           options={{
             presentation: 'modal',

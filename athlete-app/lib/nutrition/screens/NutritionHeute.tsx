@@ -295,14 +295,15 @@ export function NutritionHeute() {
           <WaterQuickAction totalMl={waterQuery.data ?? 0} onPress={() => addWaterMut.mutate(250)} />
           <ActionButton
             icon="camera"
-            onPress={() =>
-              Alert.alert('Foto-Tracking', 'Kommt in Welle 2 — Gemini-Vision-Analyse aus FEELY-Pipeline.')
-            }
+            onPress={() => router.push('/nutrition/photo')}
           />
           <ActionButton
             icon="barcode-outline"
             onPress={() =>
-              Alert.alert('Barcode-Scanner', 'Kommt in Welle 2 — Open Food Facts ist schon eingebunden.')
+              Alert.alert(
+                'Barcode-Scanner',
+                'Tippe auf eine Mahlzeit, dann auf das Barcode-Icon in der Such-Bar — dort ist der Slot eindeutig.',
+              )
             }
           />
         </View>
