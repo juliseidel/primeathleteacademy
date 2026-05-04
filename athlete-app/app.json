@@ -89,7 +89,8 @@
         }
       ],
       "expo-tracking-transparency",
-      "expo-build-properties"
+      "expo-build-properties",
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true,

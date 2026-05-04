@@ -260,6 +260,79 @@ export type AddMealArgs = {
   notes?: string | null;
 };
 
+/**
+ * Bulk-Insert mehrerer Logs auf einmal — primär für Foto-Tracking, wo Gemini
+ * mehrere Komponenten pro Mahlzeit liefert (Reis + Hähnchen + Brokkoli).
+ * Jede Komponente wird mit fixer Menge geloggt (kein "per 100g"-Rechnen),
+ * weil die KI-Werte schon absolute Werte für die Portion sind.
+ */
+export type BulkComponentLog = {
+  displayName: string;
+  amountG: number;
+  /** Absolute Macros für die geloggte Menge (NICHT per 100g) */
+  totals: { kcal: number; protein: number; carbs: number; fat: number };
+};
+
+export function useAddMealLogBulk(athleteId: string | undefined, dateIso: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (args: {
+      slotKey: SlotKey;
+      source: 'photo' | 'barcode' | 'manual';
+      items: BulkComponentLog[];
+      photoUrl?: string | null;
+      voiceNoteUrl?: string | null;
+      notes?: string | null;
+    }) => {
+      if (!athleteId) throw new Error('Athlete-ID fehlt');
+      if (args.items.length === 0) return;
+
+      const slotNote = `${SLOT_NOTE_PREFIX}${args.slotKey}`;
+      const baseNote = args.notes ? `${slotNote} · ${args.notes}` : slotNote;
+      const time = new Date().toTimeString().slice(0, 8);
+
+      const rows = args.items.map((it) => {
+        // Gespeichertes Macro-pro-100g, damit extractLogMeta später funktioniert
+        const factor = it.amountG > 0 ? 100 / it.amountG : 1;
+        const macrosPer100g = {
+          kcal: round1(it.totals.kcal * factor),
+          protein: round1(it.totals.protein * factor),
+          carbs: round1(it.totals.carbs * factor),
+          fat: round1(it.totals.fat * factor),
+        };
+        return {
+          athlete_id: athleteId,
+          log_date: dateIso,
+          log_time: time,
+          source: args.source,
+          display_name: it.displayName,
+          components: [
+            {
+              name: it.displayName,
+              amount_g: it.amountG,
+              servings: 1,
+              macros_per_100g: macrosPer100g,
+            },
+          ],
+          total_kcal: round1(it.totals.kcal),
+          total_protein_g: round1(it.totals.protein),
+          total_carbs_g: round1(it.totals.carbs),
+          total_fat_g: round1(it.totals.fat),
+          notes: baseNote,
+          photo_url: args.photoUrl ?? null,
+          voice_note_url: args.voiceNoteUrl ?? null,
+        };
+      });
+
+      const { error } = await supabase.from('athlete_meal_log').insert(rows);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['meal-log', athleteId, dateIso] });
+    },
+  });
+}
+
 export function useAddMealLog(athleteId: string | undefined, dateIso: string) {
   const qc = useQueryClient();
   return useMutation({
