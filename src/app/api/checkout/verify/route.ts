@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export const runtime = "nodejs";
@@ -23,7 +23,7 @@ export async function GET(req: Request) {
       );
     }
 
-    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+    const session = await getStripe().checkout.sessions.retrieve(sessionId, {
       expand: ["customer_details", "payment_intent"],
     });
 

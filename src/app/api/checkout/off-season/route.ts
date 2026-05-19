@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { stripe, siteUrl } from "@/lib/stripe";
+import { getStripe, siteUrl } from "@/lib/stripe";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { getProduct } from "@/lib/products";
 
@@ -16,7 +16,7 @@ export async function POST() {
 
     const base = siteUrl();
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card", "klarna", "sepa_debit"],
       line_items: [

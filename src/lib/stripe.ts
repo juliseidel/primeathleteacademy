@@ -1,18 +1,31 @@
 import Stripe from "stripe";
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.warn(
-    "[stripe] STRIPE_SECRET_KEY not set — Checkout-Routen werden 500 zurückgeben."
-  );
-}
+let cached: Stripe | null = null;
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
-  apiVersion: "2026-04-22.dahlia",
-  appInfo: {
-    name: "Prime Athlete Academy",
-    url: "https://primeathleteacademy.com",
-  },
-});
+/**
+ * Lazy-initialized Stripe client.
+ *
+ * Stripe's constructor throws when `apiKey` is empty, which would crash the
+ * Next.js build during "Collect page data" if the env var isn't set yet.
+ * We defer construction until the first request.
+ */
+export function getStripe(): Stripe {
+  if (cached) return cached;
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    throw new Error(
+      "STRIPE_SECRET_KEY is not configured — Checkout/Webhook nicht möglich."
+    );
+  }
+  cached = new Stripe(key, {
+    apiVersion: "2026-04-22.dahlia",
+    appInfo: {
+      name: "Prime Athlete Academy",
+      url: "https://primeathleteacademy.com",
+    },
+  });
+  return cached;
+}
 
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? "";
 
