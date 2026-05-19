@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import Navigation from "@/components/layout/Navigation";
 import Footer from "@/components/layout/Footer";
 import ScrollProgress from "@/components/layout/ScrollProgress";
+import PromoBanner from "@/components/layout/PromoBanner";
 import "./globals.css";
 
 const inter = Inter({
@@ -56,6 +57,7 @@ export default function RootLayout({
     <html lang="de" className="dark">
       <body className={`${inter.variable} antialiased bg-background text-foreground`}>
         <ScrollProgress />
+        <PromoBanner />
         <Navigation />
         <main className="min-h-screen">{children}</main>
         <Footer />

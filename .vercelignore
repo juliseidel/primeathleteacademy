@@ -1,0 +1,7 @@
+# Subprojects that have their own build pipelines (mobile + dashboard).
+# Excluded so they don't pollute the Next.js Landing-Page build on Vercel.
+athlete-app
+coach-dashboard
+supabase
+private
+docs

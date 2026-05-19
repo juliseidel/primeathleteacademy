@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Zap, Apple, Trophy, Quote, Instagram, Star, Volume2, VolumeX } from "lucide-react";
-import { coaches, testimonials, stats, contact } from "@/lib/constants";
+import { ArrowRight, Zap, Apple, Trophy, Quote, Instagram, Star, Volume2, VolumeX, Sparkles, Download, Check } from "lucide-react";
+import { coaches, testimonials, stats, contact, offSeasonPlan } from "@/lib/constants";
 
 const trainingVideos = [
   "/videos/training-1.mp4",
@@ -178,6 +178,9 @@ export default function Home() {
           ))}
         </div>
       </div>
+
+      {/* ===== FEATURED DROP: OFF-SEASON PLAN ===== */}
+      <OffSeasonFeatured />
 
       {/* ===== SERVICES SECTION ===== */}
       <section className="py-12 md:py-32">
@@ -494,6 +497,152 @@ export default function Home() {
         </div>
       </section>
     </>
+  );
+}
+
+/* ===== OFF-SEASON FEATURED DROP ===== */
+function OffSeasonFeatured() {
+  const [campaignActive, setCampaignActive] = useState(true);
+
+  useEffect(() => {
+    const endDate = new Date(offSeasonPlan.campaignEndDate).getTime();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCampaignActive(Date.now() < endDate);
+  }, []);
+
+  if (!campaignActive) return null;
+
+  return (
+    <section className="relative py-12 md:py-24 overflow-hidden">
+      {/* Glow background */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[40rem] bg-gold/5 rounded-full blur-[140px]" />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-gold/25 bg-gradient-to-br from-surface to-surface-light shadow-2xl shadow-gold/10"
+        >
+          {/* Top gold accent */}
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-gold to-transparent" />
+
+          {/* Background action image (right side, faded) */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/patrick-action.jpg"
+            alt=""
+            loading="lazy"
+            className="absolute right-0 inset-y-0 w-1/2 h-full object-cover hidden md:block"
+            style={{ filter: "brightness(0.5) saturate(0.4)", objectPosition: "30% 20%" }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/95 md:via-surface/85 to-surface/40 hidden md:block" />
+
+          <div className="relative grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 p-6 sm:p-8 md:p-12 lg:p-14">
+            {/* Left: text + CTA */}
+            <div className="relative z-10">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 md:mb-5 rounded-full border border-gold/30 bg-gold/5">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse-gold" />
+                <span className="text-[10px] md:text-xs tracking-[0.2em] uppercase text-gold font-medium">
+                  Neu · Limitiert
+                </span>
+              </div>
+
+              <h2 className="text-3xl md:text-5xl font-black leading-[1.05] mb-3 md:mb-4">
+                Off-Season Plan{" "}
+                <span className="gradient-text-gold">2026</span>
+              </h2>
+              <p className="text-gold/80 tracking-[0.25em] uppercase text-xs md:text-sm mb-5 md:mb-7">
+                Elite Edition · 4 Wochen
+              </p>
+
+              <p className="text-muted text-sm md:text-base leading-relaxed mb-6 md:mb-7 max-w-md">
+                Der periodisierte Athletik- und Ernährungsplan, mit dem du{" "}
+                <span className="text-foreground/90">physisch dominant</span> in
+                die Saison startest. Sofort als PDF, lebenslang verfügbar.
+              </p>
+
+              {/* Mini bullets */}
+              <ul className="space-y-2 mb-7 md:mb-8">
+                {[
+                  "67 Seiten · 4-Wochen-Periodisierung",
+                  "Athletik + Nutrition Guide + Recovery",
+                  "Sofortiger Download nach Kauf",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-sm md:text-[15px]">
+                    <Check className="w-4 h-4 text-gold flex-shrink-0 mt-0.5" />
+                    <span className="text-foreground/85">{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA */}
+              <div className="flex flex-wrap items-center gap-3 md:gap-4">
+                <Link
+                  href="/off-season-plan"
+                  className="group flex items-center gap-2 px-6 py-3 md:px-7 md:py-3.5 bg-gold hover:bg-gold-light text-background text-sm md:text-base font-bold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-gold/30"
+                >
+                  Jetzt sichern · 99 €
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link
+                  href="/off-season-plan"
+                  className="text-sm md:text-base text-foreground/70 hover:text-gold transition-colors flex items-center gap-1.5"
+                >
+                  Mehr erfahren
+                  <ArrowRight size={14} />
+                </Link>
+              </div>
+            </div>
+
+            {/* Right: stat card */}
+            <div className="relative z-10 hidden md:flex items-center justify-center">
+              <div className="relative">
+                {/* Glow */}
+                <div className="absolute inset-0 bg-gold/15 rounded-2xl blur-3xl" />
+
+                <div className="relative bg-background/60 backdrop-blur-md border border-gold/20 rounded-2xl p-7 lg:p-9 min-w-[300px] lg:min-w-[340px]">
+                  <div className="flex items-center gap-3 mb-5">
+                    <Sparkles className="w-5 h-5 text-gold" />
+                    <p className="text-xs tracking-[0.2em] uppercase text-gold/90 font-medium">
+                      Limited Drop
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    {[
+                      { label: "Dauer", value: "4 Wochen" },
+                      { label: "Inhalt", value: "67 Seiten PDF" },
+                      { label: "Format", value: "Sofort-Download" },
+                      { label: "Preis", value: "99 € einmalig" },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0 last:pb-0"
+                      >
+                        <span className="text-xs tracking-widest uppercase text-muted">
+                          {item.label}
+                        </span>
+                        <span className="text-foreground font-semibold text-sm">
+                          {item.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 flex items-center gap-2 text-[11px] text-muted">
+                    <Download className="w-3.5 h-3.5 text-gold/80" />
+                    <span>Sicheres Stripe-Checkout · USt-Rechnung</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
   );
 }
 
