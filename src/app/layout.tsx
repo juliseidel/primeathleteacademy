@@ -54,7 +54,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de" className="dark">
+    <html
+      lang="de"
+      className="dark"
+      style={{ ["--promo-banner-h" as string]: "0px" }}
+    >
       <body
         className={`${inter.variable} antialiased bg-background text-foreground`}
         style={{ paddingTop: "var(--promo-banner-h, 0px)" }}
