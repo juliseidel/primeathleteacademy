@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
@@ -633,44 +633,34 @@ export default function OffSeasonPlanPage() {
 }
 
 /* ============================================================ */
-/* HERO BACKGROUND with auto-rotating training video             */
+/* HERO BACKGROUND — premium static, no video                    */
 /* ============================================================ */
-const heroVideos = ["/videos/training-1.mp4", "/videos/training-2.mp4", "/videos/training-3.mp4"];
-
 function HeroBackground() {
-  const [idx, setIdx] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIdx(Math.floor(Math.random() * heroVideos.length));
-  }, []);
-
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.load();
-      videoRef.current.play().catch(() => {});
-    }
-  }, [idx]);
-
-  const handleEnded = () => setIdx((p) => (p + 1) % heroVideos.length);
-
   return (
     <>
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/70 to-surface" />
-      <video
-        ref={videoRef}
-        key={idx}
-        src={heroVideos[idx]}
-        autoPlay
-        muted
-        playsInline
-        onEnded={handleEnded}
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ filter: "brightness(0.4) saturate(0.4) contrast(1.05)" }}
+      {/* Deep dark base with subtle vertical gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-surface/35 to-background" />
+
+      {/* Subtle gold diamond pattern (texture, not noise) */}
+      <div
+        className="absolute inset-0 opacity-[0.04] pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C5A55A' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/35 to-background z-[1]" />
-      <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-background/40 z-[1]" />
+
+      {/* Top + bottom edge fade for premium framing */}
+      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-background to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+
+      {/* Very subtle radial highlight behind the title (centered, soft) */}
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[60vh] pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, rgba(197,165,90,0.06) 0%, transparent 60%)",
+        }}
+      />
     </>
   );
 }
