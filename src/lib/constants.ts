@@ -278,7 +278,7 @@ export const offSeasonPlan = {
   title: "Off-Season Plan 2026",
   subtitle: "Elite Edition",
   tagline:
-    "In 4 Wochen physisch dominant. Der komplette Athletik- & Ernährungsplan, mit dem du in die Saison startest.",
+    "4 Wochen Periodisierung. Athletik, Ernährung und Recovery in einem System — das exakte Programm, mit dem wir selbst in die Saison gehen.",
   priceCents: 9900,
   priceLabel: "99 €",
   priceNote: "einmalig · inkl. USt · sofort verfügbar",
@@ -287,9 +287,9 @@ export const offSeasonPlan = {
   sessionsTotal: 16,
   heroStats: [
     { value: "4", label: "Wochen", suffix: "" },
-    { value: "67", label: "Seiten", suffix: "" },
-    { value: "16+", label: "Sessions", suffix: "" },
-    { value: "100", label: "% Profi-System", suffix: "" },
+    { value: "16", label: "Sessions", suffix: "+" },
+    { value: "3", label: "Säulen", suffix: "" },
+    { value: "0", label: "Generic", suffix: "" },
   ],
   coreGoals: [
     {
@@ -399,19 +399,19 @@ export const offSeasonPlan = {
     },
   ],
   whatYouGet: [
-    "67 Seiten Profi-Athletik & Nutrition",
-    "4-Wochen periodisierter Trainingsplan",
+    "4 Wochen Periodisierung (Foundation → Peak)",
     "Krafttraining mit RPE-Skala & Gewichtsvorgaben",
-    "Sprint-, Schwellen- und Intervall-Sessions",
-    "Vollständiger Nutrition Guide",
-    "10 Superfoods + Grocery List",
-    "Performance Plate System",
-    "Recovery- und Schlaf-Protokoll",
-    "Sofort als PDF-Download",
-    "Lebenslang verfügbar",
+    "Sprint-, Schwellen- und Intervall-Sessions im Detail",
+    "Performance-Ernährung mit konkreten Makro-Zielwerten",
+    "10 Athleten-Superfoods mit Timing-Anleitung",
+    "Grocery List + Performance Plate System",
+    "Hypertrophie- und Fettverlust-Strategien",
+    "Recovery- und Schlaf-Optimierungs-Protokoll",
+    "Sofortiger PDF-Download — keine App, kein Abo",
+    "Lebenslang nutzbar, optimiert fürs Handy",
   ],
   coachStatement:
-    "Das ist die exakte Struktur, mit der wir selbst in die Saison starten. Kein Marketing-Bullshit – das System, das uns 8 Jahre FC Bayern und 100k Community-Vertrauen gebracht hat. Wer das durchzieht, startet anders in die Vorbereitung als 95 % seiner Konkurrenz.",
+    "Das ist die Periodisierung, mit der wir selbst in die Saison gehen — Woche für Woche, Session für Session. Kein Buchwissen, sondern das, was bei uns funktioniert. Wer es ernst nimmt, startet in die Vorbereitung mit Vorsprung.",
   faq: [
     {
       question: "Wann bekomme ich den Plan?",
