@@ -2,14 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ArrowRight,
-  Check,
-  Shield,
-  ChevronDown,
-  Lock,
-  Zap,
-} from "lucide-react";
+import { ArrowRight, Check, ChevronDown } from "lucide-react";
 import { offSeasonPlan, coaches } from "@/lib/constants";
 
 export default function OffSeasonPlanPage() {
@@ -381,34 +374,6 @@ export default function OffSeasonPlanPage() {
               {checkoutError ? (
                 <p className="text-center text-sm text-red-400 mt-4">{checkoutError}</p>
               ) : null}
-
-              {/* Trust row */}
-              <div className="mt-7 md:mt-9 flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5 text-[10px] md:text-xs text-muted">
-                <span className="flex items-center gap-1.5">
-                  <Lock className="w-3 h-3 text-gold/70" />
-                  Sichere Zahlung via Stripe
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Zap className="w-3 h-3 text-gold/70" />
-                  Sofortiger Download
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Shield className="w-3 h-3 text-gold/70" />
-                  USt-Rechnung inklusive
-                </span>
-              </div>
-
-              {/* Payment methods */}
-              <div className="mt-5 md:mt-7 flex items-center justify-center gap-3 flex-wrap">
-                {["Visa", "Mastercard", "Apple Pay", "Google Pay", "Klarna", "SEPA"].map((m) => (
-                  <span
-                    key={m}
-                    className="text-[10px] md:text-xs tracking-wider uppercase text-muted/70 px-2.5 py-1 rounded-md border border-white/5"
-                  >
-                    {m}
-                  </span>
-                ))}
-              </div>
             </div>
           </motion.div>
         </div>
@@ -487,7 +452,7 @@ function HeroBackground() {
         playsInline
         onEnded={handleEnded}
         className="absolute inset-0 w-full h-full object-cover scale-110"
-        style={{ filter: "brightness(0.22) saturate(0.25) blur(10px)" }}
+        style={{ filter: "brightness(0.32) saturate(0.45) blur(6px)" }}
       />
 
       {/* Dark gradient overlays (top/bottom + sides) */}
