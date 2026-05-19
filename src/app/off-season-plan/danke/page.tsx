@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -13,6 +13,35 @@ type VerifyState =
   | { status: "error"; message: string };
 
 export default function DankePage() {
+  // useSearchParams must live under a Suspense boundary for Next.js static
+  // export — wrap the content here so the page can be pre-rendered.
+  return (
+    <Suspense fallback={<DankeSkeleton />}>
+      <DankeContent />
+    </Suspense>
+  );
+}
+
+function DankeSkeleton() {
+  return (
+    <section className="relative min-h-screen pt-28 pb-20 md:pt-36 md:pb-32 overflow-hidden">
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[40rem] h-[40rem] bg-gold/8 rounded-full blur-[140px] pointer-events-none" />
+      <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-br from-surface to-surface-light border border-gold/25 rounded-2xl md:rounded-3xl p-7 sm:p-10 md:p-14">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gold/10 flex items-center justify-center">
+              <Loader2 className="w-7 h-7 text-gold animate-spin" />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-black text-white mb-3">Einen Moment…</h1>
+            <p className="text-muted text-sm md:text-base">Wir prüfen deine Bestellung.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DankeContent() {
   const search = useSearchParams();
   const sessionId = search.get("session_id");
   const [state, setState] = useState<VerifyState>({ status: "loading" });
