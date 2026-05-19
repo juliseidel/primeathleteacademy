@@ -1,45 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
   Check,
   Shield,
-  Flame,
-  Trophy,
-  Clipboard,
-  Dumbbell,
-  Apple,
-  Leaf,
-  ShoppingCart,
-  TrendingUp,
-  Moon,
-  Download,
   ChevronDown,
-  Star,
   Lock,
   Zap,
-  Sparkles,
 } from "lucide-react";
 import { offSeasonPlan, coaches } from "@/lib/constants";
-
-const goalIcons: Record<string, React.ReactNode> = {
-  shield: <Shield className="w-7 h-7 text-gold" />,
-  flame: <Flame className="w-7 h-7 text-gold" />,
-  trophy: <Trophy className="w-7 h-7 text-gold" />,
-};
-
-const featureIcons: Record<string, React.ReactNode> = {
-  clipboard: <Clipboard className="w-5 h-5 text-gold" />,
-  dumbbell: <Dumbbell className="w-5 h-5 text-gold" />,
-  apple: <Apple className="w-5 h-5 text-gold" />,
-  leaf: <Leaf className="w-5 h-5 text-gold" />,
-  shoppingCart: <ShoppingCart className="w-5 h-5 text-gold" />,
-  trendingUp: <TrendingUp className="w-5 h-5 text-gold" />,
-  moon: <Moon className="w-5 h-5 text-gold" />,
-  download: <Download className="w-5 h-5 text-gold" />,
-};
 
 export default function OffSeasonPlanPage() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -199,79 +170,6 @@ export default function OffSeasonPlanPage() {
       </section>
 
       {/* ============================================================ */}
-      {/* INTRO / WHY */}
-      {/* ============================================================ */}
-      <section className="relative py-16 md:py-32 overflow-hidden border-t border-white/5">
-        <div className="absolute inset-0 opacity-[0.025]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C5A55A' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="tracking-[0.3em] uppercase text-muted text-xs md:text-sm mb-3 md:mb-4"
-          >
-            Warum die Off-Season entscheidet
-          </motion.p>
-          <motion.h2
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-3xl sm:text-4xl md:text-6xl font-black mb-5 md:mb-7 leading-tight"
-          >
-            Neue Saison. <span className="gradient-text-gold">Neue Chance.</span>
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="text-muted text-base md:text-xl leading-relaxed max-w-2xl mx-auto"
-          >
-            Die Saison ist vorbei, die Karten werden neu gemischt. Während andere
-            zurückblicken oder komplett abschalten, nutzt du das einzige Zeitfenster
-            im Jahr, in dem du <span className="text-foreground/90">echte athletische Fortschritte</span> machst –
-            ohne Rücksicht auf den nächsten Spieltag.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
-            className="mt-10 md:mt-16 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6"
-          >
-            {offSeasonPlan.coreGoals.map((goal, i) => (
-              <motion.div
-                key={goal.title}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 + i * 0.1 }}
-                className="group relative bg-surface border border-white/5 hover:border-gold/25 rounded-2xl p-6 md:p-7 text-left transition-all duration-300 overflow-hidden"
-              >
-                <div className="absolute -top-12 -right-12 w-32 h-32 bg-gold/0 group-hover:bg-gold/5 rounded-full blur-2xl transition-all duration-500" />
-                <div className="relative">
-                  <div className="w-12 h-12 md:w-14 md:h-14 bg-gold/10 rounded-xl flex items-center justify-center mb-4 md:mb-5">
-                    {goalIcons[goal.icon]}
-                  </div>
-                  <p className="text-[10px] md:text-xs tracking-[0.2em] uppercase text-gold/70 mb-1.5">
-                    {goal.title}
-                  </p>
-                  <h3 className="text-lg md:text-xl font-bold text-white mb-2 md:mb-3 leading-tight">
-                    {goal.headline}
-                  </h3>
-                  <p className="text-muted text-sm leading-relaxed">{goal.description}</p>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ============================================================ */}
       {/* 4-WEEK TIMELINE */}
       {/* ============================================================ */}
       <section
@@ -349,53 +247,6 @@ export default function OffSeasonPlanPage() {
                     {week.rpe}
                   </span>
                 </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================ */}
-      {/* FEATURE GRID — WHAT'S INSIDE */}
-      {/* ============================================================ */}
-      <section className="py-16 md:py-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-10 md:mb-16"
-          >
-            <p className="tracking-[0.3em] uppercase text-muted text-xs md:text-sm mb-3">
-              67 Seiten · Athletik + Nutrition
-            </p>
-            <h2 className="text-3xl md:text-5xl font-black mb-3 md:mb-4">
-              Was alles <span className="gradient-text-gold">drinsteckt</span>
-            </h2>
-            <p className="text-muted text-sm md:text-base max-w-2xl mx-auto">
-              Kein PDF-Lückenfüller. Jede Seite hat einen Zweck.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-            {offSeasonPlan.features.map((feature, i) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: (i % 4) * 0.08 }}
-                className="group bg-surface border border-white/5 hover:border-gold/25 rounded-xl md:rounded-2xl p-5 md:p-6 transition-all duration-300 hover:bg-surface-light"
-              >
-                <div className="w-10 h-10 md:w-11 md:h-11 bg-gold/10 rounded-lg flex items-center justify-center mb-3 md:mb-4 group-hover:bg-gold/15 transition-colors">
-                  {featureIcons[feature.icon] || <Star className="w-5 h-5 text-gold" />}
-                </div>
-                <h3 className="text-sm md:text-base font-bold text-white mb-1.5 md:mb-2 leading-tight">
-                  {feature.title}
-                </h3>
-                <p className="text-muted text-xs md:text-sm leading-relaxed">
-                  {feature.description}
-                </p>
               </motion.div>
             ))}
           </div>
@@ -482,12 +333,6 @@ export default function OffSeasonPlanPage() {
 
             <div className="p-6 sm:p-8 md:p-12">
               <div className="text-center mb-7 md:mb-9">
-                <div className="inline-flex items-center gap-2 px-3 py-1 mb-5 rounded-full border border-gold/30 bg-gold/5">
-                  <Sparkles className="w-3 h-3 text-gold" />
-                  <span className="text-[10px] md:text-xs tracking-[0.2em] uppercase text-gold font-medium">
-                    Limitiertes Drop
-                  </span>
-                </div>
                 <h2 className="text-3xl md:text-5xl font-black text-white mb-1.5">
                   Off-Season Plan 2026
                 </h2>
@@ -596,69 +441,65 @@ export default function OffSeasonPlanPage() {
         </div>
       </section>
 
-      {/* ============================================================ */}
-      {/* FINAL CTA */}
-      {/* ============================================================ */}
-      <section className="py-16 md:py-32 bg-gradient-to-b from-background to-surface/40">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-3xl md:text-5xl font-black mb-4 md:mb-6">
-              Wer jetzt arbeitet,
-              <br />
-              <span className="gradient-text-gold">dominiert später.</span>
-            </h2>
-            <p className="text-muted text-base md:text-lg mb-7 md:mb-10 max-w-xl mx-auto">
-              4 Wochen Disziplin entscheiden über deine gesamte Hinrunde.
-              Die Vorbereitung startet heute.
-            </p>
-            <button
-              onClick={startCheckout}
-              disabled={checkoutLoading}
-              className="group inline-flex items-center gap-2 px-7 py-4 md:px-9 md:py-5 bg-gold hover:bg-gold-light disabled:opacity-60 disabled:cursor-not-allowed text-background text-base md:text-lg font-bold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-gold/30"
-            >
-              {checkoutLoading ? "Lade Checkout…" : `Plan sichern · 99 €`}
-              {!checkoutLoading && (
-                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-              )}
-            </button>
-          </motion.div>
-        </div>
-      </section>
     </>
   );
 }
 
 /* ============================================================ */
-/* HERO BACKGROUND — premium static, no video                    */
+/* HERO BACKGROUND — subtle blurred training video               */
 /* ============================================================ */
+const heroVideos = [
+  "/videos/training-1.mp4",
+  "/videos/training-2.mp4",
+  "/videos/training-3.mp4",
+];
+
 function HeroBackground() {
+  const [idx, setIdx] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIdx(Math.floor(Math.random() * heroVideos.length));
+  }, []);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
+  }, [idx]);
+
+  const handleEnded = () => setIdx((p) => (p + 1) % heroVideos.length);
+
   return (
     <>
-      {/* Deep dark base with subtle vertical gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-surface/35 to-background" />
+      {/* Deep dark base */}
+      <div className="absolute inset-0 bg-background" />
 
-      {/* Subtle gold diamond pattern (texture, not noise) */}
-      <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C5A55A' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }}
+      {/* Blurred training video — Text-Overlays werden durch Blur unkenntlich */}
+      <video
+        ref={videoRef}
+        key={idx}
+        src={heroVideos[idx]}
+        autoPlay
+        muted
+        playsInline
+        onEnded={handleEnded}
+        className="absolute inset-0 w-full h-full object-cover scale-110"
+        style={{ filter: "brightness(0.22) saturate(0.25) blur(10px)" }}
       />
 
-      {/* Top + bottom edge fade for premium framing */}
-      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-background to-transparent pointer-events-none" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+      {/* Dark gradient overlays (top/bottom + sides) */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/40 to-background pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background/50 via-transparent to-background/50 pointer-events-none" />
 
-      {/* Very subtle radial highlight behind the title (centered, soft) */}
+      {/* Subtle gold radial highlight behind the title */}
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[60vh] pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at center, rgba(197,165,90,0.06) 0%, transparent 60%)",
+            "radial-gradient(ellipse at center, rgba(197,165,90,0.08) 0%, transparent 60%)",
         }}
       />
     </>
