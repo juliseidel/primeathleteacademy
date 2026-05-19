@@ -26,7 +26,8 @@ export default function Navigation() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        style={{ top: "var(--promo-banner-h, 0px)" }}
+        className={`fixed left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
             ? "bg-background/90 backdrop-blur-xl border-b border-white/5"
             : "bg-transparent"
@@ -110,7 +111,8 @@ export default function Navigation() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 bg-background/98 backdrop-blur-xl lg:hidden pt-20"
+            style={{ paddingTop: "calc(5rem + var(--promo-banner-h, 0px))" }}
+            className="fixed inset-0 z-40 bg-background/98 backdrop-blur-xl lg:hidden"
           >
             <div className="flex flex-col items-center gap-2 p-8">
               {navLinks.map((item, index) => {

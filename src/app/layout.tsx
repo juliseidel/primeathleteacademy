@@ -55,7 +55,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de" className="dark">
-      <body className={`${inter.variable} antialiased bg-background text-foreground`}>
+      <body
+        className={`${inter.variable} antialiased bg-background text-foreground`}
+        style={{ paddingTop: "var(--promo-banner-h, 0px)" }}
+      >
         <ScrollProgress />
         <PromoBanner />
         <Navigation />
