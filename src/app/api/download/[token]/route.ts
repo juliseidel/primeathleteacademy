@@ -83,8 +83,10 @@ export async function GET(
     );
   }
 
-  // Track the download (best effort).
-  void supabase
+  // Track the download. Awaited, weil in einer Serverless-Function alles nach
+  // dem Return abgebrochen wird — ein fire-and-forget-Update würde sonst oft
+  // nicht durchlaufen.
+  await supabase
     .from("purchases")
     .update({
       download_count: (purchase.download_count ?? 0) + 1,
