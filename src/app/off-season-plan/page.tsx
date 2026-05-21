@@ -62,7 +62,7 @@ export default function OffSeasonPlanPage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
-            className="text-[10px] md:text-sm tracking-[0.3em] uppercase text-white/70 mb-4 md:mb-6"
+            className="text-[10px] md:text-sm tracking-[0.18em] md:tracking-[0.3em] uppercase text-white/70 mb-4 md:mb-6"
             style={{ textShadow: "0 2px 10px rgba(0,0,0,0.9)" }}
           >
             Prime Athlete Academy · Programm
@@ -81,7 +81,7 @@ export default function OffSeasonPlanPage() {
             <span className="block text-4xl sm:text-6xl md:text-8xl leading-[0.95] text-white/95 mt-1">
               PLAN 2026
             </span>
-            <span className="block text-base sm:text-xl md:text-2xl tracking-[0.4em] uppercase text-gold/80 mt-3 md:mt-5">
+            <span className="block text-sm sm:text-xl md:text-2xl tracking-[0.25em] sm:tracking-[0.4em] uppercase text-gold/80 mt-3 md:mt-5">
               Elite Edition
             </span>
           </motion.h1>

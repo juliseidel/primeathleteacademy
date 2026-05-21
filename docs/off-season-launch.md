@@ -23,7 +23,7 @@ Komplette Checkliste, um den Verkauf des Off-Season-Plans live zu schalten.
 - `stripe.ts` — Stripe-SDK-Client + Site-URL-Helper
 - `supabase-admin.ts` — Service-Role-Client (server-only)
 - `products.ts` — Produkt-Katalog (Preis, Storage-Pfad, Redirect-URLs)
-- `email.ts` — Resend-Versand mit Brand-konformem HTML-Template (Gold-Header, Inter-Style)
+- `email.ts` — Gmail/Google-Workspace-SMTP-Versand (Nodemailer) mit Brand-konformem HTML-Template (Gold-Header, Inter-Style)
 - `constants.ts` (Ergänzung) — `offSeasonPlan` mit Texten, FAQ, Wochen-Phasen, Features
 
 ### Datenbank + Storage
@@ -71,17 +71,22 @@ node scripts/upload-off-season-pdf.mjs
 
 Das Script ist idempotent — re-runs überschreiben die Datei.
 
-### 4. Resend-Account einrichten
+### 4. E-Mail-Versand: Gmail / Google Workspace SMTP
 
-- Account auf [resend.com](https://resend.com) (Free-Tier reicht: 3.000 Mails/Monat)
-- Domain `primeathleteacademy.com` verifizieren:
-  - DNS-Records (SPF, DKIM, DMARC) eintragen — Resend zeigt sie an
-  - Dauert ~10-30 Minuten bis Verifizierung durch ist
-- API-Key generieren → in `.env.local` als `RESEND_API_KEY`
-- Absender konfigurieren: `plan@primeathleteacademy.com` (oder anderer Subdomain-Alias)
+Die Domain `primeathleteacademy.com` nutzt bereits Google Workspace für
+E-Mail (MX `smtp.google.com`, SPF auf `_spf.google.com`). Deshalb verschicken
+wir die Download-Mail über das bestehende Konto — **kein DNS-Setup, kein
+Resend, keine Domain-Verifizierung**.
 
-**Falls Domain-Verifizierung dauert:** Resend erlaubt im Test als Absender
-`onboarding@resend.dev` und Empfang nur an die eigene Account-Mail.
+- App-Passwort erstellen: Google-Konto (`primeathleteacademy@primeathleteacademy.com`)
+  → Sicherheit → Bestätigung in zwei Schritten aktivieren →
+  [App-Passwörter](https://myaccount.google.com/apppasswords) → neues erstellen
+- Der 16-stellige Code kommt (ohne Leerzeichen) in die Env-Variable
+  `GMAIL_APP_PASSWORD`, die Adresse in `GMAIL_USER`
+- Versand läuft über `smtp.gmail.com:465` (Nodemailer), Limit ~2.000 Mails/Tag
+
+**Vorteil:** Mails kommen von der echten `@primeathleteacademy.com`-Adresse,
+gute Zustellbarkeit (Google + bestehendes SPF), kostenlos.
 
 ### 5. Environment-Variablen setzen
 
@@ -127,7 +132,7 @@ Test-Flow:
 1. http://localhost:3000/off-season-plan aufrufen
 2. "Jetzt sichern" klicken
 3. Stripe-Test-Karte verwenden: `4242 4242 4242 4242`, beliebiges Datum + CVC, beliebige PLZ
-4. Email-Adresse eingeben (für lokal-Test gerne deine eigene mit `+test` für Resend)
+4. Email-Adresse eingeben (im Test gerne deine eigene zum Prüfen des Mail-Eingangs)
 5. Nach Klick auf "Bezahlen" → Redirect auf `/off-season-plan/danke?session_id=…`
 6. Download-Button sollte funktionieren
 7. E-Mail sollte in deinem Postfach landen
@@ -137,7 +142,7 @@ Test-Flow:
 - 500 vom Checkout-Endpoint → `STRIPE_SECRET_KEY` nicht gesetzt
 - Webhook bekommt 400 "Invalid signature" → `STRIPE_WEBHOOK_SECRET` mit `stripe listen` neu generieren
 - Download gibt 404 → PDF noch nicht in Storage hochgeladen, `scripts/upload-off-season-pdf.mjs` laufen
-- E-Mail kommt nicht an → Resend-Domain nicht verifiziert ODER Absender-Adresse stimmt nicht
+- E-Mail kommt nicht an → `GMAIL_APP_PASSWORD` falsch/fehlt ODER 2-Faktor im Google-Konto nicht aktiviert
 
 ---
 
@@ -145,7 +150,7 @@ Test-Flow:
 
 - [ ] Stripe Live-Keys in Vercel-Env eintragen (nicht Test-Keys!)
 - [ ] Stripe Webhook auf Production-URL umstellen (`whsec_…` aus dem Live-Webhook)
-- [ ] Resend-Domain verifiziert (DNS-Records gesetzt)
+- [ ] Gmail-App-Passwort erstellt + `GMAIL_USER`/`GMAIL_APP_PASSWORD` in Vercel gesetzt
 - [ ] PDF in **Production**-Supabase-Storage hochgeladen
 - [ ] AGB + Widerrufsbelehrung auf `/datenschutz` oder eigener `/agb`-Seite ergänzen
 - [ ] Mit echter Karte (nicht 4242…) einen Test-Kauf machen — danach manuell im Stripe-Dashboard refunden
@@ -203,7 +208,7 @@ src/lib/
 ├── stripe.ts                 # Stripe-Client
 ├── supabase-admin.ts         # Service-Role-Client
 ├── products.ts               # Produkt-Katalog
-├── email.ts                  # Resend-Versand
+├── email.ts                  # Gmail-SMTP-Versand (Nodemailer)
 └── constants.ts              # offSeasonPlan Texte + FAQ + Wochen
 ```
 
