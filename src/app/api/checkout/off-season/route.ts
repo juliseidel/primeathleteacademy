@@ -18,7 +18,11 @@ export async function POST() {
 
     const session = await getStripe().checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card", "klarna", "sepa_debit"],
+      // Kein hart-kodiertes payment_method_types → Stripe nutzt "dynamic
+      // payment methods": zeigt automatisch ALLE im Dashboard aktivierten
+      // Methoden an (Karte inkl. Apple Pay / Google Pay automatisch, plus
+      // PayPal / Klarna / SEPA — was immer der Coach im Dashboard freischaltet
+      // und was zum Gerät/Land des Käufers passt).
       line_items: [
         {
           quantity: 1,
