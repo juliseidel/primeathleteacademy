@@ -40,14 +40,14 @@ export async function POST() {
       automatic_tax: { enabled: true },
       customer_creation: "always",
       billing_address_collection: "required",
-      // Wichtig für DSGVO/Widerrufsrecht digitaler Produkte: Käufer muss
-      // ausdrücklich bestätigen. Stripe zeigt automatisch einen Hinweis,
-      // wenn man `consent_collection.terms_of_service` aktiviert.
-      consent_collection: { terms_of_service: "required" },
+      // Hinweis: Die AGB-/Widerrufs-Zustimmung holen wir bereits auf der
+      // eigenen Seite (Pflicht-Checkbox vor dem Checkout). Daher kein
+      // Stripe-seitiges consent_collection nötig — das hängt sonst von einer
+      // im Dashboard hinterlegten ToS-URL ab.
       custom_text: {
-        terms_of_service_acceptance: {
+        submit: {
           message:
-            "Ich stimme den AGB zu und bestätige, dass die Lieferung vor Ablauf der Widerrufsfrist beginnt und mein Widerrufsrecht mit Beginn des Downloads erlischt.",
+            "Mit dem Kauf beginnt die Lieferung sofort; dein Widerrufsrecht erlischt mit Beginn des Downloads.",
         },
       },
       locale: "de",

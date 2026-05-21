@@ -8,8 +8,13 @@ import { offSeasonPlan, coaches } from "@/lib/constants";
 export default function OffSeasonPlanPage() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [agbAccepted, setAgbAccepted] = useState(false);
 
   const startCheckout = async () => {
+    if (!agbAccepted) {
+      setCheckoutError("Bitte bestätige zuerst die Hinweise über dem Button.");
+      return;
+    }
     setCheckoutError(null);
     setCheckoutLoading(true);
     try {
@@ -99,23 +104,13 @@ export default function OffSeasonPlanPage() {
             transition={{ delay: 0.9 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 mb-8 md:mb-14"
           >
-            <button
-              onClick={startCheckout}
-              disabled={checkoutLoading}
-              className="group flex items-center gap-2 px-7 py-3.5 md:px-9 md:py-4 bg-gold hover:bg-gold-light disabled:opacity-60 disabled:cursor-not-allowed text-background text-sm md:text-base font-bold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-gold/30 glow-gold"
+            <a
+              href="#kaufen"
+              className="group flex items-center gap-2 px-7 py-3.5 md:px-9 md:py-4 bg-gold hover:bg-gold-light text-background text-sm md:text-base font-bold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-gold/30 glow-gold"
             >
-              {checkoutLoading ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
-                  Lade Checkout…
-                </>
-              ) : (
-                <>
-                  Jetzt sichern · {offSeasonPlan.priceLabel}
-                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </button>
+              Jetzt sichern · {offSeasonPlan.priceLabel}
+              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            </a>
             <a
               href="#was-drin-ist"
               className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 border border-white/10 hover:border-gold/30 rounded-full text-sm md:text-base text-foreground/70 hover:text-foreground transition-all duration-300"
@@ -124,10 +119,6 @@ export default function OffSeasonPlanPage() {
               <ChevronDown size={16} />
             </a>
           </motion.div>
-
-          {checkoutError ? (
-            <p className="text-sm text-red-400 mb-6">{checkoutError}</p>
-          ) : null}
 
           {/* Trust Stats */}
           <motion.div
@@ -316,10 +307,11 @@ export default function OffSeasonPlanPage() {
 
         <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
+            id="kaufen"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative bg-gradient-to-br from-surface to-surface-light border border-gold/25 rounded-2xl md:rounded-3xl overflow-hidden glow-gold shadow-2xl shadow-gold/10"
+            className="relative scroll-mt-28 bg-gradient-to-br from-surface to-surface-light border border-gold/25 rounded-2xl md:rounded-3xl overflow-hidden glow-gold shadow-2xl shadow-gold/10"
           >
             {/* gold accent border */}
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-gold to-transparent" />
@@ -353,10 +345,32 @@ export default function OffSeasonPlanPage() {
                 ))}
               </ul>
 
+              {/* Pflicht-Bestätigung: Widerrufsverzicht bei digitalen Produkten */}
+              <label className="flex items-start gap-3 mb-5 md:mb-6 max-w-md mx-auto cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={agbAccepted}
+                  onChange={(e) => {
+                    setAgbAccepted(e.target.checked);
+                    if (e.target.checked) setCheckoutError(null);
+                  }}
+                  className="mt-0.5 w-4 h-4 flex-shrink-0 accent-gold cursor-pointer"
+                />
+                <span className="text-[11px] md:text-xs text-muted leading-relaxed text-left">
+                  Ich stimme den{" "}
+                  <a href="/agb" target="_blank" rel="noopener noreferrer" className="text-gold/90 hover:text-gold underline">
+                    AGB
+                  </a>{" "}
+                  zu und bin damit einverstanden, dass die Lieferung sofort beginnt.
+                  Mir ist bekannt, dass mein Widerrufsrecht mit Beginn des Downloads
+                  erlischt.
+                </span>
+              </label>
+
               <button
                 onClick={startCheckout}
-                disabled={checkoutLoading}
-                className="group w-full flex items-center justify-center gap-2 px-7 py-4 md:px-9 md:py-5 bg-gold hover:bg-gold-light disabled:opacity-60 disabled:cursor-not-allowed text-background text-base md:text-lg font-bold rounded-full transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-gold/30"
+                disabled={checkoutLoading || !agbAccepted}
+                className="group w-full flex items-center justify-center gap-2 px-7 py-4 md:px-9 md:py-5 bg-gold hover:bg-gold-light disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-background text-base md:text-lg font-bold rounded-full transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-gold/30"
               >
                 {checkoutLoading ? (
                   <>
