@@ -1,20 +1,38 @@
-import { Resend } from "resend";
+import nodemailer, { type Transporter } from "nodemailer";
 
-let cached: Resend | null = null;
+let cached: Transporter | null = null;
 
-function getResend(): Resend {
+/**
+ * Lazy-initialized Gmail/Google-Workspace SMTP transport.
+ *
+ * Nutzt das bestehende Google-Workspace-Konto der PAA-Domain. Kein DNS-
+ * Setup nötig — SPF (_spf.google.com) ist bereits gesetzt, da die Domain
+ * Google Workspace für E-Mail verwendet. Auth via App-Passwort.
+ */
+function getTransport(): Transporter {
   if (cached) return cached;
-  if (!process.env.RESEND_API_KEY) {
-    throw new Error("[email] RESEND_API_KEY is not configured");
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+  if (!user || !pass) {
+    throw new Error(
+      "[email] GMAIL_USER und GMAIL_APP_PASSWORD müssen gesetzt sein."
+    );
   }
-  cached = new Resend(process.env.RESEND_API_KEY);
+  cached = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: { user, pass },
+  });
   return cached;
 }
 
+const FROM_NAME = "Prime Athlete Academy";
+// Absender = die echte Workspace-Adresse. Gmail erlaubt nur Versand von der
+// authentifizierten Adresse (oder verifizierten Aliassen).
 const FROM_EMAIL =
-  process.env.RESEND_FROM_EMAIL ?? "Prime Athlete Academy <plan@primeathleteacademy.com>";
-const REPLY_TO =
-  process.env.RESEND_REPLY_TO ?? "primeathleteacademy@primeathleteacademy.com";
+  process.env.GMAIL_FROM ?? process.env.GMAIL_USER ?? "primeathleteacademy@primeathleteacademy.com";
+const REPLY_TO = process.env.MAIL_REPLY_TO ?? FROM_EMAIL;
 
 type PurchaseEmailParams = {
   toEmail: string;
@@ -24,24 +42,20 @@ type PurchaseEmailParams = {
 };
 
 export async function sendPurchaseEmail(params: PurchaseEmailParams) {
-  const resend = getResend();
+  const transport = getTransport();
   const firstName = params.toName?.split(" ")[0] ?? null;
 
   const html = renderPurchaseEmail({ ...params, firstName });
   const text = renderPurchaseEmailText({ ...params, firstName });
 
-  const { error } = await resend.emails.send({
-    from: FROM_EMAIL,
+  await transport.sendMail({
+    from: `${FROM_NAME} <${FROM_EMAIL}>`,
     to: params.toEmail,
     replyTo: REPLY_TO,
     subject: `Dein ${params.productName} ist da`,
     html,
     text,
   });
-
-  if (error) {
-    throw new Error(`Resend error: ${error.message}`);
-  }
 }
 
 function renderPurchaseEmail(p: PurchaseEmailParams & { firstName: string | null }) {
