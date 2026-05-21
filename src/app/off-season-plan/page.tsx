@@ -44,19 +44,6 @@ export default function OffSeasonPlanPage() {
         <div className="absolute bottom-1/4 right-1/4 w-56 md:w-80 h-56 md:h-80 bg-gold-dark/10 rounded-full blur-[80px] md:blur-[120px] z-[3]" />
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Limited Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 mb-5 md:mb-7 rounded-full border border-gold/30 bg-gold/5 backdrop-blur-sm"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse-gold" />
-            <span className="text-[10px] md:text-xs tracking-[0.25em] uppercase text-gold font-medium">
-              {offSeasonPlan.badge}
-            </span>
-          </motion.div>
-
           {/* Eyebrow */}
           <motion.p
             initial={{ opacity: 0, y: 12 }}
