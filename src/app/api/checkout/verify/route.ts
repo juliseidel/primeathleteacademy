@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { getStripe } from "@/lib/stripe";
+import { getStripe, siteUrl } from "@/lib/stripe";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { getProduct } from "@/lib/products";
+import { sendPurchaseEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -87,7 +89,7 @@ export async function GET(req: Request) {
         },
         { onConflict: "stripe_session_id" }
       )
-      .select("download_token, customer_email, product_key")
+      .select("download_token, customer_email, customer_name, product_key, email_sent_at")
       .single();
 
     if (upsertError || !upserted) {
@@ -97,6 +99,42 @@ export async function GET(req: Request) {
         { error: "Failed to record purchase." },
         { status: 500 }
       );
+    }
+
+    // Mail-Backup: Falls noch nicht verschickt (Webhook nicht konfiguriert
+    // oder hat sich verzögert), schicken wir sie hier. Race-condition-safe
+    // via conditional update auf email_sent_at — wir senden nur, wenn unser
+    // Update das Feld tatsächlich von NULL auf NOW gesetzt hat.
+    if (!upserted.email_sent_at && customerEmail) {
+      const { data: claimed } = await supabase
+        .from("purchases")
+        .update({ email_sent_at: new Date().toISOString() })
+        .eq("stripe_session_id", sessionId)
+        .is("email_sent_at", null)
+        .select("download_token")
+        .maybeSingle();
+
+      if (claimed?.download_token) {
+        const product = getProduct(upserted.product_key);
+        const downloadUrl = `${siteUrl()}/api/download/${claimed.download_token}`;
+        try {
+          await sendPurchaseEmail({
+            toEmail: customerEmail,
+            toName: upserted.customer_name ?? null,
+            productName: product?.name ?? "Prime Athlete Academy",
+            downloadUrl,
+          });
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error("[verify] email send failed", err);
+          // email_sent_at zurücksetzen, damit ein späterer Versuch
+          // (Webhook, Resend-Endpoint) es nochmal probieren kann.
+          await supabase
+            .from("purchases")
+            .update({ email_sent_at: null })
+            .eq("stripe_session_id", sessionId);
+        }
+      }
     }
 
     return NextResponse.json({

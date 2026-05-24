@@ -223,10 +223,11 @@ function PaidState({ token, email }: { token: string; email: string }) {
           </div>
           <div>
             <p className="text-foreground text-sm md:text-base font-semibold">
-              Rechnung mit USt von Stripe
+              Zahlungsbeleg von Stripe
             </p>
             <p className="text-muted text-xs md:text-sm mt-1 leading-relaxed">
-              Stripe schickt dir automatisch eine USt-konforme Rechnung an deine E-Mail.
+              Eine Zahlungsbestätigung mit ausgewiesener Mehrwertsteuer kommt
+              automatisch von Stripe an deine E-Mail-Adresse.
             </p>
           </div>
         </div>
