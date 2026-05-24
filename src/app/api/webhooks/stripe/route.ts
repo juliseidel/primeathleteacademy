@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { getStripe, STRIPE_WEBHOOK_SECRET, siteUrl } from "@/lib/stripe";
-import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { getStripe, STRIPE_WEBHOOK_SECRET } from "@/lib/stripe";
+import { getSupabaseAdmin, createDirectDownloadUrl } from "@/lib/supabase-admin";
 import { getProduct } from "@/lib/products";
 import { sendPurchaseEmail } from "@/lib/email";
 
@@ -121,7 +121,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   // Send the email if it hasn't been sent yet (webhook can be replayed).
   if (!row.email_sent_at) {
-    const downloadUrl = `${siteUrl()}/api/download/${row.download_token}`;
+    // Direct signed Supabase URL — Mail-Klick lädt das PDF sofort herunter,
+    // ohne Umweg über unsere Webseite (kein Vercel-Auth-Problem etc.).
+    const downloadUrl =
+      product &&
+      (await createDirectDownloadUrl(
+        product.storagePath,
+        `${product.name}.pdf`
+      ));
+    if (!downloadUrl) {
+      // eslint-disable-next-line no-console
+      console.error("[webhook] could not create signed download URL");
+      return;
+    }
     try {
       await sendPurchaseEmail({
         toEmail: customerEmail,

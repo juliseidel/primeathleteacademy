@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { getSupabaseAdmin, createDirectDownloadUrl } from "@/lib/supabase-admin";
 import { getProduct } from "@/lib/products";
 import { sendPurchaseEmail } from "@/lib/email";
-import { siteUrl } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 
@@ -63,7 +62,14 @@ export async function POST(req: Request) {
     }
 
     const product = getProduct(purchase.product_key);
-    const downloadUrl = `${siteUrl()}/api/download/${purchase.download_token}`;
+    // Direct signed Supabase URL → Mail-Klick lädt sofort das PDF.
+    const downloadUrl = product
+      ? await createDirectDownloadUrl(
+          product.storagePath,
+          `${product.name}.pdf`
+        )
+      : null;
+    if (!downloadUrl) return genericOk;
 
     await sendPurchaseEmail({
       toEmail: email,

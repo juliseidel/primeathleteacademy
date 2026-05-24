@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getStripe, siteUrl } from "@/lib/stripe";
-import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { getStripe } from "@/lib/stripe";
+import { getSupabaseAdmin, createDirectDownloadUrl } from "@/lib/supabase-admin";
 import { getProduct } from "@/lib/products";
 import { sendPurchaseEmail } from "@/lib/email";
 
@@ -116,8 +116,15 @@ export async function GET(req: Request) {
 
       if (claimed?.download_token) {
         const product = getProduct(upserted.product_key);
-        const downloadUrl = `${siteUrl()}/api/download/${claimed.download_token}`;
+        // Direct signed Supabase URL → Mail-Klick lädt sofort das PDF.
+        const downloadUrl = product
+          ? await createDirectDownloadUrl(
+              product.storagePath,
+              `${product.name}.pdf`
+            )
+          : null;
         try {
+          if (!downloadUrl) throw new Error("Could not create signed URL");
           await sendPurchaseEmail({
             toEmail: customerEmail,
             toName: upserted.customer_name ?? null,
