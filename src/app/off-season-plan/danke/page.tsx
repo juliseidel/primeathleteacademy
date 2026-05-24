@@ -217,20 +217,6 @@ function PaidState({ token, email }: { token: string; email: string }) {
           </div>
         </div>
 
-        <div className="flex items-start gap-3 md:gap-4">
-          <div className="w-9 h-9 rounded-lg bg-gold/10 flex items-center justify-center flex-shrink-0">
-            <CheckCircle2 className="w-4 h-4 text-gold" />
-          </div>
-          <div>
-            <p className="text-foreground text-sm md:text-base font-semibold">
-              Zahlungsbeleg von Stripe
-            </p>
-            <p className="text-muted text-xs md:text-sm mt-1 leading-relaxed">
-              Eine Zahlungsbestätigung mit ausgewiesener Mehrwertsteuer kommt
-              automatisch von Stripe an deine E-Mail-Adresse.
-            </p>
-          </div>
-        </div>
       </div>
 
       <div className="mt-8 md:mt-10 pt-7 border-t border-white/5 text-center">
