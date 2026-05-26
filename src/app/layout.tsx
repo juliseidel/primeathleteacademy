@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import Navigation from "@/components/layout/Navigation";
 import Footer from "@/components/layout/Footer";
 import ScrollProgress from "@/components/layout/ScrollProgress";
+import PromoBanner from "@/components/layout/PromoBanner";
 import "./globals.css";
 
 const inter = Inter({
@@ -53,9 +54,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de" className="dark">
-      <body className={`${inter.variable} antialiased bg-background text-foreground`}>
+    <html
+      lang="de"
+      className="dark"
+      style={{ ["--promo-banner-h" as string]: "0px" }}
+    >
+      <body
+        className={`${inter.variable} antialiased bg-background text-foreground`}
+        style={{ paddingTop: "var(--promo-banner-h, 0px)" }}
+      >
         <ScrollProgress />
+        <PromoBanner />
         <Navigation />
         <main className="min-h-screen">{children}</main>
         <Footer />

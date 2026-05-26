@@ -115,6 +115,9 @@ export default function Footer() {
             <Link href="/datenschutz" className="text-xs text-muted hover:text-gold transition-colors">
               Datenschutz
             </Link>
+            <Link href="/agb" className="text-xs text-muted hover:text-gold transition-colors">
+              AGB
+            </Link>
           </div>
         </div>
       </div>

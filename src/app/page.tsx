@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Zap, Apple, Trophy, Quote, Instagram, Star, Volume2, VolumeX } from "lucide-react";
-import { coaches, testimonials, stats, contact } from "@/lib/constants";
+import { ArrowRight, Zap, Apple, Trophy, Quote, Instagram, Star, Volume2, VolumeX, Check } from "lucide-react";
+import { coaches, testimonials, stats, contact, offSeasonPlan } from "@/lib/constants";
 
 const trainingVideos = [
   "/videos/training-1.mp4",
@@ -178,6 +178,9 @@ export default function Home() {
           ))}
         </div>
       </div>
+
+      {/* ===== FEATURED DROP: OFF-SEASON PLAN ===== */}
+      <OffSeasonFeatured />
 
       {/* ===== SERVICES SECTION ===== */}
       <section className="py-12 md:py-32">
@@ -494,6 +497,186 @@ export default function Home() {
         </div>
       </section>
     </>
+  );
+}
+
+/* ===== OFF-SEASON FEATURED DROP ===== */
+function OffSeasonFeatured() {
+  const [campaignActive, setCampaignActive] = useState(true);
+
+  useEffect(() => {
+    const endDate = new Date(offSeasonPlan.campaignEndDate).getTime();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCampaignActive(Date.now() < endDate);
+  }, []);
+
+  if (!campaignActive) return null;
+
+  const outcomes = [
+    {
+      label: "Robust für die Hinrunde",
+      desc: "Sehnen und Muskeln gewöhnen sich an Hochbelastung — statt Verletzungspause im November.",
+    },
+    {
+      label: "Mehr Sprint-Volumen",
+      desc: "Größeres Tankvolumen für hochintensive Aktionen bis zur 90. Minute.",
+    },
+    {
+      label: "Mental Edge",
+      desc: "Du startest in die Vorbereitung mit dem Wissen, dass du mehr getan hast als der Rest.",
+    },
+  ];
+
+  return (
+    <section className="relative py-14 md:py-28 overflow-hidden">
+      {/* Soft glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[64rem] h-[44rem] bg-gold/[0.06] rounded-full blur-[160px] pointer-events-none" />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-gold/25 bg-gradient-to-br from-surface to-surface-light shadow-2xl shadow-gold/10"
+        >
+          {/* Top gold accent */}
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-gold to-transparent" />
+
+          {/* Background action image (subtle, right side) */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/patrick-action.jpg"
+            alt=""
+            loading="lazy"
+            className="absolute right-0 inset-y-0 w-3/5 h-full object-cover hidden md:block"
+            style={{ filter: "brightness(0.35) saturate(0.35) contrast(1.05)", objectPosition: "30% 25%" }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/92 md:via-surface/80 to-surface/30 hidden md:block" />
+
+          <div className="relative grid grid-cols-1 md:grid-cols-[1.15fr_1fr] gap-8 md:gap-12 p-6 sm:p-10 md:p-12 lg:p-14">
+            {/* ============================================ */}
+            {/* LEFT: Pitch                                  */}
+            {/* ============================================ */}
+            <div className="relative z-10">
+              <p className="tracking-[0.32em] uppercase text-gold/70 text-[10px] md:text-xs mb-5 md:mb-6">
+                Drop · Saison-Start 2026 / 27
+              </p>
+
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-[1] mb-5 md:mb-7">
+                Die Saison wird
+                <br />
+                <span className="gradient-text-gold">im Sommer</span> entschieden.
+              </h2>
+
+              <p className="text-foreground/80 text-sm md:text-base lg:text-lg leading-relaxed mb-7 md:mb-9 max-w-xl">
+                Wir geben dir das exakte 4-Wochen-System, mit dem
+                wir uns selbst auf die Vorbereitung einstellen.
+                <span className="text-gold/90"> Diesen Sommer
+                einmalig.</span>
+              </p>
+
+              {/* Outcomes (3) */}
+              <ul className="space-y-4 mb-8 md:mb-10 max-w-lg">
+                {outcomes.map((item) => (
+                  <li key={item.label} className="flex items-start gap-3">
+                    <span className="flex-shrink-0 mt-1 w-5 h-5 rounded-full bg-gold/15 flex items-center justify-center">
+                      <Check className="w-3 h-3 text-gold" />
+                    </span>
+                    <div>
+                      <span className="text-foreground font-semibold text-sm md:text-base">
+                        {item.label}
+                      </span>
+                      <span className="text-muted text-sm md:text-[15px] leading-relaxed">
+                        {" "}— {item.desc}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA */}
+              <div className="flex flex-wrap items-center gap-3 md:gap-5">
+                <Link
+                  href="/off-season-plan"
+                  className="group inline-flex items-center gap-2 px-7 py-3.5 md:px-8 md:py-4 bg-gold hover:bg-gold-light text-background text-sm md:text-base font-bold rounded-full transition-all duration-300 hover:scale-[1.03] hover:shadow-xl hover:shadow-gold/30"
+                >
+                  Plan sichern · 99 €
+                  <ArrowRight
+                    size={16}
+                    className="group-hover:translate-x-1 transition-transform"
+                  />
+                </Link>
+                <Link
+                  href="/off-season-plan"
+                  className="text-sm md:text-base text-foreground/65 hover:text-gold transition-colors flex items-center gap-1.5"
+                >
+                  Was drinsteckt
+                  <ArrowRight size={14} />
+                </Link>
+              </div>
+            </div>
+
+            {/* ============================================ */}
+            {/* RIGHT: Coach Pull-Quote                      */}
+            {/* ============================================ */}
+            <div className="relative z-10 hidden md:flex items-center justify-end">
+              <div className="relative w-full max-w-md">
+                {/* Soft glow */}
+                <div className="absolute -inset-1 bg-gold/10 rounded-3xl blur-2xl" />
+
+                <div className="relative bg-background/70 backdrop-blur-xl border border-gold/25 rounded-2xl p-8 lg:p-9">
+                  {/* Coach Avatars */}
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="flex -space-x-2.5">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="/images/jonas.jpg"
+                        alt="Jonas Kehl"
+                        className="w-10 h-10 rounded-full border-2 border-surface object-cover"
+                      />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="/images/patrick.jpg"
+                        alt="Patrick Scheder"
+                        className="w-10 h-10 rounded-full border-2 border-surface object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-xs md:text-sm text-foreground font-semibold">
+                        Jonas &amp; Patrick
+                      </p>
+                      <p className="text-[10px] tracking-[0.18em] uppercase text-gold/75 mt-0.5">
+                        Coaches · PAA
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Quote */}
+                  <Quote size={20} className="text-gold/40 mb-2" />
+                  <blockquote className="text-foreground/90 text-[15px] md:text-base leading-relaxed font-light italic">
+                    Das ist die Periodisierung, mit der wir selbst
+                    in die Saison gehen. Wer das durchzieht, startet
+                    anders als 95&nbsp;% der Konkurrenz.
+                  </blockquote>
+
+                  {/* Mini footer */}
+                  <div className="mt-7 pt-5 border-t border-white/5">
+                    <p className="text-[10px] tracking-[0.2em] uppercase text-gold/80 mb-1.5">
+                      Im Plan enthalten
+                    </p>
+                    <p className="text-xs md:text-sm text-foreground/75 leading-relaxed">
+                      4 Wochen Athletik · Performance-Ernährung ·
+                      Recovery-Protokoll
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
   );
 }
 
