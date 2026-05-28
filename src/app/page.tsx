@@ -514,16 +514,16 @@ function OffSeasonFeatured() {
 
   const outcomes = [
     {
-      label: "Robust für die Hinrunde",
-      desc: "Sehnen und Muskeln gewöhnen sich an Hochbelastung — statt Verletzungspause im November.",
+      label: "Fitter als je zuvor",
+      desc: "Du startest in die Vorbereitung in deiner absoluten Bestform. Stärker, belastbarer und fitter als jemals zuvor.",
     },
     {
-      label: "Mehr Sprint-Volumen",
-      desc: "Größeres Tankvolumen für hochintensive Aktionen bis zur 90. Minute.",
+      label: "Schneller. Stärker. Ausdauernder.",
+      desc: "Mehr Explosivität, mehr Intensität, mehr Tank für wiederholte Sprints bis zur 90. Minute.",
     },
     {
       label: "Mental Edge",
-      desc: "Du startest in die Vorbereitung mit dem Wissen, dass du mehr getan hast als der Rest.",
+      desc: "Du nutzt die Sommerpause, während andere abschalten. Genau das wird dein Vorteil zum Saisonstart.",
     },
   ];
 
