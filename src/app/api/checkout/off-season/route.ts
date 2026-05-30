@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getStripe, siteUrl } from "@/lib/stripe";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { getProduct } from "@/lib/products";
+import { getLaunchPromoStatus } from "@/lib/promo";
 
 export const runtime = "nodejs";
 
@@ -16,8 +17,19 @@ export async function POST() {
 
     const base = siteUrl();
 
+    // Auto-Apply für den Launch-Rabatt: Wenn der Promo-Code in Stripe aktiv
+    // ist UND noch Slots frei sind, ziehen wir den Rabatt automatisch ab —
+    // ohne dass der Käufer einen Code eingeben muss. Stripe zählt
+    // `times_redeemed` selbst hoch und deaktiviert den Code, sobald
+    // `max_redemptions` erreicht ist.
+    const promo = await getLaunchPromoStatus();
+    const discounts = promo.promotionCodeId
+      ? [{ promotion_code: promo.promotionCodeId }]
+      : undefined;
+
     const session = await getStripe().checkout.sessions.create({
       mode: "payment",
+      ...(discounts ? { discounts } : {}),
       // Kein hart-kodiertes payment_method_types → Stripe nutzt "dynamic
       // payment methods": zeigt automatisch ALLE im Dashboard aktivierten
       // Methoden an (Karte inkl. Apple Pay / Google Pay automatisch, plus

@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Check, ChevronDown } from "lucide-react";
 import { offSeasonPlan, coaches } from "@/lib/constants";
+import { useLaunchPromoActive } from "@/lib/use-launch-promo";
 
 export default function OffSeasonPlanPage() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [agbAccepted, setAgbAccepted] = useState(false);
+  const launchActive = useLaunchPromoActive();
 
   const startCheckout = async () => {
     if (!agbAccepted) {
@@ -305,6 +307,14 @@ export default function OffSeasonPlanPage() {
 
             <div className="p-6 sm:p-8 md:p-12">
               <div className="text-center mb-7 md:mb-9">
+                {launchActive ? (
+                  <div className="inline-flex items-center gap-2 mb-4 px-3.5 py-1.5 rounded-full bg-gold/15 border border-gold/45">
+                    <span className="text-gold text-[10px] md:text-xs font-bold tracking-[0.18em] uppercase">
+                      🎉 Launch-Rabatt aktiv · 20 % off
+                    </span>
+                  </div>
+                ) : null}
+
                 <h2 className="text-3xl md:text-5xl font-black text-white mb-1.5">
                   Off-Season Plan 2026
                 </h2>
@@ -312,12 +322,28 @@ export default function OffSeasonPlanPage() {
                   Elite Edition
                 </p>
 
-                <div className="flex items-baseline justify-center gap-2 mb-2">
-                  <span className="text-6xl md:text-7xl font-black gradient-text-gold glow-gold-text">
-                    99
-                  </span>
-                  <span className="text-3xl md:text-4xl font-black text-gold">€</span>
-                </div>
+                {launchActive ? (
+                  <>
+                    <div className="flex items-baseline justify-center gap-2 mb-1">
+                      <span className="text-6xl md:text-7xl font-black gradient-text-gold glow-gold-text">
+                        79
+                      </span>
+                      <span className="text-3xl md:text-4xl font-black text-gold">€</span>
+                    </div>
+                    <p className="text-muted/70 text-xs md:text-sm mb-1.5">
+                      Statt{" "}
+                      <span className="line-through">99&nbsp;€</span> —
+                      du sparst <span className="text-gold/90">20&nbsp;€</span>
+                    </p>
+                  </>
+                ) : (
+                  <div className="flex items-baseline justify-center gap-2 mb-2">
+                    <span className="text-6xl md:text-7xl font-black gradient-text-gold glow-gold-text">
+                      99
+                    </span>
+                    <span className="text-3xl md:text-4xl font-black text-gold">€</span>
+                  </div>
+                )}
                 <p className="text-muted text-xs md:text-sm">{offSeasonPlan.priceNote}</p>
               </div>
 
@@ -363,6 +389,14 @@ export default function OffSeasonPlanPage() {
                   <>
                     <span className="w-5 h-5 border-2 border-background/30 border-t-background rounded-full animate-spin" />
                     Lade Checkout…
+                  </>
+                ) : launchActive ? (
+                  <>
+                    Jetzt sichern · 79&nbsp;€
+                    <span className="text-background/55 line-through font-medium text-xs md:text-sm ml-0.5">
+                      99&nbsp;€
+                    </span>
+                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                   </>
                 ) : (
                   <>
