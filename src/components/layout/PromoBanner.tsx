@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
 import { offSeasonPlan } from "@/lib/constants";
+import { useLaunchPromoActive } from "@/lib/use-launch-promo";
 
 const DISMISS_KEY = "paa_promo_banner_dismissed_off_season_2026";
 const BANNER_H_PX = 32;
@@ -12,6 +13,7 @@ const BANNER_H_PX = 32;
 export default function PromoBanner() {
   const [dismissed, setDismissed] = useState(true); // start hidden to avoid flicker
   const [campaignActive, setCampaignActive] = useState(false);
+  const launchActive = useLaunchPromoActive();
 
   useEffect(() => {
     // Hydration-safe init: read campaign and dismissed state on the client.
@@ -61,10 +63,26 @@ export default function PromoBanner() {
               href="/off-season-plan"
               className="flex items-center justify-center gap-1.5 md:gap-2.5 h-full group text-[11px] md:text-[13px]"
             >
-              <span className="font-bold tracking-wider uppercase">
-                Off-Season Plan 2026
-              </span>
-              <span className="font-black">— 99 €</span>
+              {launchActive ? (
+                <>
+                  <span className="font-black tracking-wider uppercase">
+                    🎉 Launch-Rabatt aktiv
+                  </span>
+                  <span className="hidden sm:inline font-medium opacity-90">
+                    · Du sparst 20 % — solange Slots verfügbar
+                  </span>
+                  <span className="sm:hidden font-medium opacity-90">
+                    · 20 % off
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="font-bold tracking-wider uppercase">
+                    Off-Season Plan 2026
+                  </span>
+                  <span className="font-black">— 99 €</span>
+                </>
+              )}
               <ArrowRight
                 size={12}
                 className="group-hover:translate-x-1 transition-transform"

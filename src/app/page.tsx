@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Zap, Apple, Trophy, Quote, Instagram, Star, Volume2, VolumeX, Check } from "lucide-react";
 import { coaches, testimonials, stats, contact, offSeasonPlan } from "@/lib/constants";
+import { useLaunchPromoActive } from "@/lib/use-launch-promo";
 
 const trainingVideos = [
   "/videos/training-1.mp4",
@@ -503,6 +504,7 @@ export default function Home() {
 /* ===== OFF-SEASON FEATURED DROP ===== */
 function OffSeasonFeatured() {
   const [campaignActive, setCampaignActive] = useState(true);
+  const launchActive = useLaunchPromoActive();
 
   useEffect(() => {
     const endDate = new Date(offSeasonPlan.campaignEndDate).getTime();
@@ -559,6 +561,14 @@ function OffSeasonFeatured() {
             {/* LEFT: Pitch                                  */}
             {/* ============================================ */}
             <div className="relative z-10">
+              {launchActive ? (
+                <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-gold/15 border border-gold/40">
+                  <span className="text-gold text-[10px] md:text-xs font-bold tracking-[0.18em] uppercase">
+                    🎉 Launch-Rabatt · 20 % off
+                  </span>
+                </div>
+              ) : null}
+
               <p className="tracking-[0.32em] uppercase text-gold/70 text-[10px] md:text-xs mb-5 md:mb-6">
                 Drop · Saison-Start 2026 / 27
               </p>
@@ -601,7 +611,16 @@ function OffSeasonFeatured() {
                   href="/off-season-plan"
                   className="group inline-flex items-center gap-2 px-7 py-3.5 md:px-8 md:py-4 bg-gold hover:bg-gold-light text-background text-sm md:text-base font-bold rounded-full transition-all duration-300 hover:scale-[1.03] hover:shadow-xl hover:shadow-gold/30"
                 >
-                  Plan sichern · 99 €
+                  {launchActive ? (
+                    <>
+                      Plan sichern · 79&nbsp;€
+                      <span className="text-background/55 line-through font-medium text-[11px] md:text-xs ml-0.5">
+                        99&nbsp;€
+                      </span>
+                    </>
+                  ) : (
+                    <>Plan sichern · 99&nbsp;€</>
+                  )}
                   <ArrowRight
                     size={16}
                     className="group-hover:translate-x-1 transition-transform"
