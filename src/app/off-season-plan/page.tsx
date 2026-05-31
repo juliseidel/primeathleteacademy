@@ -97,7 +97,16 @@ export default function OffSeasonPlanPage() {
               href="#kaufen"
               className="group flex items-center gap-2 px-7 py-3.5 md:px-9 md:py-4 bg-gold hover:bg-gold-light text-background text-sm md:text-base font-bold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-gold/30 glow-gold"
             >
-              Jetzt sichern · {offSeasonPlan.priceLabel}
+              {launchActive ? (
+                <>
+                  Jetzt sichern · 79&nbsp;€
+                  <span className="text-background/55 line-through font-medium text-[11px] md:text-xs ml-0.5">
+                    99&nbsp;€
+                  </span>
+                </>
+              ) : (
+                <>Jetzt sichern · {offSeasonPlan.priceLabel}</>
+              )}
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </a>
             <a
@@ -332,8 +341,9 @@ export default function OffSeasonPlanPage() {
                     </div>
                     <p className="text-muted/70 text-xs md:text-sm mb-1.5">
                       Statt{" "}
-                      <span className="line-through">99&nbsp;€</span> —
-                      du sparst <span className="text-gold/90">20&nbsp;€</span>
+                      <span className="line-through">99&nbsp;€</span>
+                      {" · "}
+                      du sparst <span className="text-gold/90">20&nbsp;%</span>
                     </p>
                   </>
                 ) : (
