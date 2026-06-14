@@ -99,7 +99,7 @@ export default function OffSeasonPlanPage() {
             >
               {launchActive ? (
                 <>
-                  Jetzt sichern · 79&nbsp;€
+                  Jetzt sichern · 74&nbsp;€
                   <span className="text-background/55 line-through font-medium text-[11px] md:text-xs ml-0.5">
                     99&nbsp;€
                   </span>
@@ -319,7 +319,7 @@ export default function OffSeasonPlanPage() {
                 {launchActive ? (
                   <div className="inline-flex items-center gap-2 mb-4 px-3.5 py-1.5 rounded-full bg-gold/15 border border-gold/45">
                     <span className="text-gold text-[10px] md:text-xs font-bold tracking-[0.18em] uppercase">
-                      🎉 Launch-Rabatt aktiv · 20 % off
+                      🎉 Sommer-Rabatt aktiv · 25 % off
                     </span>
                   </div>
                 ) : null}
@@ -335,7 +335,7 @@ export default function OffSeasonPlanPage() {
                   <>
                     <div className="flex items-baseline justify-center gap-2 mb-1">
                       <span className="text-6xl md:text-7xl font-black gradient-text-gold glow-gold-text">
-                        79
+                        74
                       </span>
                       <span className="text-3xl md:text-4xl font-black text-gold">€</span>
                     </div>
@@ -343,7 +343,7 @@ export default function OffSeasonPlanPage() {
                       Statt{" "}
                       <span className="line-through">99&nbsp;€</span>
                       {" · "}
-                      du sparst <span className="text-gold/90">20&nbsp;%</span>
+                      du sparst <span className="text-gold/90">25&nbsp;%</span>
                     </p>
                   </>
                 ) : (
@@ -402,7 +402,7 @@ export default function OffSeasonPlanPage() {
                   </>
                 ) : launchActive ? (
                   <>
-                    Jetzt sichern · 79&nbsp;€
+                    Jetzt sichern · 74&nbsp;€
                     <span className="text-background/55 line-through font-medium text-xs md:text-sm ml-0.5">
                       99&nbsp;€
                     </span>

@@ -564,7 +564,7 @@ function OffSeasonFeatured() {
               {launchActive ? (
                 <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-gold/15 border border-gold/40">
                   <span className="text-gold text-[10px] md:text-xs font-bold tracking-[0.18em] uppercase">
-                    🎉 Launch-Rabatt · 20 % off
+                    🎉 Sommer-Rabatt · 25 % off
                   </span>
                 </div>
               ) : null}
@@ -613,7 +613,7 @@ function OffSeasonFeatured() {
                 >
                   {launchActive ? (
                     <>
-                      Plan sichern · 79&nbsp;€
+                      Plan sichern · 74&nbsp;€
                       <span className="text-background/55 line-through font-medium text-[11px] md:text-xs ml-0.5">
                         99&nbsp;€
                       </span>

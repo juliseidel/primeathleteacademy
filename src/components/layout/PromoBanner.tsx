@@ -66,13 +66,13 @@ export default function PromoBanner() {
               {launchActive ? (
                 <>
                   <span className="font-black tracking-wider uppercase">
-                    🎉 Launch-Rabatt
+                    🎉 Sommer-Rabatt
                   </span>
                   <span className="hidden sm:inline font-bold">
-                    20 % auf den Off-Season Plan sichern
+                    25 % auf den Off-Season Plan sichern
                   </span>
                   <span className="sm:hidden font-bold">
-                    20 % auf den Off-Season Plan
+                    25 % auf den Off-Season Plan
                   </span>
                 </>
               ) : (

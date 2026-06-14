@@ -1,23 +1,25 @@
 /**
  * Promo-Code-Konfiguration für den Off-Season Plan.
  *
- * Der Code wird in Stripe verwaltet (Coupon + Promotion Code) und ist
- * standardmäßig inaktiv. Aktivierung erfolgt manuell im Stripe-Dashboard
- * (Promotion Codes → LAUNCH2K → Toggle "Active") — oder via API mit dem
- * passenden Helper auf Anfrage.
+ * Der Code wird in Stripe verwaltet (Coupon + Promotion Code). Aktivierung /
+ * Deaktivierung erfolgt im Stripe-Dashboard (Promotion Codes → SUMMER25 →
+ * Toggle "Active") — oder via API.
  *
+ * Aktuelle Aktion: 25 % Sommer-Rabatt, unbegrenzte Einlösungen.
  * Stripe-IDs:
- *  - Coupon:         uMfMAEIh
- *  - Promotion Code: promo_1TcmIILpNyRPKCxvqypistQm (Code: LAUNCH2K)
+ *  - Coupon:         tCnM2abP (25 % off)
+ *  - Promotion Code: promo_1TiCMyLpNyRPKCxv6ENVPcKf (Code: SUMMER25)
+ *
+ * Vorherige Aktion (beendet): Coupon uMfMAEIh / Code LAUNCH2K (20 %, 19/20).
  */
 
 import { getStripe } from "./stripe";
 
 /** Display code — auch das was Käufer (theoretisch) eingeben würden. */
-export const LAUNCH_PROMO_CODE = "LAUNCH2K";
+export const LAUNCH_PROMO_CODE = "SUMMER25";
 
-/** Maximale Einlösungen — muss mit dem in Stripe gesetzten Wert übereinstimmen. */
-export const LAUNCH_PROMO_MAX_REDEMPTIONS = 20;
+/** Rabatt in Prozent — für die Anzeige im Frontend. */
+export const LAUNCH_PROMO_PERCENT = 25;
 
 export type LaunchPromoStatus = {
   /** True, wenn der Promo-Code aktiv ist UND noch mindestens 1 Slot frei. */
