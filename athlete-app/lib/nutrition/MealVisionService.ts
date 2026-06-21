@@ -14,6 +14,9 @@
  * AvatarService. API-Key kommt aus EXPO_PUBLIC_GEMINI_API_KEY.
  */
 
+// gemini-2.5-flash MIT aktivem Thinking — Mittelweg aus Qualität & Kosten.
+// Pro wäre besser, aber ~10× teurer; Flash+Thinking liefert nahezu gleiche
+// Erkennungs-Qualität bei ~0.1-0.3 Cent pro Foto.
 const VISION_MODEL = 'gemini-2.5-flash';
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${VISION_MODEL}:generateContent`;
 
@@ -48,49 +51,39 @@ export type MealAnalysis = {
 
 // ─── Foto-Analyse (Bild + optional Voice-Note multimodal) ───────────────────
 
-const FOOD_ANALYSIS_PROMPT = `Du bist ein erfahrener Sport-Ernährungsexperte und analysierst Mahlzeit-Fotos für die Prime Athlete Academy App.
+const FOOD_ANALYSIS_PROMPT = `Du bist Ernährungsexperte und analysierst ein Foto einer Mahlzeit.
 
 AUFGABE:
-Analysiere das Foto dieser Mahlzeit sehr genau. Erkenne ALLE sichtbaren Lebensmittel und Komponenten einzeln.
+Erkenne jedes einzelne sichtbare Lebensmittel und liste es separat auf. Nutze deine Bildanalyse, um Texturen, Farben und Formen zu unterscheiden — Brot, Butter, Sauerkraut, Apfel, Oliven, Eier sind alles eigenständige Lebensmittel und gehören jeweils in einen eigenen Eintrag.
 
-FÜR JEDE KOMPONENTE SCHÄTZE:
-- Name auf Deutsch (möglichst spezifisch, z.B. "Hähnchenbrust gegrillt" statt nur "Fleisch")
-- Geschätzte Menge in Gramm
+FÜR JEDES LEBENSMITTEL:
+- Name auf Deutsch, so spezifisch wie möglich (z.B. "Roggenbrot" statt "Brot", "Hähnchenbrust gegrillt" statt "Fleisch")
+- Geschätzte Menge in Gramm (nutze Teller, Besteck, Hände als Größenreferenz)
 - Kalorien (kcal)
 - Protein (g)
 - Kohlenhydrate (g)
 - Fett (g)
-- Confidence 0.0–1.0 (wie sicher bist du dir?)
 
-REGELN:
-1. Sei so präzise wie möglich bei der Mengen-Abschätzung — nutze sichtbare Referenzpunkte (Teller-Größe, Besteck, Hände)
-2. Berücksichtige typische Portionsgrößen für sportliche Athleten (eher größere Portionen)
-3. Erkenne auch Zutaten die nicht direkt sichtbar sind (z.B. Öl beim Anbraten, Sauce, Dressing)
-4. Bei mehreren Komponenten auf einem Teller: jede einzeln auflisten, NICHT zu einer Pauschal-Schätzung zusammenfassen
-5. Wenn eine Sprachnotiz mitgeschickt wird: nutze sie als Korrektur/Ergänzung deiner Foto-Analyse (z.B. "ich hatte 200g Reis" → übernimm 200g, ignoriere deine ursprüngliche Schätzung)
+WICHTIG ZUM NAMEN:
+Verwende für jeden Eintrag nur den Basis-Namen der Zutat, ohne Bezug zu anderen Komponenten:
+- richtig: "Butter"  — falsch: "Butter auf Brot"
+- richtig: "Apfel"  — falsch: "Apfelstücken im Sauerkraut"
+- richtig: "Olivenöl"  — falsch: "Olivenöl zum Anbraten"
 
-ANTWORTE NUR MIT VALIDEM JSON (kein Markdown-Codeblock, kein Text drumherum):
+Auch bei Mischungen wie Salaten, eingelegtem Gemüse oder Müsli: trenne die sichtbaren Bestandteile in eigene Einträge. Sauerkraut und Apfel sind zwei separate Komponenten, auch wenn sie in derselben Schüssel liegen. Müsli, Milch und Banane sind drei Komponenten.
+
+Berücksichtige auch unsichtbare Zutaten wie Öl beim Anbraten oder Dressing am Salat — als eigene Einträge.
+Sportliche Athleten essen oft größere Portionen — schätze entsprechend großzügig.
+
+ANTWORTE NUR MIT VALIDEM JSON (kein Markdown, kein Text drumherum):
 {
-  "dish_name": "Name des gesamten Gerichts",
+  "dish_name": "Name des Gerichts",
   "components": [
-    {
-      "name": "Komponente 1",
-      "weight_g": 150,
-      "calories": 165,
-      "protein": 31,
-      "carbs": 0,
-      "fat": 3.6,
-      "confidence": 0.9
-    }
+    { "name": "Komponente", "weight_g": 150, "calories": 165, "protein": 31, "carbs": 0, "fat": 3.6 }
   ],
-  "total": {
-    "calories": 520,
-    "protein": 45,
-    "carbs": 30,
-    "fat": 12
-  },
-  "meal_type_suggestion": "lunch",
-  "notes": "kurze Anmerkung wenn etwas unsicher ist, sonst null"
+  "total": { "calories": 520, "protein": 45, "carbs": 30, "fat": 12 },
+  "meal_type_suggestion": "breakfast | lunch | dinner | snack",
+  "notes": null
 }`;
 
 type GeminiPart =
@@ -102,10 +95,14 @@ type GeminiResponse = {
   error?: { message?: string };
 };
 
+export type AnalyzeResult =
+  | { success: true; analysis: MealAnalysis }
+  | { success: false; error: string; debug?: string };
+
 export async function analyzeMealPhoto(
   imageBase64: string,
   audioBase64?: string,
-): Promise<{ success: true; analysis: MealAnalysis } | { success: false; error: string }> {
+): Promise<AnalyzeResult> {
   const apiKey = getApiKey();
 
   let prompt = FOOD_ANALYSIS_PROMPT;
@@ -136,9 +133,12 @@ export async function analyzeMealPhoto(
         generationConfig: {
           responseMimeType: 'application/json',
           temperature: 0.2,
-          maxOutputTokens: 2048,
+          maxOutputTokens: 8192,
           topP: 0.8,
           topK: 40,
+          // Thinking aktiv lassen — gemini-2.5-pro nutzt das Reasoning, um
+          // Lebensmittel sauberer zu trennen (Brot vs. Butter vs. Sauerkraut).
+          // Defensives JSON-Parsing fängt die längere Response ab.
         },
         safetySettings: [
           { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
@@ -151,50 +151,104 @@ export async function analyzeMealPhoto(
 
     if (!res.ok) {
       const body = await res.text();
-      return { success: false, error: `Gemini API ${res.status}: ${body.slice(0, 200)}` };
+      console.log('[MealVision] HTTP error', res.status, body.slice(0, 400));
+      console.warn('[MealVision] HTTP error', res.status, body.slice(0, 400));
+      return {
+        success: false,
+        error: `Gemini API ${res.status}`,
+        debug: body.slice(0, 800),
+      };
     }
 
     const data = (await res.json()) as GeminiResponse;
     if (data.error) {
-      return { success: false, error: data.error.message ?? 'Gemini-Fehler' };
+      console.log('[MealVision] API error', data.error);
+      return {
+        success: false,
+        error: data.error.message ?? 'Gemini-Fehler',
+        debug: JSON.stringify(data.error).slice(0, 800),
+      };
     }
 
-    const textPart = data.candidates?.[0]?.content?.parts?.find((p) => p.text && !p.thought);
-    if (!textPart?.text) {
-      return { success: false, error: 'Leere Antwort von Gemini' };
+    // Alle text-parts concatten — Gemini splittet die JSON-Antwort manchmal
+    // über mehrere parts auf, find() würde dann ein Fragment zurückgeben.
+    const allParts = data.candidates?.[0]?.content?.parts ?? [];
+    const fullText = allParts
+      .filter((p) => typeof p.text === 'string' && !p.thought)
+      .map((p) => p.text as string)
+      .join('')
+      .trim();
+
+    if (!fullText) {
+      const finishReason = (data.candidates?.[0] as { finishReason?: string } | undefined)?.finishReason;
+      const rawDump = JSON.stringify(data).slice(0, 800);
+      console.log('[MealVision] Empty response. finishReason:', finishReason, 'raw:', rawDump);
+      return {
+        success: false,
+        error: finishReason === 'MAX_TOKENS'
+          ? 'Antwort zu lang — bitte schärferes Foto oder weniger Komponenten'
+          : `Leere Antwort von Gemini${finishReason ? ` (${finishReason})` : ''}`,
+        debug: rawDump,
+      };
     }
 
-    return parseAnalysis(textPart.text);
+    console.log('[MealVision] raw text (first 400 chars):', fullText.slice(0, 400));
+    return parseAnalysis(fullText);
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {
       return { success: false, error: 'Zeitüberschreitung — bitte nochmal versuchen' };
     }
-    return { success: false, error: err instanceof Error ? err.message : 'Netzwerkfehler' };
+    const msg = err instanceof Error ? err.message : 'Netzwerkfehler';
+    console.log('[MealVision] exception:', msg, err);
+    return {
+      success: false,
+      error: msg,
+      debug: err instanceof Error && err.stack ? err.stack.slice(0, 800) : undefined,
+    };
   } finally {
     clearTimeout(timeoutId);
   }
 }
 
-function parseAnalysis(
-  text: string,
-): { success: true; analysis: MealAnalysis } | { success: false; error: string } {
-  // Gemini returnt manchmal trotz responseMimeType=json einen Markdown-Block.
-  // Wir säubern defensiv.
-  const cleaned = text
+function parseAnalysis(text: string): AnalyzeResult {
+  // Gemini returnt trotz responseMimeType=json gelegentlich Markdown-Fences
+  // oder einen erklärenden Vorlauf ("Hier ist die Analyse: {...}").
+  // Drei-Stufen-Säuberung: Fences strippen → falls weiterhin nicht-JSON
+  // drumherum, ersten { bis letzten } extrahieren.
+  let cleaned = text
     .replace(/^```json\s*/i, '')
     .replace(/^```\s*/i, '')
     .replace(/```\s*$/i, '')
     .trim();
 
+  if (!cleaned.startsWith('{')) {
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    if (firstBrace >= 0 && lastBrace > firstBrace) {
+      cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+    }
+  }
+
   let parsed: unknown;
   try {
     parsed = JSON.parse(cleaned);
   } catch (err) {
-    return { success: false, error: 'Gemini-Antwort konnte nicht geparst werden' };
+    const msg = err instanceof Error ? err.message : String(err);
+    console.log('[MealVision] JSON parse failed:', msg);
+    console.log('[MealVision] raw text (first 800):', text.slice(0, 800));
+    return {
+      success: false,
+      error: 'Gemini-Antwort konnte nicht geparst werden',
+      debug: `Parse-Error: ${msg}\n\nRAW (erste 800 Zeichen):\n${text.slice(0, 800)}`,
+    };
   }
 
   if (!parsed || typeof parsed !== 'object') {
-    return { success: false, error: 'Unerwartetes Antwort-Format' };
+    return {
+      success: false,
+      error: 'Unerwartetes Antwort-Format',
+      debug: `Parsed type: ${typeof parsed}\n\nRAW:\n${text.slice(0, 600)}`,
+    };
   }
   const obj = parsed as Record<string, unknown>;
   const components = Array.isArray(obj.components) ? obj.components : [];
@@ -215,7 +269,11 @@ function parseAnalysis(
     .filter((c) => c.name.length > 0 && c.calories > 0);
 
   if (validComponents.length === 0) {
-    return { success: false, error: 'Keine Komponenten erkannt — bitte schärferes Foto' };
+    return {
+      success: false,
+      error: 'Keine Komponenten erkannt — bitte schärferes Foto',
+      debug: `Geparstes JSON hatte ${components.length} components, aber keine valide.\n\nRAW:\n${text.slice(0, 600)}`,
+    };
   }
 
   // Totals neu berechnen aus validierten Komponenten (Gemini-Totals oft inkonsistent)
